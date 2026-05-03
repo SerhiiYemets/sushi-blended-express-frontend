@@ -1,0 +1,17 @@
+.categories {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 16px;
+    position: sticky;
+    top: 72px;
+    background: white;
+    z-index: 10;
+}
+
+.categories a {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    white-space: nowrap;
+}
