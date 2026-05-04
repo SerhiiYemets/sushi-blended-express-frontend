@@ -1,3 +1,62 @@
+/* ── CSS Variables ── */
+
+:root {
+  /* Colors – light theme (default) */
+  --color-bg-page:       #faf8f5;
+  --color-bg-white:      #ffffff;
+  --color-surface:       #f0ebe3;
+  --color-surface-light: #f5f0e8;
+
+  --color-text-primary:  #2d1c0e;
+  --color-text-main:     #2d1c0e;
+  --color-text-dark:     #1a0e06;
+  --color-text-muted:    #8c7060;
+
+  --color-primary:       #c0654a;
+  --color-primary-dark:  #a84535;
+
+  --color-error:         #c0392b;
+
+  --color-border:        #ddd3c8;
+  --color-border-warm:   #ede8e3;
+
+  --color-scheme-2-text: #2d1c0e;
+
+  /* Typography */
+  --font-montserrat:          var(--font-geist-sans, system-ui, sans-serif);
+  --font-manrope:             var(--font-geist-sans, system-ui, sans-serif);
+  --font-size-base:           16px;
+  --line-height-normal:       1.5;
+
+  /* Layout */
+  --container-padding-tablet:  32px;
+  --container-padding-desktop: 64px;
+}
+
+[data-theme="dark"] {
+  --color-bg-page:       #1c0e07;
+  --color-bg-white:      #3d2419;
+  --color-surface:       #4a2e1e;
+  --color-surface-light: #5a3a28;
+
+  --color-text-primary:  #f5e6d8;
+  --color-text-main:     #f5e6d8;
+  --color-text-dark:     #fff5ec;
+  --color-text-muted:    #a08060;
+
+  --color-primary:       #d4785c;
+  --color-primary-dark:  #c0654a;
+
+  --color-error:         #e86a5a;
+
+  --color-border:        #5a3a28;
+  --color-border-warm:   #6a4535;
+
+  --color-scheme-2-text: #e0d0c0;
+}
+
+/* ── Reset ── */
+
 *,
 *::before,
 *::after {

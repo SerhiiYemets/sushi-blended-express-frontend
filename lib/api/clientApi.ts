@@ -18,21 +18,21 @@ clientApi.interceptors.response.use(
         const originalRequest = error.config;
 
         if (
-        error.response?.status === 401 &&
-        !originalRequest._retry &&
-        originalRequest.url !== "/auth/login"
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            originalRequest.url !== "/api/auth/login"
         ) {
-        originalRequest._retry = true;
+            originalRequest._retry = true;
 
-        try {
-            await clientApi.post("/auth/session");
-            return clientApi(originalRequest);
-        } catch {
-            if (typeof window !== "undefined") {
-                localStorage.removeItem("auth-storage");
-                window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+            try {
+                await clientApi.post("/api/auth/refresh");
+                return clientApi(originalRequest);
+            } catch {
+                if (typeof window !== "undefined") {
+                    localStorage.removeItem("auth-storage");
+                    window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+                }
             }
-        }
         }
 
         return Promise.reject(error);
@@ -42,33 +42,28 @@ clientApi.interceptors.response.use(
 export default clientApi;
 
 export const login = async (data: LoginPayload): Promise<AuthResponse> => {
-    const res = await clientApi.post<AuthResponse>("/auth/login", data);
+    const res = await clientApi.post<AuthResponse>("/api/auth/login", data);
     return res.data;
 };
 
 export const register = async (
     data: RegisterPayload
 ): Promise<AuthResponse> => {
-    const res = await clientApi.post<AuthResponse>("/auth/register", data);
+    const res = await clientApi.post<AuthResponse>("/api/auth/register", data);
     return res.data;
 };
 
 export const logout = async (): Promise<void> => {
-    await clientApi.post("/auth/logout");
-};
-
-export const getMe = async (): Promise<AuthResponse> => {
-    const res = await clientApi.get<AuthResponse>("/users/me");
-    return res.data;
+    await clientApi.post("/api/auth/logout");
 };
 
 export const getMenu = async (): Promise<MenuCategory[]> => {
-    const res = await clientApi.get<MenuCategory[]>("/menu");
+    const res = await clientApi.get<MenuCategory[]>("/api/menu");
     return res.data;
 };
 
 export const getProducts = async (): Promise<Product[]> => {
-    const res = await clientApi.get<Product[]>("/products");
+    const res = await clientApi.get<Product[]>("/api/products");
     return res.data;
 };
 
