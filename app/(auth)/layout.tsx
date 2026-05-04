@@ -1,13 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import css from "@/components/AuthComponent/AuthNav/Auth.module.css";
+import css from "@/components/AuthComponent/Auth.module.css";
 import Logo from "@/components/Logo/Logo";
 
-export default function AuthLayout({
-    children,
-}: {
-    children: ReactNode;
-}) {
+export default function AuthLayout({ children }: { children: ReactNode }) {
     return (
         <div className={css.wrapper}>
             <header className={css.header}>
@@ -16,7 +12,11 @@ export default function AuthLayout({
                 </Link>
             </header>
 
-            <main className={css.content}>{children}</main>
+            <main className={css.content}>
+                <div className={css.card}>
+                    {children}
+                </div>
+            </main>
 
             <footer className={css.footer}>
                 <p>© {new Date().getFullYear()} SushiMax</p>

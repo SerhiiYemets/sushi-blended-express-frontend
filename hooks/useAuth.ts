@@ -28,6 +28,11 @@ function mapErrorMessage(message: string): string {
     return ERROR_MAP[message] || "Něco se pokazilo";
 }
 
+function safeRedirect(url: string): string {
+    if (!url.startsWith("/") || url.startsWith("//")) return "/";
+    return url;
+}
+
 export function useAuth(redirectTo: string = "/") {
     const router = useRouter();
     const setUser = useAuthStore((state) => state.setUser);
@@ -40,48 +45,45 @@ export function useAuth(redirectTo: string = "/") {
         const { setSubmitting, setFieldError, resetForm } = helpers;
 
         const loading = toast.loading(
-        isLogin ? "Přihlašování..." : "Registrace..."
+            isLogin ? "Přihlašování..." : "Registrace..."
         );
 
         try {
-        const data = isLogin
-            ? await login(values as LoginValues)
-            : await register(values as RegisterValues);
+            const data = isLogin
+                ? await login(values as LoginValues)
+                : await register(values as RegisterValues);
 
-        if (!data) throw new Error("User not returned");
+            setUser(data.user);
+            resetForm();
 
-        setUser(data);
+            toast.success(
+                isLogin ? "Přihlášení proběhlo úspěšně" : "Registrace proběhla úspěšně"
+            );
 
-        resetForm();
-
-        toast.success(
-            isLogin ? "Přihlášení proběhlo úspěšně" : "Registrace proběhla úspěšně"
-        );
-
-        router.push(redirectTo);
-        router.refresh();
+            router.push(safeRedirect(redirectTo));
+            router.refresh();
         } catch (e: unknown) {
-        const rawMessage = isAxiosError(e)
-            ? e.response?.data?.response?.message ||
-            e.response?.data?.response?.error ||
-            e.response?.data?.error ||
-            e.message
-            : e instanceof Error
-            ? e.message
-            : "Unknown error";
+            const rawMessage = isAxiosError(e)
+                ? e.response?.data?.response?.message ||
+                  e.response?.data?.response?.error ||
+                  e.response?.data?.error ||
+                  e.message
+                : e instanceof Error
+                ? e.message
+                : "Unknown error";
 
-        const message = mapErrorMessage(rawMessage);
+            const message = mapErrorMessage(rawMessage);
 
-        if (rawMessage.toLowerCase().includes("email")) {
-            setFieldError("email", message);
-        } else if (rawMessage.toLowerCase().includes("password")) {
-            setFieldError("password", message);
-        } else {
-            toast.error(message);
-        }
+            if (rawMessage.toLowerCase().includes("email")) {
+                setFieldError("email", message);
+            } else if (rawMessage.toLowerCase().includes("password")) {
+                setFieldError("password", message);
+            } else {
+                toast.error(message);
+            }
         } finally {
-        toast.dismiss(loading);
-        setSubmitting(false);
+            toast.dismiss(loading);
+            setSubmitting(false);
         }
     }
 

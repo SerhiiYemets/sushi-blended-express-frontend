@@ -28,7 +28,10 @@ clientApi.interceptors.response.use(
             await clientApi.post("/auth/session");
             return clientApi(originalRequest);
         } catch {
-            localStorage.removeItem("auth-storage");
+            if (typeof window !== "undefined") {
+                localStorage.removeItem("auth-storage");
+                window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+            }
         }
         }
 
