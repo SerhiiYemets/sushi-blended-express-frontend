@@ -67,3 +67,5 @@ export const getProducts = async (): Promise<Product[]> => {
     return res.data;
 };
 
+
+
