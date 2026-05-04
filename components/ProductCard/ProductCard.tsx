@@ -1,7 +1,10 @@
-import css from "./ProductCard.module.css";
-import { useCartStore } from "@/lib/store/cartStore";
+"use client";
 
-export default function ProductCard({ item }: any) {
+import type { Product } from "@/types/product";
+import { useCartStore } from "@/lib/store/cartStore";
+import css from "./ProductCard.module.css";
+
+export default function ProductCard({ item }: { item: Product }) {
     const addToCart = useCartStore((s) => s.addToCart);
 
     return (
@@ -16,14 +19,7 @@ export default function ProductCard({ item }: any) {
 
                 <button
                 className={css.addBtn}
-                onClick={() =>
-                    addToCart({
-                        id: item.id,
-                        name: item.name,
-                        price: item.price,
-                        image: item.image,
-                    })
-                }
+                onClick={() => addToCart(item)}
                 >
                 +
                 </button>

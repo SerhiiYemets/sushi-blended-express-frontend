@@ -4,27 +4,21 @@ import MenuSection from "@/components/MenuSection/MenuSection";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 
-async function getMenu() {
-  const res = await fetch(
-    "https://sushi-blended-express.onrender.com/api/menu",
-    { cache: "no-store" }
-  );
-
-  if (!res.ok) throw new Error("Failed to fetch");
-
-  return res.json();
-}
+import { getMenu } from "@/lib/api/clientApi";
+import type { MenuCategory } from "@/types/menu";
 
 export default async function Home() {
-  const data = await getMenu();
+  const data: MenuCategory[] = await getMenu();
 
   return (
     <>
       <Header />
       <Hero />
-      {/* <Categories data={data} /> */}
-      {/* <MenuSection data={data} /> */}
-      <Footer/>
+
+      {/* <Categories data={data} />
+      <MenuSection data={data} /> */}
+
+      <Footer />
     </>
   );
 }

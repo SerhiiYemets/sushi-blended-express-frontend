@@ -1,18 +1,16 @@
-import css from "./MenuSection.module.css";
-import ProductCard from "@/components/ProductCard/ProductCard";
+import type { MenuCategory } from "@/types/menu";
+import ProductCard from "../ProductCard/ProductCard";
 
-export default function MenuSection({ data }: any) {
+export default function MenuSection({ data }: { data: MenuCategory[] }) {
     return (
-        <div id="menu">
-            {data.map((cat: any) => (
-                <section key={cat.category} id={cat.category} className={css.section}>
-                    <h2 className={css.categoryTitle}>{cat.category}</h2>
+        <div>
+            {data.map((cat) => (
+                <section key={cat.category} id={cat.category}>
+                <h2>{cat.category}</h2>
 
-                    <div className={css.grid}>
-                        {cat.products.map((item: any) => (
-                        <ProductCard key={item.id} item={item} />
-                        ))}
-                    </div>
+                {cat.products.map((item) => (
+                    <ProductCard key={item.id} item={item} />
+                ))}
                 </section>
             ))}
         </div>

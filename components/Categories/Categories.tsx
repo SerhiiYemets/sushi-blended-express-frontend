@@ -1,12 +1,8 @@
-type Props = {
-    data: { 
-        category: string 
-    }[];
-};
+import type { MenuCategory } from "@/types/menu";
 
-export default function Categories({ data }: Props) {
+export default function Categories({ data }: { data: MenuCategory[] }) {
     return (
-        <div className="categories">
+        <div>
             {data.map((cat) => (
                 <a key={cat.category} href={`#${cat.category}`}>
                 {cat.category}

@@ -35,6 +35,7 @@
     border-radius: 999px;
     border: none;
     background: var(--color-button-primary);
+    background-color: rgb(213, 0, 0);
     color: var(--color-bg-white);
     font-weight: 600;
     cursor: pointer;

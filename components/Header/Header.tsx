@@ -3,21 +3,21 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-// import Image from "next/image";
+import Image from "next/image";
 
 import css from "./Header.module.css";
 
 import Logo from "@/components/Logo/Logo";
-// import Logout from "@/components/Logout/Logout";
+import Logout from "@/components/Logout/Logout";
 import ThemeToggle from "@/components/ThemeToggle/ThemeToggle";
 
-// import { useAuthStore } from "@/lib/store/authStore";
+import { useAuthStore } from "@/lib/store/authStore";
 import { useCartStore } from "@/lib/store/cartStore";
 
 export default function Header() {
     const pathname = usePathname();
     const router = useRouter();
-    // const user = useAuthStore((s) => s.user);
+    const user = useAuthStore((s) => s.user);
     const items = useCartStore((s) => s.items);
 
     const [menuOpen, setMenuOpen] = useState(false);
@@ -90,7 +90,6 @@ export default function Header() {
                 )}
             </Link>
 
-            {/* AUTH
             <div className={css.auth}>
                 {user ? (
                 <>
@@ -121,7 +120,7 @@ export default function Header() {
                     </Link>
                 </>
                 )}
-            </div> */}
+            </div>
 
             <ThemeToggle />
             </div>
@@ -179,7 +178,7 @@ export default function Header() {
             </Link>
 
             AUTH
-            {/* {user ? (
+            {user ? (
                 <>
                 <Link
                     href="/profile"
@@ -209,7 +208,7 @@ export default function Header() {
                     Registrace
                 </Link>
                 </>
-            )} */}
+            )}
             </div>
         )}
         </header>

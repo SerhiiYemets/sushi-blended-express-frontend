@@ -39,6 +39,7 @@
     text-decoration: none;
     font-weight: 600;
     transition: var(--transition-base);
+    background-color: rgb(213, 0, 0);
 }
 
 .button:hover {
