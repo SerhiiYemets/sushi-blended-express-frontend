@@ -26,12 +26,12 @@ export default function Home() {
       <Header />
       <Hero />
 
-      {!loading && (
+      {/* {!loading && (
         <>
           <Categories data={data} />
           <MenuSection data={data} />
         </>
-      )}
+      )} */}
 
       <Footer />
     </>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import Providers from "@/components/Providers/Providers";
 import "./globals.css";
 
@@ -37,11 +38,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             suppressHydrationWarning
             className={`${geistSans.variable} ${geistMono.variable}`}
         >
-            <head>
-                {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-                <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-            </head>
             <body>
+                <Script
+                    id="theme-init"
+                    strategy="beforeInteractive"
+                    dangerouslySetInnerHTML={{ __html: themeInitScript }}
+                />
                 <Providers>{children}</Providers>
             </body>
         </html>

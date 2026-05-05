@@ -31,7 +31,7 @@ export default function Header() {
     const navLinks = [
         { href: "/", label: "Domů" },
         { href: "/menu", label: "Menu" },
-        { href: "/contacts", label: "Kontakt" },
+        { href: "#contacts", label: "Kontakt" },
     ];
 
     const handleSearch = () => {
@@ -42,6 +42,11 @@ export default function Header() {
     };
 
     const closeMenu = () => setMenuOpen(false);
+
+    const scrollToContacts = () => {
+        document.getElementById("contacts")?.scrollIntoView({ behavior: "smooth" });
+        setMenuOpen(false);
+    };
 
     return (
         <header className={css.header}>
@@ -65,22 +70,26 @@ export default function Header() {
             </div>
 
             <nav className={css.nav}>
-            {navLinks.map(({ href, label }) => (
+            {navLinks.map(({ href, label }) =>
+                href === "#contacts" ? (
+                <button key={href} onClick={scrollToContacts} className={css.navLink}>
+                    {label}
+                </button>
+                ) : (
                 <Link
-                key={href}
-                href={href}
-                className={`${css.navLink} ${
-                    pathname === href ? css.active : ""
-                }`}
+                    key={href}
+                    href={href}
+                    className={`${css.navLink} ${pathname === href ? css.active : ""}`}
                 >
-                {label}
+                    {label}
                 </Link>
-            ))}
+                )
+            )}
             </nav>
 
             <div className={css.rightSide}>
-            <a href="tel:+420123456789" className={css.phone}>
-                +420 123 456 789
+            <a href="tel:+420721479332" className={css.phone}>
+                +420 721 479 332
             </a>
 
             <Link href="/cart" className={css.cart}>
@@ -125,7 +134,6 @@ export default function Header() {
             <ThemeToggle />
             </div>
 
-            {/* BURGER */}
             <button
             className={css.burger}
             onClick={() => setMenuOpen((prev) => !prev)}
@@ -138,79 +146,79 @@ export default function Header() {
 
         {menuOpen && (
             <div className={css.mobileMenu}>
-            <div className={css.mobileSearch}>
-                <input
-                type="text"
-                placeholder="Hledat sushi..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className={css.mobileSearchInput}
-                />
-                <button
-                onClick={handleSearch}
-                className={css.mobileSearchBtn}
-                >
-                🔍
-                </button>
-            </div>
+                <div className={css.mobileSearch}>
+                    <input
+                    type="text"
+                    placeholder="Hledat sushi..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className={css.mobileSearchInput}
+                    />
+                    <button
+                    onClick={handleSearch}
+                    className={css.mobileSearchBtn}
+                    >
+                    🔍
+                    </button>
+                </div>
 
-            {navLinks.map(({ href, label }) => (
+                {navLinks.map(({ href, label }) =>
+                    href === "#contacts" ? (
+                    <button key={href} onClick={scrollToContacts} className={css.mobileLink}>
+                        {label}
+                    </button>
+                    ) : (
+                    <Link key={href} href={href} className={css.mobileLink} onClick={closeMenu}>
+                        {label}
+                    </Link>
+                    )
+                )}
+
+                <a href="tel:+420123456789" className={css.mobileLink}>
+                    📞 +420 123 456 789
+                </a>
+
                 <Link
-                key={href}
-                href={href}
-                className={css.mobileLink}
-                onClick={closeMenu}
-                >
-                {label}
-                </Link>
-            ))}
-
-            <a href="tel:+420123456789" className={css.mobileLink}>
-                📞 +420 123 456 789
-            </a>
-
-            <Link
-                href="/cart"
-                className={css.mobileLink}
-                onClick={closeMenu}
-            >
-                🛒 Košík ({totalCount})
-            </Link>
-
-            AUTH
-            {user ? (
-                <>
-                <Link
-                    href="/profile"
+                    href="/cart"
                     className={css.mobileLink}
                     onClick={closeMenu}
                 >
-                    Profil
+                    🛒 Košík ({totalCount})
                 </Link>
-                <button className={css.mobileLink} onClick={closeMenu}>
-                    <Logout />
-                </button>
-                </>
-            ) : (
-                <>
-                <Link
-                    href="/login"
-                    className={css.mobileLink}
-                    onClick={closeMenu}
-                >
-                    Přihlášení
-                </Link>
-                <Link
-                    href="/register"
-                    className={css.mobileLink}
-                    onClick={closeMenu}
-                >
-                    Registrace
-                </Link>
-                </>
+
+                {user ? (
+                    <>
+                    <Link
+                        href="/profile"
+                        className={css.mobileLink}
+                        onClick={closeMenu}
+                    >
+                        Profil
+                    </Link>
+                    <button className={css.mobileLink} onClick={closeMenu}>
+                        <Logout />
+                    </button>
+                    </>
+                ) : (
+                    <>
+                    <Link
+                        href="/login"
+                        className={css.mobileLink}
+                        onClick={closeMenu}
+                    >
+                        Přihlášení
+                    </Link>
+                    <Link
+                        href="/register"
+                        className={css.mobileLink}
+                        onClick={closeMenu}
+                    >
+                        Registrace
+                    </Link>
+                    </>
+                )}
+                </div>
             )}
-            </div>
-        )}
         </header>
     );
 }

@@ -13,11 +13,22 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
-.image {
+.imageWrapper {
+    position: relative;
     width: 100%;
     height: 140px;
-    object-fit: cover;
     border-radius: 8px;
+    overflow: hidden;
+}
+
+.image {
+    object-fit: cover;
+}
+
+.imagePlaceholder {
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-surface-light, #f0ebe3);
 }
 
 .title {
@@ -63,13 +74,13 @@
 }
 
 @media (min-width: 768px) {
-    .image {
+    .imageWrapper {
         height: 160px;
     }
 }
 
 @media (min-width: 1440px) {
-    .image {
+    .imageWrapper {
         height: 180px;
     }
 
