@@ -30,43 +30,43 @@ export default function MenuPage() {
         <>
             <Header />
 
-            <main className={css.page}>
-                <div className={css.container}>
-                    <h1 className={css.title}>Menu</h1>
+                <main className={css.page}>
+                    <div className={css.container}>
+                        <h1 className={css.title}>Menu</h1>
 
-                    {loading ? (
-                        <div className={css.loading}>Načítání…</div>
-                    ) : (
-                        <>
-                            <div className={css.categories}>
-                                {data.map((cat) => (
-                                    <button
-                                        key={cat.category}
-                                        onClick={() => setActiveCategory(cat.category)}
-                                        className={`${css.categoryBtn} ${
-                                            activeCategory === cat.category ? css.active : ''
-                                        }`}
-                                    >
-                                        {cat.category}
-                                    </button>
-                                ))}
-                            </div>
-
-                            {current && current.products.length > 0 ? (
-                                <div className={css.products}>
-                                    {current.products.map((product) => (
-                                        <ProductCard key={product.id} item={product} />
+                        {loading ? (
+                            <div className={css.loading}>Načítání…</div>
+                        ) : (
+                            <>
+                                <div className={css.categories}>
+                                    {data.map((cat) => (
+                                        <button
+                                            key={cat.category}
+                                            onClick={() => setActiveCategory(cat.category)}
+                                            className={`${css.categoryBtn} ${
+                                                activeCategory === cat.category ? css.active : ''
+                                            }`}
+                                        >
+                                            {cat.category}
+                                        </button>
                                     ))}
                                 </div>
-                            ) : (
-                                <p className={css.empty}>
-                                    V této kategorii zatím nejsou žádné produkty.
-                                </p>
-                            )}
-                        </>
-                    )}
-                </div>
-            </main>
+
+                                {current && current.products.length > 0 ? (
+                                    <div className={css.products}>
+                                        {current.products.map((product) => (
+                                            <ProductCard key={product.id} item={product} />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className={css.empty}>
+                                        V této kategorii zatím nejsou žádné produkty.
+                                    </p>
+                                )}
+                            </>
+                        )}
+                    </div>
+                </main>
 
             <Footer />
         </>

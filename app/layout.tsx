@@ -22,13 +22,12 @@ export const metadata: Metadata = {
     description: "Objednávejte sushi online – čerstvé, rychlé, chutné.",
 };
 
-// Runs before React hydrates → prevents FOUC on theme-dependent styles
 const themeInitScript = `(function(){
-  try {
-    var t = localStorage.getItem('theme');
-    if (!t && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
-    if (t) document.documentElement.setAttribute('data-theme', t);
-  } catch(e) {}
+    try {
+        var t = localStorage.getItem('theme');
+        if (!t && window.matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
+        if (t) document.documentElement.setAttribute('data-theme', t);
+    } catch(e) {}
 })();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

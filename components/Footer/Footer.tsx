@@ -30,7 +30,7 @@ export default function Footer() {
                         <div className={css.block}>
                             <h3 className={css.label}>Telefon</h3>
                             <a href="tel:+420777499970" className={css.phone}>
-                                721 47 93 32
+                                721 479 332
                             </a>
                         </div>
 

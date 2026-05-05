@@ -41,7 +41,7 @@ export default function ProductCard({ item }: { item: Product }) {
                         })
                     }
                 >
-                    +
+                🛒 
                 </button>
             </div>
         </div>

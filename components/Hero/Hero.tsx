@@ -6,7 +6,7 @@ export default function Hero() {
             <div className={css.heroContent}>
                 <h1>Nejlepší sushi v Kolíně</h1>
                 <p>Čerstvé, rychlé, chutné 🍣</p>
-                <a href="#menu" className={css.heroBtn}> Objednat</a>
+                <a href="/menu" className={css.heroBtn}> Objednat</a>
             </div>
         </section>
     );
