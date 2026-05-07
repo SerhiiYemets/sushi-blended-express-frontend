@@ -26,3 +26,4 @@ export const signInSchema = Yup.object({
         .max(40, "Heslo může mít maximálně 40 znaků")
         .required("Toto pole je povinné"),
 });
+

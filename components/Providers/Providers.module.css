@@ -2,8 +2,24 @@
     background: var(--color-bg-white);
     color: var(--color-text-dark);
     border: 1px solid var(--color-border-warm);
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 14px;
+    font-weight: 500;
     font-family: var(--font-montserrat);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 12px 14px;
+}
+
+.toastSuccess {
+    border-color: #16a34a;
+    border-left-width: 4px;
+    background: var(--color-bg-white);
+    color: var(--color-text-dark);
+}
+
+.toastError {
+    border-color: var(--color-error, #c0392b);
+    border-left-width: 4px;
+    background: var(--color-bg-white);
+    color: var(--color-text-dark);
 }
