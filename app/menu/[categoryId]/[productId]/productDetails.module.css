@@ -1,0 +1,210 @@
+.page {
+    background: var(--color-bg-page);
+    min-height: calc(100vh - 80px);
+}
+
+.container {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 20px 64px;
+}
+
+/* ── Breadcrumbs ── */
+.breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.crumbLink {
+    color: var(--color-text-muted);
+    text-transform: capitalize;
+    transition: color 0.2s ease;
+}
+
+.crumbLink:hover {
+    color: var(--color-primary);
+    opacity: 1;
+}
+
+.crumbSep {
+    color: var(--color-border);
+}
+
+.crumbCurrent {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+/* ── Layout ── */
+.layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* ── Media ── */
+.media {
+    width: 100%;
+}
+
+.imageWrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--color-surface);
+}
+
+.image {
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.imageWrapper:hover .image {
+    transform: scale(1.03);
+}
+
+.imagePlaceholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        var(--color-surface) 0%,
+        var(--color-surface-light) 100%
+    );
+}
+
+/* ── Content ── */
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.heading {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.title {
+    font-size: 28px;
+    line-height: 1.15;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.weight {
+    display: inline-block;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+}
+
+.description {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--color-text-primary);
+}
+
+/* ── Ingredients ── */
+.ingredients {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ingredient {
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-warm);
+    font-size: 13px;
+    color: var(--color-text-primary);
+    text-transform: lowercase;
+}
+
+/* ── Tablet ── */
+@media (min-width: 768px) {
+    .container {
+        padding: 32px 32px 80px;
+    }
+
+    .breadcrumbs {
+        margin-bottom: 28px;
+        font-size: 14px;
+    }
+
+    .layout {
+        gap: 36px;
+    }
+
+    .imageWrapper {
+        aspect-ratio: 1 / 1;
+        border-radius: 24px;
+    }
+
+    .title {
+        font-size: 36px;
+    }
+
+    .description {
+        font-size: 17px;
+    }
+}
+
+/* ── Desktop ── */
+@media (min-width: 1024px) {
+    .container {
+        padding: 40px 48px 100px;
+    }
+
+    .layout {
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+        gap: 56px;
+    }
+
+    .content {
+        gap: 28px;
+        position: sticky;
+        top: 96px;
+    }
+
+    .title {
+        font-size: 44px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .container {
+        padding: 56px 64px 120px;
+    }
+
+    .title {
+        font-size: 52px;
+    }
+}

@@ -55,7 +55,11 @@ export default function MenuPage() {
                                 {current && current.products.length > 0 ? (
                                     <div className={css.products}>
                                         {current.products.map((product) => (
-                                            <ProductCard key={product.id} item={product} />
+                                            <ProductCard
+                                                key={product._id}
+                                                item={product}
+                                                categorySlug={current.category}
+                                            />
                                         ))}
                                     </div>
                                 ) : (

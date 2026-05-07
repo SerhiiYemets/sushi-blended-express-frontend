@@ -1,0 +1,18 @@
+.container {
+    display: flex;
+    gap: 65px;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 64px;
+    align-items: flex-start;
+}
+
+.sidebar {
+    width: 360px;
+    flex-shrink: 0;
+}
+
+.content {
+    flex: 1;
+    min-width: 0;
+}
