@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -9,8 +9,6 @@ import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 
 import { useCartStore } from "@/lib/store/cartStore";
-
-import { useHydration } from "@/hooks/useHydration";
 
 import css from "./cart.module.css";
 
@@ -21,7 +19,18 @@ const DELIVERY_FEE = 49;
 const FREE_DELIVERY_THRESHOLD = 599;
 
 export default function CartClient() {
-    const hydrated = useHydration();
+    const [mounted, setMounted] =
+        useState(false);
+
+    useEffect(() => {
+        const id =
+            requestAnimationFrame(() => {
+                setMounted(true);
+            });
+
+        return () =>
+            cancelAnimationFrame(id);
+    }, []);
 
     const items = useCartStore(
         (s) => s.items
@@ -89,7 +98,7 @@ export default function CartClient() {
             100
     );
 
-    if (!hydrated) {
+    if (!mounted) {
         return null;
     }
 
