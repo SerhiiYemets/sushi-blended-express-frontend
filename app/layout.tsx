@@ -37,12 +37,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             suppressHydrationWarning
             className={`${geistSans.variable} ${geistMono.variable}`}
         >
+            <head>
+                <Script id="theme-init" strategy="beforeInteractive">
+                    {themeInitScript}
+                </Script>
+            </head>
+
             <body>
-                <Script
-                    id="theme-init"
-                    strategy="beforeInteractive"
-                    dangerouslySetInnerHTML={{ __html: themeInitScript }}
-                />
                 <Providers>{children}</Providers>
             </body>
         </html>

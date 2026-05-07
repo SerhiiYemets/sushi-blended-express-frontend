@@ -5,6 +5,10 @@ import Logo from "@/components/Logo/Logo";
 import css from "./Footer.module.css";
 
 export default function Footer() {
+    const scrollToContacts = () => {
+        document.getElementById("contacts")?.scrollIntoView({ behavior: "smooth" });
+    };
+
     return (
         <footer id="contacts" className={css.footer}>
             <div className={css.inner}>
@@ -44,7 +48,7 @@ export default function Footer() {
                             <h3 className={css.label}>Navigace</h3>
                             <Link href="/" className={css.navLink}>Domů</Link>
                             <Link href="/menu" className={css.navLink}>Menu</Link>
-                            <Link href="#contacts" className={css.navLink}>Kontakt</Link>
+                            <button type="button" onClick={scrollToContacts} className={css.navLink}>Kontakt</button>
                         </div>
                     </div>
                 </div>
