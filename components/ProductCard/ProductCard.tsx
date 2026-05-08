@@ -48,11 +48,7 @@ export default function ProductCard({
     };
 
     return (
-        <Link
-            href={href}
-            className={css.link}
-            target="_blank"
-        >
+        <Link href={href} className={css.link}>
             <article className={css.card}>
                 <div className={css.imageWrapper}>
                     {item.image ? (

@@ -1,0 +1,65 @@
+.page {
+    background: var(--color-bg-page);
+    min-height: calc(100vh - 80px);
+}
+
+.container {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 20px 64px;
+}
+
+.breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.crumbLink {
+    color: var(--color-text-muted);
+    text-transform: capitalize;
+    transition: color 0.2s ease;
+}
+
+.crumbLink:hover {
+    color: var(--color-primary);
+    opacity: 1;
+}
+
+.crumbSep {
+    color: var(--color-border);
+}
+
+.crumbCurrent {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 32px 32px 80px;
+    }
+
+    .breadcrumbs {
+        margin-bottom: 28px;
+        font-size: 14px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container {
+        padding: 40px 48px 100px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .container {
+        padding: 56px 64px 120px;
+    }
+}

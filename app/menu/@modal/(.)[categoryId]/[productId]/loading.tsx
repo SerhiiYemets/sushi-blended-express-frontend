@@ -1,6 +1,6 @@
 import Spinner from "@/components/Spinner/Spinner";
 
-import css from "./loading.module.css";
+import css from "./state.module.css";
 
 export default function Loading() {
     return (

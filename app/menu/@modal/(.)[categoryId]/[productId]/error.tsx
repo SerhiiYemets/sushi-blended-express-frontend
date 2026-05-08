@@ -1,6 +1,6 @@
 "use client";
 
-import css from "./error.module.css";
+import css from "./state.module.css";
 
 type Props = {
     error: Error;
@@ -9,7 +9,7 @@ type Props = {
 
 export default function Error({ error, reset }: Props) {
     return (
-        <div className={css.container}>
+        <div className={css.wrapper}>
             <h2 className={css.title}>Něco se pokazilo</h2>
             <p className={css.message}>
                 {error.message || "Produkt se nepodařilo načíst."}
