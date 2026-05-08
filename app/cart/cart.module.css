@@ -65,8 +65,6 @@
     margin: 0;
 }
 
-/* ── Item card ────────────────────────────── */
-
 .card {
     position: relative;
     display: grid;
@@ -212,8 +210,6 @@
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
-
-/* ── Remove button ────────────────────────── */
 
 .removeBtn {
     position: absolute;

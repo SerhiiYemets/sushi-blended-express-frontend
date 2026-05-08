@@ -180,10 +180,15 @@ export default function CartClient() {
                                     <strong>{total} Kč</strong>
                                     </div>
 
-                                    <button className={css.checkoutBtn}>Pokračovat k objednávce</button>
+                                    <Link
+                                        href="/checkout"
+                                        className={css.checkoutBtn}
+                                    >
+                                        Pokračovat k objednávce
+                                    </Link>
 
                                     <Link href="/menu" className={css.continueLink}>
-                                    Pokračovat v nákupu
+                                        Pokračovat v nákupu
                                     </Link>
                                 </aside>
                             </div>
