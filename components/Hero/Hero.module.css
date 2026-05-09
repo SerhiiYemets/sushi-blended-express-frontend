@@ -20,7 +20,7 @@
     display: inline-block;
     margin-top: 12px;
     padding: 10px 20px;
-    background: red;
+    background: rgba(160, 61, 0, 0.744);
     color: #fff;
     border-radius: 8px;
 }

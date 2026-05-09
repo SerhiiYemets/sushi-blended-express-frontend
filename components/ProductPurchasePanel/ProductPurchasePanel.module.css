@@ -88,20 +88,19 @@
 .addBtn {
     height: 56px;
     padding: 0 24px;
-    border-radius: 14px;
+    border-radius: var(--btn-radius);
     background: var(--color-primary);
     color: #fff;
     font-size: 16px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    transition: background-color 0.2s ease, transform 0.15s ease,
-        box-shadow 0.2s ease;
-    box-shadow: 0 8px 18px rgba(192, 101, 74, 0.28);
+    font-weight: var(--btn-font-weight);
+    letter-spacing: var(--btn-letter-spacing);
+    transition: var(--btn-transition);
+    box-shadow: var(--btn-shadow);
 }
 
 .addBtn:hover {
     background: var(--color-primary-dark);
-    box-shadow: 0 10px 22px rgba(168, 69, 53, 0.34);
+    box-shadow: var(--btn-shadow-hover);
 }
 
 .addBtn:active {

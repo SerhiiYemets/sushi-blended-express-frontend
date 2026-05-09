@@ -97,19 +97,18 @@
     background-color: var(--color-primary);
     color: #fff;
     font-size: 22px;
-    font-weight: 600;
+    font-weight: var(--btn-font-weight);
     line-height: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s ease, transform 0.15s ease,
-        box-shadow 0.2s ease;
-    box-shadow: 0 6px 14px rgba(192, 101, 74, 0.28);
+    transition: var(--btn-transition);
+    box-shadow: var(--btn-shadow);
 }
 
 .addBtn:hover {
     background-color: var(--color-primary-dark);
-    box-shadow: 0 8px 18px rgba(168, 69, 53, 0.36);
+    box-shadow: var(--btn-shadow-hover);
 }
 
 .addBtn:active {
