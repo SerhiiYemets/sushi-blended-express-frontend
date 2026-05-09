@@ -6,7 +6,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { useForm, type SubmitErrorHandler } from 'react-hook-form';
+import {
+    useForm,
+    useWatch,
+    type SubmitErrorHandler,
+} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import axios from 'axios';
@@ -48,7 +52,7 @@ export default function CheckoutClient() {
     const {
         register,
         handleSubmit,
-        watch,
+        control,
         formState: { errors, isSubmitting },
     } = useForm<OrderFormInput, undefined, OrderFormData>({
         resolver: zodResolver(orderSchema),
@@ -66,7 +70,11 @@ export default function CheckoutClient() {
         mode: 'onTouched',
     });
 
-    const deliveryType = watch('deliveryType');
+    const deliveryType = useWatch({
+        control,
+        name: 'deliveryType',
+    });
+
     const isDelivery = deliveryType === 'delivery';
 
     const deliveryFee =
