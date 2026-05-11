@@ -293,7 +293,7 @@ export default function CheckoutClient() {
                                         id="phone"
                                         type="tel"
                                         autoComplete="tel"
-                                        placeholder="+420 ..."
+                                        placeholder="+420123456789"
                                         className={`${css.input} ${
                                             errors.phone ? css.inputError : ''
                                         }`}

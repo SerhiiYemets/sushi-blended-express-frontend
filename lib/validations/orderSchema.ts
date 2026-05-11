@@ -83,3 +83,6 @@ export const orderSchema =
         ]),
     });
 
+export type OrderFormData =
+    z.infer<typeof orderSchema>;
+
