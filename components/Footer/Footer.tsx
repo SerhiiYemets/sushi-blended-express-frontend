@@ -55,7 +55,7 @@ export default function Footer() {
 
                 <div className={css.bottom}>
                     <span className={css.copy}>
-                        © {new Date().getFullYear()} SushiMax. 
+                        © {new Date().getFullYear()}. 
                     </span>
                 </div>
             </div>
