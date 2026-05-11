@@ -239,16 +239,25 @@ export default function CheckoutClient() {
                                         id="firstName"
                                         type="text"
                                         autoComplete="given-name"
+                                        maxLength={10}
+                                        inputMode="text"
                                         className={`${css.input} ${
-                                            errors.firstName ? css.inputError : ''
+                                            errors.firstName
+                                                ? css.inputError
+                                                : ''
                                         }`}
-                                        aria-invalid={!!errors.firstName}
+                                        aria-invalid={
+                                            !!errors.firstName
+                                        }
                                         {...register('firstName')}
                                     />
 
                                     {errors.firstName && (
                                         <span className={css.errorText}>
-                                            Zadejte jméno
+                                            {
+                                                errors.firstName
+                                                    .message
+                                            }
                                         </span>
                                     )}
                                 </div>
@@ -265,16 +274,25 @@ export default function CheckoutClient() {
                                         id="lastName"
                                         type="text"
                                         autoComplete="family-name"
+                                        maxLength={15}
+                                        inputMode="text"
                                         className={`${css.input} ${
-                                            errors.lastName ? css.inputError : ''
+                                            errors.lastName
+                                                ? css.inputError
+                                                : ''
                                         }`}
-                                        aria-invalid={!!errors.lastName}
+                                        aria-invalid={
+                                            !!errors.lastName
+                                        }
                                         {...register('lastName')}
                                     />
 
                                     {errors.lastName && (
                                         <span className={css.errorText}>
-                                            Zadejte příjmení
+                                            {
+                                                errors.lastName
+                                                    .message
+                                            }
                                         </span>
                                     )}
                                 </div>

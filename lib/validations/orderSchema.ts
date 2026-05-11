@@ -26,7 +26,7 @@ export const orderSchema =
             .trim()
             .min(
                 2,
-                'Zadejte příjmení'
+                'Zadejte příjmení - Příjmení může mít maximálně 15 znaků'
             )
             .max(
                 15,
