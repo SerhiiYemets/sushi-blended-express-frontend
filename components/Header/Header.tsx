@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -86,21 +86,23 @@ export default function Header() {
 
     const user = useAuthStore((s) => s.user);
     const isHydrated = useAuthStore((s) => s.isHydrated);
-    const items = useCartStore((s) => s.items);
+    const totalCount = useCartStore((state) =>
+    state.items.reduce(
+        (acc, item) =>
+            acc + item.quantity,
+        0
+    )
+);
 
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [query, setQuery] = useState("");
-    const [lastPath, setLastPath] = useState(pathname);
+    const [menuOpen, setMenuOpen] =
+        useState(false);
 
-    if (pathname !== lastPath) {
-        setLastPath(pathname);
-        if (menuOpen) setMenuOpen(false);
-    }
+    const [query, setQuery] =
+        useState("");
 
-    const totalCount = useMemo(
-        () => items.reduce((acc, i) => acc + i.quantity, 0),
-        [items]
-    );
+    useEffect(() => {
+        setMenuOpen(false);
+    }, [pathname]);
 
     useEffect(() => {
         if (!menuOpen) return;
