@@ -1,42 +1,85 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const orderSchema = z.object({
-    firstName: z
-        .string()
-        .min(2),
+const nameRegex =
+    /^[A-Za-zÀ-ÿĀ-žА-яЁёЇїІіЄєҐґČčŘřŠšŽžÝýÁáÍíÉéÚúŮůŤťĎďŇň\s-]+$/;
 
-    lastName: z
-        .string()
-        .min(2),
+const phoneRegex =
+    /^[0-9+\s()\-]+$/;
 
-    phone: z
-        .string()
-        .min(6),
+export const orderSchema =
+    z.object({
+        firstName: z
+            .string()
+            .trim()
+            .min(2, 'Zadejte jméno - Jméno může mít maximálně 10 znaků')
+            .max(
+                10,
+                'Jméno může mít maximálně 10 znaků'
+            )
+            .regex(
+                nameRegex,
+                'Jméno může obsahovat pouze písmena'
+            ),
 
-    email: z
-        .string()
-        .email()
-        .optional()
-        .or(z.literal("")),
+        lastName: z
+            .string()
+            .trim()
+            .min(
+                2,
+                'Zadejte příjmení'
+            )
+            .max(
+                15,
+                'Příjmení může mít maximálně 15 znaků'
+            )
+            .regex(
+                nameRegex,
+                'Příjmení může obsahovat pouze písmena'
+            ),
 
-    deliveryType: z.enum([
-        "delivery",
-        "pickup",
-    ]),
+        phone: z
+            .string()
+            .trim()
+            .min(
+                6,
+                'Zadejte telefonní číslo'
+            )
+            .max(
+                15,
+                'Telefonní číslo je příliš dlouhé'
+            )
+            .regex(
+                phoneRegex,
+                'Telefon může obsahovat pouze čísla'
+            ),
 
-    address: z.string().optional(),
+        email: z
+            .string()
+            .email(
+                'Neplatný email'
+            )
+            .optional()
+            .or(z.literal('')),
 
-    peopleCount: z.coerce
-        .number()
-        .min(1),
+        deliveryType: z.enum([
+            'delivery',
+            'pickup',
+        ]),
 
-    notes: z.string().optional(),
+        address:
+            z.string().optional(),
 
-    paymentMethod: z.enum([
-        "cash",
-        "card",
-    ]),
-});
+        peopleCount:
+            z.coerce
+                .number()
+                .min(1),
 
-export type OrderFormData =
-    z.infer<typeof orderSchema>;
+        notes:
+            z.string().optional(),
+
+        paymentMethod: z.enum([
+            'cash',
+            'card',
+        ]),
+    });
+
