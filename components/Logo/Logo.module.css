@@ -5,9 +5,11 @@
 }
 
 .image {
-    width: auto;
-    height: auto;
-    max-height: 40px;
+    display: block;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
 .text {

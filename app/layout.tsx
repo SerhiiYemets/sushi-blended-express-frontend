@@ -38,6 +38,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             className={`${geistSans.variable} ${geistMono.variable}`}
         >
             <head>
+                <link
+                    rel="preload"
+                    as="image"
+                    href="/logo.png"
+                    fetchPriority="high"
+                />
                 <Script id="theme-init" strategy="beforeInteractive">
                     {themeInitScript}
                 </Script>

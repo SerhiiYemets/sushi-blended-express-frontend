@@ -189,15 +189,18 @@
 .auth {
     display: none;
     align-items: center;
+    justify-content: flex-end;
     gap: 10px;
-    min-width: 1px;
+    min-width: 210px;
+    min-height: 38px;
 }
 
 .authSkeleton {
     display: inline-block;
-    width: 120px;
-    height: 32px;
-    border-radius: 999px;
+    width: 100%;
+    max-width: 200px;
+    height: 38px;
+    border-radius: var(--btn-radius-pill);
     background: color-mix(in srgb, var(--color-text-muted, #999) 14%, transparent);
     animation: pulse 1.4s ease-in-out infinite;
 }

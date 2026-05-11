@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -17,6 +17,7 @@ import axios from 'axios';
 import type { z } from 'zod';
 
 import { useCartStore } from '@/lib/store/cartStore';
+import { useHydrated } from '@/hooks/useHydrated';
 import { createOrder } from '@/lib/api/ordersApi';
 import { orderSchema, type OrderFormData } from '@/lib/validations/orderSchema';
 
@@ -29,12 +30,7 @@ const FREE_DELIVERY_THRESHOLD = 599;
 
 export default function CheckoutClient() {
     const router = useRouter();
-
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    const hydrated = useHydrated();
 
     const items = useCartStore(s => s.items);
     const clearCart = useCartStore(s => s.clearCart);
@@ -177,11 +173,7 @@ export default function CheckoutClient() {
         );
     };
 
-    if (!mounted) {
-        return null;
-    }
-
-    if (items.length === 0) {
+    if (hydrated && items.length === 0) {
         return (
             <main className={css.page}>
                 <section className={css.container}>

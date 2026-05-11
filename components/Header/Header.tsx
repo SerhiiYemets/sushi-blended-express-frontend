@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -18,6 +18,12 @@ const NAV_LINKS = [
     { href: "/", label: "Domů" },
     { href: "/menu", label: "Menu" },
 ] as const;
+
+const selectUser = (s: ReturnType<typeof useAuthStore.getState>) => s.user;
+const selectAuthHydrated = (s: ReturnType<typeof useAuthStore.getState>) =>
+    s.isHydrated;
+const selectCartCount = (s: ReturnType<typeof useCartStore.getState>) =>
+    s.items.reduce((acc, item) => acc + item.quantity, 0);
 
 function SearchIcon({ className }: { className?: string }) {
     return (
@@ -80,29 +86,80 @@ function ProfileIcon({ className }: { className?: string }) {
     );
 }
 
+const SearchBox = memo(function SearchBox({
+    onSubmit,
+    variant,
+}: {
+    onSubmit: (query: string) => void;
+    variant: "desktop" | "mobile";
+}) {
+    const [query, setQuery] = useState("");
+
+    const submit = () => {
+        const trimmed = query.trim();
+        if (!trimmed) return;
+        onSubmit(trimmed);
+        setQuery("");
+    };
+
+    if (variant === "mobile") {
+        return (
+            <div className={css.mobileSearch}>
+                <SearchIcon className={css.mobileSearchIcon} />
+                <input
+                    type="search"
+                    placeholder="Hledat sushi..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && submit()}
+                    className={css.mobileSearchInput}
+                    aria-label="Hledat sushi"
+                />
+            </div>
+        );
+    }
+
+    return (
+        <div className={css.searchBox}>
+            <span className={css.searchIcon} aria-hidden>
+                <SearchIcon />
+            </span>
+            <input
+                type="search"
+                placeholder="Hledat sushi..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && submit()}
+                className={css.searchInput}
+                aria-label="Hledat sushi"
+            />
+            <button
+                type="button"
+                onClick={submit}
+                className={css.searchBtn}
+            >
+                Hledat
+            </button>
+        </div>
+    );
+});
+
 export default function Header() {
     const pathname = usePathname();
     const router = useRouter();
 
-    const user = useAuthStore((s) => s.user);
-    const isHydrated = useAuthStore((s) => s.isHydrated);
-    const totalCount = useCartStore((state) =>
-    state.items.reduce(
-        (acc, item) =>
-            acc + item.quantity,
-        0
-    )
-);
+    const user = useAuthStore(selectUser);
+    const isHydrated = useAuthStore(selectAuthHydrated);
+    const totalCount = useCartStore(selectCartCount);
 
-    const [menuOpen, setMenuOpen] =
-        useState(false);
+    const [menuOpenAt, setMenuOpenAt] = useState<string | null>(null);
+    const menuOpen = menuOpenAt === pathname;
 
-    const [query, setQuery] =
-        useState("");
-
-    useEffect(() => {
-        setMenuOpen(false);
-    }, [pathname]);
+    const closeMenu = useCallback(() => setMenuOpenAt(null), []);
+    const toggleMenu = useCallback(
+        () => setMenuOpenAt((prev) => (prev === pathname ? null : pathname)),
+        [pathname]
+    );
 
     useEffect(() => {
         if (!menuOpen) return;
@@ -115,59 +172,38 @@ export default function Header() {
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === "Escape") setMenuOpen(false);
+            if (e.key === "Escape") setMenuOpenAt(null);
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, []);
 
-    const closeMenu = () => setMenuOpen(false);
+    const handleSearch = useCallback(
+        (query: string) => {
+            router.push(`/menu?search=${encodeURIComponent(query)}`);
+            setMenuOpenAt(null);
+        },
+        [router]
+    );
 
-    const handleSearch = () => {
-        if (!query.trim()) return;
-        router.push(`/menu?search=${encodeURIComponent(query.trim())}`);
-        setQuery("");
-        setMenuOpen(false);
-    };
-
-    const scrollToContacts = () => {
-        setMenuOpen(false);
+    const scrollToContacts = useCallback(() => {
+        setMenuOpenAt(null);
         if (pathname !== "/") {
             router.push("/#contacts");
             return;
         }
         const el = document.getElementById("contacts");
         if (el) el.scrollIntoView({ behavior: "smooth" });
-    };
+    }, [pathname, router]);
 
     return (
         <header className={css.header}>
             <div className={css.inner}>
                 <Link href="/" className={css.logoWrapper} onClick={closeMenu}>
-                    <Logo />
+                    <Logo priority />
                 </Link>
 
-                <div className={css.searchBox}>
-                    <span className={css.searchIcon} aria-hidden>
-                        <SearchIcon />
-                    </span>
-                    <input
-                        type="search"
-                        placeholder="Hledat sushi..."
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                        className={css.searchInput}
-                        aria-label="Hledat sushi"
-                    />
-                    <button
-                        type="button"
-                        onClick={handleSearch}
-                        className={css.searchBtn}
-                    >
-                        Hledat
-                    </button>
-                </div>
+                <SearchBox onSubmit={handleSearch} variant="desktop" />
 
                 <nav className={css.nav}>
                     {NAV_LINKS.map(({ href, label }) => (
@@ -223,6 +259,7 @@ export default function Header() {
                                             alt={user.name}
                                             width={32}
                                             height={32}
+                                            sizes="32px"
                                             className={css.avatar}
                                         />
                                     ) : (
@@ -254,7 +291,7 @@ export default function Header() {
                 <button
                     type="button"
                     className={`${css.burger} ${menuOpen ? css.burgerOpen : ""}`}
-                    onClick={() => setMenuOpen((prev) => !prev)}
+                    onClick={toggleMenu}
                     aria-label={menuOpen ? "Zavřít menu" : "Otevřít menu"}
                     aria-expanded={menuOpen}
                     aria-controls="mobile-menu"
@@ -270,18 +307,7 @@ export default function Header() {
                 className={`${css.mobileMenu} ${menuOpen ? css.mobileMenuOpen : ""}`}
                 aria-hidden={!menuOpen}
             >
-                <div className={css.mobileSearch}>
-                    <SearchIcon className={css.mobileSearchIcon} />
-                    <input
-                        type="search"
-                        placeholder="Hledat sushi..."
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                        className={css.mobileSearchInput}
-                        aria-label="Hledat sushi"
-                    />
-                </div>
+                <SearchBox onSubmit={handleSearch} variant="mobile" />
 
                 <nav className={css.mobileNav}>
                     {NAV_LINKS.map(({ href, label }) => (
