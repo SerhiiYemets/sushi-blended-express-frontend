@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { useCartStore } from "@/lib/store/cartStore";
@@ -17,18 +17,17 @@ type PanelProduct = {
 
 const MAX_QUANTITY = 30;
 
+const selectAdd = (s: ReturnType<typeof useCartStore.getState>) => s.addToCart;
+
 export default function ProductPurchasePanel({
     product,
 }: {
     product: PanelProduct;
 }) {
-    const addToCart = useCartStore((s) => s.addToCart);
+    const addToCart = useCartStore(selectAdd);
     const [quantity, setQuantity] = useState(1);
 
-    const total = useMemo(
-        () => product.price * quantity,
-        [product.price, quantity]
-    );
+    const total = product.price * quantity;
 
     const decrement = () => setQuantity((q) => Math.max(1, q - 1));
     const increment = () => setQuantity((q) => Math.min(MAX_QUANTITY, q + 1));

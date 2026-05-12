@@ -7,11 +7,15 @@ import "./globals.css";
 const geistSans = Geist({
     variable: "--font-geist-sans",
     subsets: ["latin"],
+    display: "swap",
+    preload: true,
 });
 
 const geistMono = Geist_Mono({
     variable: "--font-geist-mono",
     subsets: ["latin"],
+    display: "swap",
+    preload: false,
 });
 
 export const metadata: Metadata = {
@@ -30,7 +34,11 @@ const themeInitScript = `(function(){
     } catch(e) {}
 })();`;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return (
         <html
             lang="cs"
@@ -38,12 +46,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             className={`${geistSans.variable} ${geistMono.variable}`}
         >
             <head>
-                <link
-                    rel="preload"
-                    as="image"
-                    href="/logo.png"
-                    fetchPriority="high"
-                />
                 <Script id="theme-init" strategy="beforeInteractive">
                     {themeInitScript}
                 </Script>

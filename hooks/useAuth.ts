@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { isAxiosError } from "axios";
-import type { FormikHelpers } from "formik";
 import { useAuthStore } from "@/lib/store/authStore";
 import { login, register } from "@/lib/api/clientApi";
 
@@ -16,6 +15,13 @@ type RegisterValues = {
     name: string;
     email: string;
     password: string;
+};
+
+type FieldName = "name" | "email" | "password";
+
+type AuthHelpers = {
+    setFieldError: (field: FieldName, message: string) => void;
+    resetForm?: () => void;
 };
 
 const ERROR_MAP: Record<string, string> = {
@@ -40,9 +46,9 @@ export function useAuth(redirectTo: string = "/") {
     async function submitAuth<T extends LoginValues | RegisterValues>(
         isLogin: boolean,
         values: T,
-        helpers: FormikHelpers<T>
+        helpers: AuthHelpers
     ) {
-        const { setSubmitting, setFieldError, resetForm } = helpers;
+        const { setFieldError, resetForm } = helpers;
 
         const loading = toast.loading(
             isLogin ? "Přihlašování..." : "Registrace..."
@@ -54,10 +60,12 @@ export function useAuth(redirectTo: string = "/") {
                 : await register(values as RegisterValues);
 
             setUser(data.user);
-            resetForm();
+            resetForm?.();
 
             toast.success(
-                isLogin ? "Přihlášení proběhlo úspěšně" : "Registrace proběhla úspěšně"
+                isLogin
+                    ? "Přihlášení proběhlo úspěšně"
+                    : "Registrace proběhla úspěšně"
             );
 
             router.push(safeRedirect(redirectTo));
@@ -73,17 +81,17 @@ export function useAuth(redirectTo: string = "/") {
                 : "Unknown error";
 
             const message = mapErrorMessage(rawMessage);
+            const lower = rawMessage.toLowerCase();
 
-            if (rawMessage.toLowerCase().includes("email")) {
+            if (lower.includes("email")) {
                 setFieldError("email", message);
-            } else if (rawMessage.toLowerCase().includes("password")) {
+            } else if (lower.includes("password")) {
                 setFieldError("password", message);
             } else {
                 toast.error(message);
             }
         } finally {
             toast.dismiss(loading);
-            setSubmitting(false);
         }
     }
 

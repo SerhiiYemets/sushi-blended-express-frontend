@@ -14,12 +14,19 @@ export default function MenuClient() {
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
     useEffect(() => {
+        let cancelled = false;
         getMenu()
             .then((res) => {
+                if (cancelled) return;
                 setData(res);
                 if (res.length > 0) setActiveCategory(res[0].category);
             })
-            .finally(() => setLoading(false));
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const current = data.find((c) => c.category === activeCategory);
@@ -38,9 +45,7 @@ export default function MenuClient() {
                                 <button
                                     key={cat.category}
                                     type="button"
-                                    onClick={() =>
-                                        setActiveCategory(cat.category)
-                                    }
+                                    onClick={() => setActiveCategory(cat.category)}
                                     className={`${css.categoryBtn} ${
                                         activeCategory === cat.category
                                             ? css.active

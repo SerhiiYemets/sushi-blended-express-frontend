@@ -14,30 +14,23 @@ type AuthState = {
 export const useAuthStore = create<AuthState>()(
     persist(
         (set) => ({
-        user: null,
-        isHydrated: false,
-
-        setUser: (user) => set({ user }),
-
-        logout: () =>
-            set({
             user: null,
-            }),
+            isHydrated: false,
 
-        setHydrated: (state) => set({ isHydrated: state }),
+            setUser: (user) => set({ user }),
+
+            logout: () => set({ user: null }),
+
+            setHydrated: (state) => set({ isHydrated: state }),
         }),
         {
-        name: "auth-storage",
-
-        storage: createJSONStorage(() => localStorage),
-        
-        onRehydrateStorage: () => (state) => {
-            state?.setHydrated(true);
-        },
-
-        partialize: (state) => ({
-            user: state.user,
-        }),
+            name: "auth-storage",
+            storage: createJSONStorage(() => localStorage),
+            partialize: (state) => ({ user: state.user }),
+            onRehydrateStorage: () => (state) => {
+                state?.setHydrated(true);
+            },
+            skipHydration: false,
         }
     )
 );

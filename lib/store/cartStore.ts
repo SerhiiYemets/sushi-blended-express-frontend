@@ -1,16 +1,20 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { useShallow } from "zustand/react/shallow";
 
 import type { CartItem } from "@/types/cart";
 
-type CartStore = {
-    items: CartItem[];
+export type CartActions = {
     addToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
     removeFromCart: (id: string) => void;
     incrementItem: (id: string) => void;
     decrementItem: (id: string) => void;
     setQuantity: (id: string, quantity: number) => void;
     clearCart: () => void;
+};
+
+type CartStore = CartActions & {
+    items: CartItem[];
 };
 
 export const useCartStore = create<CartStore>()(
@@ -63,9 +67,7 @@ export const useCartStore = create<CartStore>()(
             setQuantity: (id, quantity) =>
                 set((state) => ({
                     items: state.items
-                        .map((i) =>
-                            i._id === id ? { ...i, quantity } : i
-                        )
+                        .map((i) => (i._id === id ? { ...i, quantity } : i))
                         .filter((i) => i.quantity > 0),
                 })),
 
@@ -77,3 +79,22 @@ export const useCartStore = create<CartStore>()(
         }
     )
 );
+
+export const selectCartActions = (s: CartStore): CartActions => ({
+    addToCart: s.addToCart,
+    removeFromCart: s.removeFromCart,
+    incrementItem: s.incrementItem,
+    decrementItem: s.decrementItem,
+    setQuantity: s.setQuantity,
+    clearCart: s.clearCart,
+});
+
+export const useCartActions = () =>
+    useCartStore(useShallow(selectCartActions));
+
+export const useCartCount = () =>
+    useCartStore((s) => {
+        let n = 0;
+        for (const item of s.items) n += item.quantity;
+        return n;
+    });

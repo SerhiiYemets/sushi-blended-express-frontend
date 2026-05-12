@@ -1,3 +1,5 @@
+import Header from '@/components/Header/Header';
+import Footer from '@/components/Footer/Footer';
 import CartClient from './CartClient';
 
 export const metadata = {
@@ -5,5 +7,11 @@ export const metadata = {
 };
 
 export default function CartPage() {
-    return <CartClient />;
+    return (
+        <>
+            <Header />
+                <CartClient />
+            <Footer />
+        </>
+    );
 }

@@ -195,19 +195,12 @@
     min-height: 38px;
 }
 
-.authSkeleton {
+.authPlaceholder {
     display: inline-block;
-    width: 100%;
-    max-width: 200px;
+    width: 200px;
     height: 38px;
-    border-radius: var(--btn-radius-pill);
-    background: color-mix(in srgb, var(--color-text-muted, #999) 14%, transparent);
-    animation: pulse 1.4s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 0.55; }
-    50% { opacity: 1; }
+    visibility: hidden;
+    contain: strict;
 }
 
 .loginBtn,

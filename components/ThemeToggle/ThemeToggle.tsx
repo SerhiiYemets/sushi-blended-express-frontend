@@ -1,31 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import css from "./ThemeToggle.module.css";
 
+type Theme = "light" | "dark";
+
+function getTheme(): Theme {
+    const t = document.documentElement.getAttribute("data-theme");
+    return t === "dark" ? "dark" : "light";
+}
+
+function subscribe(onChange: () => void) {
+    const observer = new MutationObserver(onChange);
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
+}
+
+const getServerSnapshot = (): Theme => "light";
+
 export default function ThemeToggle() {
-    const [mounted, setMounted] = useState(false);
-    const [dark, setDark] = useState(false);
-
-    useEffect(() => {
-        const isDark =
-            document.documentElement.getAttribute("data-theme") === "dark";
-
-        setDark(isDark);
-        setMounted(true);
-    }, []);
+    const theme = useSyncExternalStore(subscribe, getTheme, getServerSnapshot);
+    const dark = theme === "dark";
 
     const toggle = () => {
-        const next = dark ? "light" : "dark";
-
+        const next: Theme = dark ? "light" : "dark";
         document.documentElement.setAttribute("data-theme", next);
-        localStorage.setItem("theme", next);
-
-        setDark(next === "dark");
+        try {
+            localStorage.setItem("theme", next);
+        } catch {}
     };
-
-
-    if (!mounted) return null;
 
     return (
         <button
@@ -33,6 +39,7 @@ export default function ThemeToggle() {
             className={css.btn}
             onClick={toggle}
             aria-label={dark ? "Zapnout světlý režim" : "Zapnout tmavý režim"}
+            suppressHydrationWarning
         >
             {dark ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">

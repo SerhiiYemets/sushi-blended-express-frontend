@@ -1,7 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
-
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -28,22 +26,23 @@ import css from './checkout.module.css';
 const DELIVERY_FEE = 49;
 const FREE_DELIVERY_THRESHOLD = 599;
 
+const selectItems = (s: ReturnType<typeof useCartStore.getState>) => s.items;
+const selectClearCart = (s: ReturnType<typeof useCartStore.getState>) =>
+    s.clearCart;
+
 export default function CheckoutClient() {
     const router = useRouter();
     const hydrated = useHydrated();
 
-    const items = useCartStore(s => s.items);
-    const clearCart = useCartStore(s => s.clearCart);
+    const items = useCartStore(selectItems);
+    const clearCart = useCartStore(selectClearCart);
 
-    const subtotal = useMemo(
-        () => items.reduce((acc, item) => acc + item.price * item.quantity, 0),
-        [items]
-    );
-
-    const totalQty = useMemo(
-        () => items.reduce((acc, item) => acc + item.quantity, 0),
-        [items]
-    );
+    let subtotal = 0;
+    let totalQty = 0;
+    for (const item of items) {
+        subtotal += item.price * item.quantity;
+        totalQty += item.quantity;
+    }
 
     const {
         register,
@@ -81,8 +80,6 @@ export default function CheckoutClient() {
     const total = subtotal + deliveryFee;
 
     const onSubmit = async (values: OrderFormData) => {
-        console.log('[checkout] onSubmit reached', values);
-
         if (items.length === 0) {
             toast.error('Košík je prázdný');
             return;
@@ -119,32 +116,14 @@ export default function CheckoutClient() {
             totalPrice: total,
         };
 
-        console.log(
-            '[checkout] POST',
-            `${process.env.NEXT_PUBLIC_API_URL}/api/orders`,
-            payload
-        );
-
         try {
-            const data = await createOrder(payload);
-
-            console.log('[checkout] order created', data);
+            await createOrder(payload);
 
             toast.success('Objednávka byla úspěšně odeslána');
             clearCart();
             router.push('/success');
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                console.error('[checkout] axios error', {
-                    code: error.code,
-                    message: error.message,
-                    status: error.response?.status,
-                    statusText: error.response?.statusText,
-                    data: error.response?.data,
-                    requestUrl: error.config?.url,
-                    requestData: error.config?.data,
-                });
-
                 const serverMsg =
                     (error.response?.data as { message?: string } | undefined)
                         ?.message ?? error.message;
@@ -155,15 +134,12 @@ export default function CheckoutClient() {
 
                 toast.error(fallback);
             } else {
-                console.error('[checkout] unknown error', error);
                 toast.error('Něco se pokazilo. Zkuste to prosím znovu.');
             }
         }
     };
 
     const onInvalid: SubmitErrorHandler<OrderFormInput> = formErrors => {
-        console.warn('[checkout] validation blocked submit', formErrors);
-
         const firstField = Object.keys(formErrors)[0];
 
         toast.error(

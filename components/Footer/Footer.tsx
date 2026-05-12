@@ -1,13 +1,9 @@
-"use client";
-
 import Link from "next/link";
 import Logo from "@/components/Logo/Logo";
 import css from "./Footer.module.css";
 
 export default function Footer() {
-    const scrollToContacts = () => {
-        document.getElementById("contacts")?.scrollIntoView({ behavior: "smooth" });
-    };
+    const year = new Date().getFullYear();
 
     return (
         <footer id="contacts" className={css.footer}>
@@ -48,14 +44,21 @@ export default function Footer() {
                             <h3 className={css.label}>Navigace</h3>
                             <Link href="/" className={css.navLink}>Domů</Link>
                             <Link href="/menu" className={css.navLink}>Menu</Link>
-                            <button type="button" onClick={scrollToContacts} className={css.navLink}>Kontakt</button>
+                            <a href="#contacts" className={css.navLink}>Kontakt</a>
                         </div>
                     </div>
                 </div>
 
                 <div className={css.bottom}>
                     <span className={css.copy}>
-                        © {new Date().getFullYear()}. 
+                        © {year}{" "}
+                        <a
+                            href="https://www.linkedin.com/in/serhii-yemets/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Serhii Yemets
+                        </a>
                     </span>
                 </div>
             </div>

@@ -15,23 +15,15 @@ type Props = {
     categorySlug?: string;
 };
 
-export default function ProductCard({
-    item,
-    categorySlug,
-}: Props) {
-    const addToCart = useCartStore(
-        (s) => s.addToCart
-    );
+const selectAdd = (s: ReturnType<typeof useCartStore.getState>) => s.addToCart;
 
-    const href = `/menu/${encodeURIComponent(
-        categorySlug ?? "all"
-    )}/${item._id}`;
+export default function ProductCard({ item, categorySlug }: Props) {
+    const addToCart = useCartStore(selectAdd);
 
-    const handleAdd = (
-        e: React.MouseEvent<HTMLButtonElement>
-    ) => {
+    const href = `/menu/${encodeURIComponent(categorySlug ?? "all")}/${item._id}`;
+
+    const handleAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-
         e.stopPropagation();
 
         addToCart({
@@ -42,13 +34,11 @@ export default function ProductCard({
             weight: item.weight,
         });
 
-        toast.success(
-            `${item.name} přidáno do košíku`
-        );
+        toast.success(`${item.name} přidáno do košíku`);
     };
 
     return (
-        <Link href={href} className={css.link}>
+        <Link href={href} className={css.link} prefetch={false}>
             <article className={css.card}>
                 <div className={css.imageWrapper}>
                     {item.image ? (
@@ -58,31 +48,19 @@ export default function ProductCard({
                             fill
                             className={css.image}
                             sizes="(min-width: 1440px) 33vw, (min-width: 768px) 50vw, 100vw"
+                            loading="lazy"
                         />
                     ) : (
-                        <div
-                            className={
-                                css.imagePlaceholder
-                            }
-                            aria-hidden
-                        />
+                        <div className={css.imagePlaceholder} aria-hidden />
                     )}
                 </div>
 
-                <h3 className={css.title}>
-                    {item.name}
-                </h3>
+                <h3 className={css.title}>{item.name}</h3>
 
-                {item.weight && (
-                    <p className={css.weight}>
-                        {item.weight}
-                    </p>
-                )}
+                {item.weight && <p className={css.weight}>{item.weight}</p>}
 
                 <div className={css.bottom}>
-                    <span className={css.price}>
-                        {item.price} Kč
-                    </span>
+                    <span className={css.price}>{item.price} Kč</span>
 
                     <button
                         type="button"

@@ -6,7 +6,6 @@ import {
     useId,
     useRef,
     useState,
-    useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
@@ -29,8 +28,6 @@ const FOCUSABLE_SELECTOR = [
 
 const ANIMATION_MS = 220;
 
-const noopSubscribe = () => () => {};
-
 type Props = {
     children: React.ReactNode;
     labelledBy?: string;
@@ -43,15 +40,10 @@ export default function Modal({
     closeAriaLabel = "Zavřít",
 }: Props) {
     const router = useRouter();
-    const isClient = useSyncExternalStore(
-        noopSubscribe,
-        () => true,
-        () => false
-    );
+    const [mounted, setMounted] = useState(false);
     const [closing, setClosing] = useState(false);
     const closingRef = useRef(false);
     const dialogRef = useRef<HTMLDivElement>(null);
-    const previouslyFocusedRef = useRef<HTMLElement | null>(null);
     const pointerDownOnBackdropRef = useRef(false);
     const titleFallbackId = useId();
 
@@ -63,6 +55,20 @@ export default function Modal({
     }, [router]);
 
     useEffect(() => {
+        setMounted(true);
+
+        const previouslyFocused =
+            (document.activeElement as HTMLElement | null) ?? null;
+
+        const { body, documentElement } = document;
+        const originalOverflow = body.style.overflow;
+        const originalPaddingRight = body.style.paddingRight;
+        const scrollbarWidth = window.innerWidth - documentElement.clientWidth;
+        body.style.overflow = "hidden";
+        if (scrollbarWidth > 0) {
+            body.style.paddingRight = `${scrollbarWidth}px`;
+        }
+
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 e.preventDefault();
@@ -70,42 +76,24 @@ export default function Modal({
             }
         };
         document.addEventListener("keydown", onKeyDown);
-        return () => document.removeEventListener("keydown", onKeyDown);
-    }, [close]);
 
-    useEffect(() => {
-        const { body, documentElement } = document;
-        const originalOverflow = body.style.overflow;
-        const originalPaddingRight = body.style.paddingRight;
-        const scrollbarWidth =
-            window.innerWidth - documentElement.clientWidth;
-        body.style.overflow = "hidden";
-        if (scrollbarWidth > 0) {
-            body.style.paddingRight = `${scrollbarWidth}px`;
-        }
-        return () => {
-            body.style.overflow = originalOverflow;
-            body.style.paddingRight = originalPaddingRight;
-        };
-    }, []);
-
-    useEffect(() => {
-        previouslyFocusedRef.current =
-            (document.activeElement as HTMLElement | null) ?? null;
-
-        const dialog = dialogRef.current;
-        if (dialog) {
+        const focusTimer = window.setTimeout(() => {
+            const dialog = dialogRef.current;
+            if (!dialog) return;
             const items =
                 dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
             const target = items[0] ?? dialog;
             target.focus({ preventScroll: true });
-        }
+        }, 0);
 
-        const previouslyFocused = previouslyFocusedRef.current;
         return () => {
+            window.clearTimeout(focusTimer);
+            document.removeEventListener("keydown", onKeyDown);
+            body.style.overflow = originalOverflow;
+            body.style.paddingRight = originalPaddingRight;
             previouslyFocused?.focus?.({ preventScroll: true });
         };
-    }, []);
+    }, [close]);
 
     const onKeyDownInDialog = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key !== "Tab") return;
@@ -144,7 +132,7 @@ export default function Modal({
         pointerDownOnBackdropRef.current = false;
     };
 
-    if (!isClient) return null;
+    if (!mounted) return null;
 
     const labelId = labelledBy ?? titleFallbackId;
 

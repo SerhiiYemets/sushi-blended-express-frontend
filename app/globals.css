@@ -1,7 +1,4 @@
-/* ── CSS Variables ── */
-
 :root {
-  /* Colors – light theme (default) */
   --color-bg-page:       #faf8f5;
   --color-bg-white:      #ffffff;
   --color-surface:       #f0ebe3;
@@ -22,17 +19,13 @@
 
   --color-scheme-2-text: #2d1c0e;
 
-  /* Typography */
   --font-montserrat:          var(--font-geist-sans, system-ui, sans-serif);
   --font-manrope:             var(--font-geist-sans, system-ui, sans-serif);
   --font-size-base:           16px;
   --line-height-normal:       1.5;
 
-  /* Layout */
   --container-padding-tablet:  32px;
   --container-padding-desktop: 64px;
-
-  /* Buttons (shared design tokens) */
   --btn-radius:        14px;
   --btn-radius-pill:   999px;
   --btn-font-weight:   600;
@@ -66,7 +59,6 @@
   --color-scheme-2-text: #e0d0c0;
 }
 
-/* ── Reset ── */
 
 *,
 *::before,
@@ -96,7 +88,7 @@ body {
   line-height: var(--line-height-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4, h5, h6, p {
@@ -118,11 +110,10 @@ a {
   text-decoration: none;
   cursor: pointer;
   outline: none;
-  transition: opacity 0.2s ease;
 }
 
 a:hover {
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 button {
@@ -131,7 +122,6 @@ button {
   background: none;
   border: none;
   outline: none;
-  transition: all 0.2s ease;
 }
 
 img {
@@ -146,7 +136,6 @@ svg {
   height: auto;
 }
 
-/* ── Layout helpers ── */
 .mainLayout {
   display: flex;
   flex-direction: column;

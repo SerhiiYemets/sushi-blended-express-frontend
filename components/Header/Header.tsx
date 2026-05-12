@@ -12,7 +12,7 @@ import Logout from "@/components/Logout/Logout";
 import ThemeToggle from "@/components/ThemeToggle/ThemeToggle";
 
 import { useAuthStore } from "@/lib/store/authStore";
-import { useCartStore } from "@/lib/store/cartStore";
+import { useCartCount } from "@/lib/store/cartStore";
 
 const NAV_LINKS = [
     { href: "/", label: "Domů" },
@@ -22,10 +22,8 @@ const NAV_LINKS = [
 const selectUser = (s: ReturnType<typeof useAuthStore.getState>) => s.user;
 const selectAuthHydrated = (s: ReturnType<typeof useAuthStore.getState>) =>
     s.isHydrated;
-const selectCartCount = (s: ReturnType<typeof useCartStore.getState>) =>
-    s.items.reduce((acc, item) => acc + item.quantity, 0);
 
-function SearchIcon({ className }: { className?: string }) {
+const SearchIcon = memo(function SearchIcon({ className }: { className?: string }) {
     return (
         <svg
             className={className}
@@ -43,9 +41,9 @@ function SearchIcon({ className }: { className?: string }) {
             <path d="m20 20-3.5-3.5" />
         </svg>
     );
-}
+});
 
-function CartIcon({ className }: { className?: string }) {
+const CartIcon = memo(function CartIcon({ className }: { className?: string }) {
     return (
         <svg
             className={className}
@@ -64,9 +62,9 @@ function CartIcon({ className }: { className?: string }) {
             <circle cx="17.5" cy="20.5" r="1.5" />
         </svg>
     );
-}
+});
 
-function ProfileIcon({ className }: { className?: string }) {
+const ProfileIcon = memo(function ProfileIcon({ className }: { className?: string }) {
     return (
         <svg
             className={className}
@@ -84,7 +82,7 @@ function ProfileIcon({ className }: { className?: string }) {
             <path d="M4 21a8 8 0 0 1 16 0" />
         </svg>
     );
-}
+});
 
 const SearchBox = memo(function SearchBox({
     onSubmit,
@@ -133,24 +131,130 @@ const SearchBox = memo(function SearchBox({
                 className={css.searchInput}
                 aria-label="Hledat sushi"
             />
-            <button
-                type="button"
-                onClick={submit}
-                className={css.searchBtn}
-            >
+            <button type="button" onClick={submit} className={css.searchBtn}>
                 Hledat
             </button>
         </div>
     );
 });
 
+function AuthArea({ isHydrated }: { isHydrated: boolean }) {
+    const user = useAuthStore(selectUser);
+
+    if (!isHydrated) {
+        return <span className={css.authPlaceholder} aria-hidden />;
+    }
+
+    if (user) {
+        return (
+            <>
+                <Link
+                    href="/profile"
+                    className={css.avatarLink}
+                    aria-label={`Profil ${user.name}`}
+                >
+                    {user.avatarUrl ? (
+                        <Image
+                            src={user.avatarUrl}
+                            alt={user.name}
+                            width={32}
+                            height={32}
+                            sizes="32px"
+                            className={css.avatar}
+                        />
+                    ) : (
+                        <span className={css.avatarFallback}>
+                            {user.name.charAt(0).toUpperCase()}
+                        </span>
+                    )}
+                </Link>
+                <Logout />
+            </>
+        );
+    }
+
+    return (
+        <>
+            <Link href="/login" className={css.loginBtn}>
+                Přihlášení
+            </Link>
+            <Link href="/register" className={css.registerBtn}>
+                Registrace
+            </Link>
+        </>
+    );
+}
+
+function MobileAuthArea({
+    isHydrated,
+    onClose,
+}: {
+    isHydrated: boolean;
+    onClose: () => void;
+}) {
+    const user = useAuthStore(selectUser);
+
+    if (!isHydrated) return null;
+
+    if (user) {
+        return (
+            <>
+                <Link
+                    href="/profile"
+                    className={css.mobileProfile}
+                    onClick={onClose}
+                >
+                    <ProfileIcon />
+                    {user.name}
+                </Link>
+                <Logout />
+            </>
+        );
+    }
+
+    return (
+        <>
+            <Link href="/login" className={css.mobileLoginBtn} onClick={onClose}>
+                Přihlášení
+            </Link>
+            <Link
+                href="/register"
+                className={css.mobileRegisterBtn}
+                onClick={onClose}
+            >
+                Registrace
+            </Link>
+        </>
+    );
+}
+
+function CartBadge() {
+    const totalCount = useCartCount();
+
+    return (
+        <Link
+            href="/cart"
+            className={css.cart}
+            aria-label={`Košík (${totalCount})`}
+        >
+            <CartIcon />
+            {totalCount > 0 && (
+                <span className={css.cartCount}>{totalCount}</span>
+            )}
+        </Link>
+    );
+}
+
+function MobileCartCount() {
+    const totalCount = useCartCount();
+    if (totalCount === 0) return null;
+    return <span className={css.mobileCount}>{totalCount}</span>;
+}
+
 export default function Header() {
     const pathname = usePathname();
     const router = useRouter();
-
-    const user = useAuthStore(selectUser);
     const isHydrated = useAuthStore(selectAuthHydrated);
-    const totalCount = useCartStore(selectCartCount);
 
     const [menuOpenAt, setMenuOpenAt] = useState<string | null>(null);
     const menuOpen = menuOpenAt === pathname;
@@ -165,18 +269,17 @@ export default function Header() {
         if (!menuOpen) return;
         const original = document.body.style.overflow;
         document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = original;
-        };
-    }, [menuOpen]);
 
-    useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === "Escape") setMenuOpenAt(null);
         };
         window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-    }, []);
+
+        return () => {
+            document.body.style.overflow = original;
+            window.removeEventListener("keydown", onKey);
+        };
+    }, [menuOpen]);
 
     const handleSearch = useCallback(
         (query: string) => {
@@ -232,57 +335,10 @@ export default function Header() {
                         +420 721 479 332
                     </a>
 
-                    <Link
-                        href="/cart"
-                        className={css.cart}
-                        aria-label={`Košík (${totalCount})`}
-                    >
-                        <CartIcon />
-                        {totalCount > 0 && (
-                            <span className={css.cartCount}>{totalCount}</span>
-                        )}
-                    </Link>
+                    <CartBadge />
 
                     <div className={css.auth} aria-busy={!isHydrated}>
-                        {!isHydrated ? (
-                            <span className={css.authSkeleton} aria-hidden />
-                        ) : user ? (
-                            <>
-                                <Link
-                                    href="/profile"
-                                    className={css.avatarLink}
-                                    aria-label={`Profil ${user.name}`}
-                                >
-                                    {user.avatarUrl ? (
-                                        <Image
-                                            src={user.avatarUrl}
-                                            alt={user.name}
-                                            width={32}
-                                            height={32}
-                                            sizes="32px"
-                                            className={css.avatar}
-                                        />
-                                    ) : (
-                                        <span className={css.avatarFallback}>
-                                            {user.name.charAt(0).toUpperCase()}
-                                        </span>
-                                    )}
-                                </Link>
-                                <Logout />
-                            </>
-                        ) : (
-                            <>
-                                <Link href="/login" className={css.loginBtn}>
-                                    Přihlášení
-                                </Link>
-                                <Link
-                                    href="/register"
-                                    className={css.registerBtn}
-                                >
-                                    Registrace
-                                </Link>
-                            </>
-                        )}
+                        <AuthArea isHydrated={isHydrated} />
                     </div>
 
                     <ThemeToggle />
@@ -340,9 +396,7 @@ export default function Header() {
                             <CartIcon />
                             Košík
                         </span>
-                        {totalCount > 0 && (
-                            <span className={css.mobileCount}>{totalCount}</span>
-                        )}
+                        <MobileCartCount />
                     </Link>
 
                     <a href="tel:+420721479332" className={css.mobileLink}>
@@ -351,36 +405,7 @@ export default function Header() {
                 </nav>
 
                 <div className={css.mobileAuth}>
-                    {!isHydrated ? null : user ? (
-                        <>
-                            <Link
-                                href="/profile"
-                                className={css.mobileProfile}
-                                onClick={closeMenu}
-                            >
-                                <ProfileIcon />
-                                {user.name}
-                            </Link>
-                            <Logout />
-                        </>
-                    ) : (
-                        <>
-                            <Link
-                                href="/login"
-                                className={css.mobileLoginBtn}
-                                onClick={closeMenu}
-                            >
-                                Přihlášení
-                            </Link>
-                            <Link
-                                href="/register"
-                                className={css.mobileRegisterBtn}
-                                onClick={closeMenu}
-                            >
-                                Registrace
-                            </Link>
-                        </>
-                    )}
+                    <MobileAuthArea isHydrated={isHydrated} onClose={closeMenu} />
                 </div>
             </div>
         </header>
