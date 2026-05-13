@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍣 Sushi Blended Express Frontend
 
-## Getting Started
+## 🇨🇿 Čeština
 
-First, run the development server:
+Moderní frontend aplikace pro online objednávání sushi postavená pomocí **Next.js**, **TypeScript** a **Zustand**. Aplikace umožňuje prohlížení menu, správu košíku, autentizaci uživatelů a vytvoření objednávky.
+
+### 🚀 Funkce
+
+- Registrace / přihlášení uživatelů
+- JWT autentizace
+- Obnovení session pomocí refresh token
+- Zobrazení menu a detail produktu
+- Produktové modální okno (intercepting routes)
+- Nákupní košík
+- Checkout formulář
+- Odesílání objednávky na backend API
+- Email notifikace přes backend
+- Dark / Light theme
+- Responzivní design
+- SEO metadata
+
+### 🛠 Technologie
+
+**Frontend**
+- Next.js (App Router)
+- React
+- TypeScript
+- Zustand
+- React Hook Form
+- Zod
+- Axios
+- CSS Modules
+- react-hot-toast
+
+### ⚙️ Instalace
 
 ```bash
+git clone https://github.com/SerhiiYemets/sushi-blended-express-frontend.git
+cd sushi-blended-express-frontend
+npm install
+Environment variables
+
+Vytvoř .env.local:
+NEXT_PUBLIC_API_URL=https://sushi-blended-express.onrender.com
+
+Spuštění
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Produkce
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Frontend deploy:
+https://sushi-blended-express-frontend.vercel.app
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🇬🇧 English
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Modern frontend application for online sushi ordering built with Next.js, TypeScript, and Zustand. The app supports menu browsing, shopping cart management, user authentication, and checkout flow.
 
-## Learn More
+🚀 Features
+User registration / login
+JWT authentication
+Session refresh via refresh token
+Menu browsing and product details
+Product modal routing (intercepting routes)
+Shopping cart
+Checkout form
+Order submission to backend API
+Email notifications via backend
+Dark / Light theme
+Responsive design
+SEO metadata
+🛠 Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+Frontend
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Next.js (App Router)
+React
+TypeScript
+Zustand
+React Hook Form
+Zod
+Axios
+CSS Modules
+react-hot-toast
+⚙️ Installation
+git clone https://github.com/SerhiiYemets/sushi-blended-express-frontend.git
+cd sushi-blended-express-frontend
+npm install
+Environment variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Create .env.local:
+NEXT_PUBLIC_API_URL=https://sushi-blended-express.onrender.com
 
-## Deploy on Vercel
+Run locally
+npm run dev
+Production
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Frontend deployment:
+https://sushi-blended-express-frontend.vercel.app
