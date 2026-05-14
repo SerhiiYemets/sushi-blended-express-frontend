@@ -30,8 +30,8 @@ export const metadata: Metadata = {
     ),
 
     title: {
-        default: "SushiMax",
-        template: "%s | SushiMax",
+        default: "SushiRoom",
+        template: "%s | SushiRoom",
     },
 
     description:
@@ -56,11 +56,11 @@ export const metadata: Metadata = {
     creator: "Serhii Yemets",
 
     openGraph: {
-        title: "SushiMax",
+        title: "SushiRoom",
         description:
             "Objednávejte čerstvé sushi online – rychlé doručení a moderní objednávkový systém.",
         url: "https://sushi-blended-express-frontend.vercel.app",
-        siteName: "SushiMax",
+        siteName: "SushiRoom",
         locale: "cs_CZ",
         type: "website",
     },
