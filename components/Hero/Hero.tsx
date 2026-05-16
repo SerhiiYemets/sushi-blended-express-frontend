@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import css from "@/components/Hero/Hero.module.css";
 
@@ -5,7 +6,7 @@ export default function Hero() {
     return (
         <section className={css.hero}>
             <Image
-                src="/Hero.jpg"
+                src="/Hero.webp"
                 alt="Sushi hero"
                 fill
                 priority
@@ -14,9 +15,18 @@ export default function Hero() {
             />
 
             <div className={css.heroContent}>
-                <h1 className={css.heroTitle}>Nejlepší sushi v Kolíně</h1>
-                <p className={css.heroSubtitle}>Čerstvé, rychlé, chutné 🍣</p>
-                <a href="/menu" className={css.heroBtn}>Objednat</a>
+                <h1 className={css.heroTitle}>
+                    <span>Nejlepší sushi</span>
+                    <span>v Kolíně a Jihlavě</span>
+                </h1>
+
+                <p className={css.heroSubtitle}>
+                    Čerstvé, rychlé, chutné 🍣
+                </p>
+
+                <Link href="/menu" className={css.heroBtn}>
+                    Objednat
+                </Link>
             </div>
         </section>
     );

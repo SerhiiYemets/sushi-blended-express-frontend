@@ -10,6 +10,10 @@
     background-color: #1a0e06;
 }
 
+.heroTitle span {
+    display: block;
+}
+
 .heroImage {
     object-fit: cover;
     z-index: -1;
