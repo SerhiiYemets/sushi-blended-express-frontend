@@ -8,7 +8,8 @@ import type {
 } from "@/types/auth";
 import type { MenuCategory } from "@/types/menu";
 import type { Product } from "@/types/product";
-import type { User } from "@/types/user";
+import type { Order } from "@/types/order";
+import type { ProfileUpdatePayload, User } from "@/types/user";
 
 const clientApi = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -23,7 +24,8 @@ clientApi.interceptors.response.use(
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&
-            originalRequest.url !== "/api/auth/login"
+            originalRequest.url !== "/api/auth/login" &&
+            originalRequest.url !== "/api/auth/refresh"
         ) {
             originalRequest._retry = true;
 
@@ -44,46 +46,25 @@ clientApi.interceptors.response.use(
 
 export default clientApi;
 
-function deriveNameFromEmail(email: string): string {
-    const local = email.split("@")[0] ?? email;
-    return local
-        .replace(/[._-]+/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .replace(/\b\w/g, (c) => c.toUpperCase()) || email;
-}
-
-export const login = async (payload: LoginPayload): Promise<AuthResult> => {
+export const login = async (
+    payload: LoginPayload
+): Promise<AuthResult> => {
     await clientApi.post<LoginResponse>("/api/auth/login", payload);
-
-    const user: User = {
-        _id: "",
-        email: payload.email,
-        name: deriveNameFromEmail(payload.email),
-    };
-
+    const user = await getMe();
     return { user };
 };
 
 export const register = async (
     payload: RegisterPayload
 ): Promise<AuthResult> => {
-    const { data } = await clientApi.post<RegisterResponse>(
-        "/api/auth/register",
-        payload
-    );
+    await clientApi.post<RegisterResponse>("/api/auth/register", payload);
 
     await clientApi.post<LoginResponse>("/api/auth/login", {
         email: payload.email,
         password: payload.password,
     });
 
-    const user: User = {
-        _id: data.id,
-        name: data.name,
-        email: data.email,
-    };
-
+    const user = await getMe();
     return { user };
 };
 
@@ -98,5 +79,22 @@ export const getMenu = async (): Promise<MenuCategory[]> => {
 
 export const getProducts = async (): Promise<Product[]> => {
     const res = await clientApi.get<Product[]>("/api/products");
+    return res.data;
+};
+
+export const getMe = async (): Promise<User> => {
+    const res = await clientApi.get<User>("/api/users/me");
+    return res.data;
+};
+
+export const updateMe = async (
+    payload: ProfileUpdatePayload
+): Promise<User> => {
+    const res = await clientApi.patch<User>("/api/users/me", payload);
+    return res.data;
+};
+
+export const getMyOrders = async (): Promise<Order[]> => {
+    const res = await clientApi.get<Order[]>("/api/users/me/orders");
     return res.data;
 };

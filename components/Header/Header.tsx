@@ -161,6 +161,7 @@ function AuthArea({ isHydrated }: { isHydrated: boolean }) {
                             height={32}
                             sizes="32px"
                             className={css.avatar}
+                            unoptimized
                         />
                     ) : (
                         <span className={css.avatarFallback}>

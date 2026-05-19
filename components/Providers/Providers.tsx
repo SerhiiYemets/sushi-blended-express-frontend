@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import dynamic from "next/dynamic";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 import styles from "./Providers.module.css";
 
 const Toaster = dynamic(
@@ -32,10 +35,27 @@ export default function Providers({
 }: {
     children: React.ReactNode;
 }) {
+    const [queryClient] = useState(
+        () =>
+            new QueryClient({
+                defaultOptions: {
+                    queries: {
+                        staleTime: 30_000,
+                        retry: 1,
+                        refetchOnWindowFocus: false,
+                    },
+                },
+            })
+    );
+
     return (
-        <>
+        <QueryClientProvider client={queryClient}>
             {children}
-            <Toaster position="top-right" gutter={10} toastOptions={toastOptions} />
-        </>
+            <Toaster
+                position="top-right"
+                gutter={10}
+                toastOptions={toastOptions}
+            />
+        </QueryClientProvider>
     );
 }

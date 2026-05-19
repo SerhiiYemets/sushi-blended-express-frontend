@@ -1,0 +1,126 @@
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.title {
+    font-size: clamp(20px, 3vw, 26px);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+    margin: 0;
+}
+
+.count {
+    display: inline-flex;
+    align-items: center;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: var(--color-surface-light);
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.listItem {
+    margin: 0;
+}
+
+.empty {
+    background: var(--color-bg-white);
+    border: 1px solid var(--color-border-warm);
+    border-radius: 20px;
+    padding: 48px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.emptyIcon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--color-surface-light);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 4px;
+}
+
+.emptyTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.emptyText {
+    color: var(--color-text-muted);
+    font-size: 14px;
+    max-width: 360px;
+}
+
+.retryBtn {
+    margin-top: 8px;
+    height: 40px;
+    padding: 0 20px;
+    border: none;
+    border-radius: var(--btn-radius);
+    background: var(--color-primary);
+    color: #fff;
+    font-weight: var(--btn-font-weight);
+    font-size: 13px;
+    letter-spacing: var(--btn-letter-spacing);
+    cursor: pointer;
+    transition: var(--btn-transition);
+    box-shadow: var(--btn-shadow);
+}
+
+.retryBtn:hover {
+    background: var(--color-primary-dark);
+    box-shadow: var(--btn-shadow-hover);
+    opacity: 1;
+}
+
+.skeleton {
+    width: 100%;
+    min-height: 200px;
+    border-radius: 20px;
+    background: linear-gradient(
+        110deg,
+        var(--color-surface) 8%,
+        var(--color-surface-light) 18%,
+        var(--color-surface) 33%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}

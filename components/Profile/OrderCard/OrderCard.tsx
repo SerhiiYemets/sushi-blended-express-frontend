@@ -1,0 +1,133 @@
+"use client";
+
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
+import { useCartActions } from "@/lib/store/cartStore";
+import type { Order, OrderStatus } from "@/types/order";
+
+import css from "./OrderCard.module.css";
+
+type Props = {
+    order: Order;
+};
+
+const STATUS_LABEL: Record<OrderStatus, string> = {
+    pending: "Čeká na potvrzení",
+    confirmed: "Potvrzeno",
+    preparing: "Připravuje se",
+    delivering: "Na cestě",
+    completed: "Doručeno",
+    cancelled: "Zrušeno",
+};
+
+const STATUS_CLASS: Record<OrderStatus, string> = {
+    pending: css.statusPending,
+    confirmed: css.statusConfirmed,
+    preparing: css.statusPreparing,
+    delivering: css.statusDelivering,
+    completed: css.statusCompleted,
+    cancelled: css.statusCancelled,
+};
+
+const dateFormatter = new Intl.DateTimeFormat("cs-CZ", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+});
+
+export default function OrderCard({ order }: Props) {
+    const router = useRouter();
+    const { addToCart } = useCartActions();
+
+    const formattedDate = useMemo(() => {
+        const d = new Date(order.createdAt);
+        return Number.isNaN(d.getTime()) ? "" : dateFormatter.format(d);
+    }, [order.createdAt]);
+
+    const shortId = order._id?.slice(-6).toUpperCase() ?? "";
+    const status: OrderStatus = order.status ?? "pending";
+    const statusLabel = STATUS_LABEL[status] ?? status;
+    const statusClass = STATUS_CLASS[status] ?? css.statusPending;
+
+    const handleReorder = () => {
+        if (!order.items?.length) {
+            toast.error("Tato objednávka neobsahuje žádné položky");
+            return;
+        }
+
+        for (const item of order.items) {
+            if (!item.productId) continue;
+            addToCart(
+                {
+                    _id: item.productId,
+                    name: item.name,
+                    price: item.price,
+                    image: item.image ?? null,
+                    weight: item.weight,
+                },
+                item.quantity
+            );
+        }
+
+        toast.success("Položky byly přidány do košíku");
+        router.push("/cart");
+    };
+
+    return (
+        <article className={css.card}>
+            <header className={css.header}>
+                <div className={css.headerInfo}>
+                    <h3 className={css.orderId}>Objednávka #{shortId}</h3>
+                    {formattedDate && (
+                        <p className={css.date}>{formattedDate}</p>
+                    )}
+                </div>
+
+                <span className={`${css.status} ${statusClass}`}>
+                    {statusLabel}
+                </span>
+            </header>
+
+            <ul className={css.items}>
+                {order.items.map((item, idx) => (
+                    <li
+                        key={`${item.productId ?? "item"}-${idx}`}
+                        className={css.item}
+                    >
+                        <span className={css.itemName}>
+                            <span className={css.itemQty}>
+                                {item.quantity}×
+                            </span>{" "}
+                            {item.name}
+                        </span>
+                        <span className={css.itemPrice}>
+                            {item.price * item.quantity} Kč
+                        </span>
+                    </li>
+                ))}
+            </ul>
+
+            <footer className={css.footer}>
+                <div className={css.totalWrap}>
+                    <span className={css.totalLabel}>Celkem</span>
+                    <strong className={css.totalValue}>
+                        {order.totalPrice} Kč
+                    </strong>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={handleReorder}
+                    className={css.reorderBtn}
+                    disabled={status === "cancelled" && order.items.length === 0}
+                >
+                    Objednat znovu
+                </button>
+            </footer>
+        </article>
+    );
+}
