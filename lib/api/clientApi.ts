@@ -57,15 +57,37 @@ export const login = async (
 export const register = async (
     payload: RegisterPayload
 ): Promise<AuthResult> => {
-    await clientApi.post<RegisterResponse>("/api/auth/register", payload);
+    const { data } = await clientApi.post<RegisterResponse>(
+        "/api/auth/register",
+        payload
+    );
 
-    await clientApi.post<LoginResponse>("/api/auth/login", {
-        email: payload.email,
-        password: payload.password,
-    });
+    try {
+        await clientApi.post<LoginResponse>("/api/auth/login", {
+            email: payload.email,
+            password: payload.password,
+        });
 
-    const user = await getMe();
-    return { user };
+        const user = await getMe();
+        return { user };
+    } catch {
+        return {
+            user: {
+                _id: data.id,
+                name: data.name,
+                email: data.email,
+                avatarUrl: "",
+                lastName: "",
+                phone: "",
+                address: "",
+                apartment: "",
+                deliveryNotes: "",
+                defaultDeliveryType: "delivery",
+                preferredPaymentMethod: "cash",
+                peopleCount: 1,
+            },
+        };
+    }
 };
 
 export const logout = async (): Promise<void> => {
