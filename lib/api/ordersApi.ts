@@ -1,15 +1,17 @@
-import axios from "axios";
+import clientApi from "@/lib/api/clientApi";
+import type { Order, OrderPayload } from "@/types/order";
 
-import type { OrderPayload } from "@/types/order";
-
-const API_URL =
-    process.env.NEXT_PUBLIC_API_URL;
+type CreateOrderResponse = {
+    message: string;
+    order: Order;
+    emailSent?: boolean;
+};
 
 export async function createOrder(
     payload: OrderPayload
-) {
-    const { data } = await axios.post(
-        `${API_URL}/api/orders`,
+): Promise<CreateOrderResponse> {
+    const { data } = await clientApi.post<CreateOrderResponse>(
+        "/api/orders",
         payload
     );
 

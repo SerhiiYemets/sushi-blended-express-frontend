@@ -6,7 +6,11 @@ import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import ProductDetails from "@/components/ProductDetails/ProductDetails";
 
-import { getProductById, NotFoundError } from "@/lib/api/serverApi";
+import {
+    getProductFromMenu,
+    NotFoundError,
+    resolveRestaurantId,
+} from "@/lib/api/serverApi";
 
 import css from "./page.module.css";
 
@@ -15,13 +19,20 @@ type Props = {
         categoryId: string;
         productId: string;
     }>;
+    searchParams: Promise<{
+        r?: string;
+    }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const { productId } = await params;
+export async function generateMetadata({
+    params,
+    searchParams,
+}: Props): Promise<Metadata> {
+    const [{ productId }, { r }] = await Promise.all([params, searchParams]);
+    const restaurantId = resolveRestaurantId(r);
 
     try {
-        const product = await getProductById(productId);
+        const product = await getProductFromMenu(restaurantId, productId);
         return {
             title: product.name,
             description:
@@ -33,12 +44,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 }
 
-export default async function ProductPage({ params }: Props) {
-    const { categoryId, productId } = await params;
+export default async function ProductPage({ params, searchParams }: Props) {
+    const [{ categoryId, productId }, { r }] = await Promise.all([
+        params,
+        searchParams,
+    ]);
+    const restaurantId = resolveRestaurantId(r);
 
     let product;
     try {
-        product = await getProductById(productId);
+        product = await getProductFromMenu(restaurantId, productId);
     } catch (err) {
         if (err instanceof NotFoundError) notFound();
         throw err;
@@ -68,7 +83,11 @@ export default async function ProductPage({ params }: Props) {
                             <span className={css.crumbCurrent}>{product.name}</span>
                         </nav>
 
-                        <ProductDetails product={product} priority />
+                        <ProductDetails
+                            product={product}
+                            restaurantId={restaurantId}
+                            priority
+                        />
                     </div>
                 </main>
 

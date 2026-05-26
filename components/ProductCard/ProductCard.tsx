@@ -5,6 +5,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 
 import type { Product } from "@/types/product";
+import type { RestaurantId } from "@/lib/store/restaurantStore";
 
 import { useCartStore } from "@/lib/store/cartStore";
 
@@ -12,15 +13,22 @@ import css from "./ProductCard.module.css";
 
 type Props = {
     item: Product;
+    restaurantId: RestaurantId;
     categorySlug?: string;
 };
 
 const selectAdd = (s: ReturnType<typeof useCartStore.getState>) => s.addToCart;
 
-export default function ProductCard({ item, categorySlug }: Props) {
+export default function ProductCard({
+    item,
+    restaurantId,
+    categorySlug,
+}: Props) {
     const addToCart = useCartStore(selectAdd);
 
-    const href = `/menu/${encodeURIComponent(categorySlug ?? "all")}/${item._id}`;
+    const href = `/menu/${encodeURIComponent(
+        categorySlug ?? "all"
+    )}/${item._id}?r=${restaurantId}`;
 
     const handleAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -32,6 +40,7 @@ export default function ProductCard({ item, categorySlug }: Props) {
             price: item.price,
             image: item.image ?? null,
             weight: item.weight,
+            restaurantId,
         });
 
         toast.success(`${item.name} přidáno do košíku`);

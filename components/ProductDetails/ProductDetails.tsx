@@ -2,17 +2,20 @@ import Image from "next/image";
 
 import ProductPurchasePanel from "@/components/ProductPurchasePanel/ProductPurchasePanel";
 import type { ProductDetails as ProductDetailsType } from "@/types/product";
+import type { RestaurantId } from "@/lib/store/restaurantStore";
 
 import css from "./ProductDetails.module.css";
 
 type Props = {
     product: ProductDetailsType;
+    restaurantId: RestaurantId;
     titleId?: string;
     priority?: boolean;
 };
 
 export default function ProductDetails({
     product,
+    restaurantId,
     titleId,
     priority = false,
 }: Props) {
@@ -81,6 +84,7 @@ export default function ProductDetails({
                         image: product.image ?? null,
                         weight: product.weight,
                     }}
+                    restaurantId={restaurantId}
                 />
             </div>
         </article>

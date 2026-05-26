@@ -1,3 +1,10 @@
+import type { RestaurantId } from "@/lib/store/restaurantStore";
+
+export type OrderItemInput = {
+    productId: string;
+    quantity: number;
+};
+
 export type OrderItem = {
     productId: string;
     name: string;
@@ -8,46 +15,52 @@ export type OrderItem = {
 };
 
 export type OrderStatus =
-    | "pending"
+    | "new"
     | "confirmed"
-    | "preparing"
-    | "delivering"
-    | "completed"
-    | "cancelled";
+    | "cooking"
+    | "delivery"
+    | "completed";
+
+export type OrderCustomer = {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email?: string;
+
+    address?: string;
+    deliveryNotes?: string;
+    peopleCount: number;
+};
 
 export type OrderPayload = {
-    customer: {
-        firstName: string;
-        lastName: string;
-        phone: string;
-        email?: string;
-    };
+    restaurantId: RestaurantId;
+
+    customer: OrderCustomer;
 
     deliveryType: "delivery" | "pickup";
-    address?: string;
-    peopleCount: number;
-    notes?: string;
     paymentMethod: "cash" | "card";
-    items: OrderItem[];
-    subtotal: number;
-    deliveryFee: number;
-    totalPrice: number;
+
+    items: OrderItemInput[];
 };
 
 export type Order = {
     _id: string;
-    userId?: string;
-    customer: OrderPayload["customer"];
+    userId?: string | null;
+
+    restaurantId?: RestaurantId;
+
+    customer: OrderCustomer;
+
     deliveryType: OrderPayload["deliveryType"];
-    address?: string;
-    peopleCount: number;
-    notes?: string;
     paymentMethod: OrderPayload["paymentMethod"];
+
     items: OrderItem[];
     subtotal: number;
     deliveryFee: number;
     totalPrice: number;
+
     status: OrderStatus;
+
     createdAt: string;
     updatedAt?: string;
 };

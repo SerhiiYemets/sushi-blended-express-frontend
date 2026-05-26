@@ -4,6 +4,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { useCartStore } from "@/lib/store/cartStore";
+import type { RestaurantId } from "@/lib/store/restaurantStore";
 
 import css from "./ProductPurchasePanel.module.css";
 
@@ -19,11 +20,12 @@ const MAX_QUANTITY = 30;
 
 const selectAdd = (s: ReturnType<typeof useCartStore.getState>) => s.addToCart;
 
-export default function ProductPurchasePanel({
-    product,
-}: {
+type Props = {
     product: PanelProduct;
-}) {
+    restaurantId: RestaurantId;
+};
+
+export default function ProductPurchasePanel({ product, restaurantId }: Props) {
     const addToCart = useCartStore(selectAdd);
     const [quantity, setQuantity] = useState(1);
 
@@ -40,6 +42,7 @@ export default function ProductPurchasePanel({
                 price: product.price,
                 image: product.image ?? null,
                 weight: product.weight,
+                restaurantId,
             },
             quantity
         );

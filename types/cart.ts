@@ -1,7 +1,13 @@
-import type { Product } from "./product";
+import type { RestaurantId } from "@/lib/store/restaurantStore";
 
-export type CartItem = Product & {
+export type CartItem = {
+    _id: string;
+    name: string;
+    price: number;
+    image?: string | null;
+    weight?: string;
     quantity: number;
+    restaurantId?: RestaurantId;
 };
 
 export type CartState = {

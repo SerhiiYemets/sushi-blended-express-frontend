@@ -98,3 +98,6 @@ export const useCartCount = () =>
         for (const item of s.items) n += item.quantity;
         return n;
     });
+
+export const useCartRestaurantId = () =>
+    useCartStore((s) => s.items.find((i) => i.restaurantId)?.restaurantId ?? null);

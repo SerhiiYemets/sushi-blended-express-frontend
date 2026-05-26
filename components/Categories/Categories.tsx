@@ -4,8 +4,8 @@ export default function Categories({ data }: { data: MenuCategory[] }) {
     return (
         <div>
             {data.map((cat) => (
-                <a key={cat.category} href={`#${cat.category}`}>
-                {cat.category}
+                <a key={cat._id} href={`#${cat.name}`}>
+                    {cat.name}
                 </a>
             ))}
         </div>

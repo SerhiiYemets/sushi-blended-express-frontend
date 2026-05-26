@@ -14,21 +14,19 @@ type Props = {
 };
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
-    pending: "Čeká na potvrzení",
+    new: "Čeká na potvrzení",
     confirmed: "Potvrzeno",
-    preparing: "Připravuje se",
-    delivering: "Na cestě",
+    cooking: "Připravuje se",
+    delivery: "Na cestě",
     completed: "Doručeno",
-    cancelled: "Zrušeno",
 };
 
 const STATUS_CLASS: Record<OrderStatus, string> = {
-    pending: css.statusPending,
+    new: css.statusPending,
     confirmed: css.statusConfirmed,
-    preparing: css.statusPreparing,
-    delivering: css.statusDelivering,
+    cooking: css.statusPreparing,
+    delivery: css.statusDelivering,
     completed: css.statusCompleted,
-    cancelled: css.statusCancelled,
 };
 
 const dateFormatter = new Intl.DateTimeFormat("cs-CZ", {
@@ -48,8 +46,22 @@ export default function OrderCard({ order }: Props) {
         return Number.isNaN(d.getTime()) ? "" : dateFormatter.format(d);
     }, [order.createdAt]);
 
+    const itemsTotal = useMemo(
+        () =>
+            order.items.reduce(
+                (sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 0),
+                0
+            ),
+        [order.items]
+    );
+
+    const displayTotal =
+        typeof order.totalPrice === "number" && order.totalPrice > 0
+            ? order.totalPrice
+            : itemsTotal + (order.deliveryFee ?? 0);
+
     const shortId = order._id?.slice(-6).toUpperCase() ?? "";
-    const status: OrderStatus = order.status ?? "pending";
+    const status: OrderStatus = order.status ?? "new";
     const statusLabel = STATUS_LABEL[status] ?? status;
     const statusClass = STATUS_CLASS[status] ?? css.statusPending;
 
@@ -68,6 +80,7 @@ export default function OrderCard({ order }: Props) {
                     price: item.price,
                     image: item.image ?? null,
                     weight: item.weight,
+                    restaurantId: order.restaurantId,
                 },
                 item.quantity
             );
@@ -115,7 +128,7 @@ export default function OrderCard({ order }: Props) {
                 <div className={css.totalWrap}>
                     <span className={css.totalLabel}>Celkem</span>
                     <strong className={css.totalValue}>
-                        {order.totalPrice} Kč
+                        {displayTotal} Kč
                     </strong>
                 </div>
 
@@ -123,7 +136,7 @@ export default function OrderCard({ order }: Props) {
                     type="button"
                     onClick={handleReorder}
                     className={css.reorderBtn}
-                    disabled={status === "cancelled" && order.items.length === 0}
+                    disabled={order.items.length === 0}
                 >
                     Objednat znovu
                 </button>

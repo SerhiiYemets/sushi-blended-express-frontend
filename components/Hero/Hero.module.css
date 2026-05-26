@@ -10,38 +10,175 @@
     background-color: #1a0e06;
 }
 
-.heroTitle span {
-    display: block;
-}
-
 .heroImage {
     object-fit: cover;
     z-index: -1;
 }
 
+.heroImage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.2) 0%,
+        rgba(0, 0, 0, 0.55) 60%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+}
+
 .heroContent {
-    background: rgba(0, 0, 0, 0.5);
-    padding: 24px;
-    border-radius: 12px;
+    position: relative;
+    max-width: 720px;
+    padding: 32px 24px;
+    border-radius: 20px;
     color: #fff;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.25) 0%,
+        rgba(0, 0, 0, 0.45) 100%
+    );
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.45);
 }
 
 .heroTitle {
-    font-size: clamp(28px, 5vw, 44px);
-    line-height: 1.15;
-    font-weight: 700;
+    font-size: clamp(30px, 5.4vw, 52px);
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    text-shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
+}
+
+.heroTitle span {
+    display: block;
 }
 
 .heroSubtitle {
-    margin-top: 6px;
-    font-size: 16px;
+    margin-top: 10px;
+    font-size: clamp(15px, 1.6vw, 18px);
+    color: #f1e4d6;
+    letter-spacing: 0.01em;
+}
+
+/* ── CTA row ── */
+.heroCtas {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    align-items: stretch;
 }
 
 .heroBtn {
-    display: inline-block;
-    margin-top: 12px;
-    padding: 10px 20px;
-    background: rgba(160, 61, 0, 0.744);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 52px;
+    padding: 0 26px;
+    border-radius: var(--btn-radius-pill, 999px);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform 0.18s ease, box-shadow 0.2s ease,
+        background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.heroBtn:active {
+    transform: translateY(1px) scale(0.99);
+}
+
+.heroBtn:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+.heroBtnPin {
+    font-size: 17px;
+    line-height: 1;
+}
+
+.heroBtnLabel {
+    line-height: 1;
+}
+
+/* Primary — solid warm */
+.heroBtnPrimary {
+    background: linear-gradient(135deg, #d4785c 0%, #a84535 100%);
     color: #fff;
-    border-radius: 8px;
+    box-shadow: 0 14px 30px -10px rgba(192, 101, 74, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.heroBtnPrimary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 40px -10px rgba(192, 101, 74, 0.85),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Secondary — outlined glassy */
+.heroBtnSecondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.heroBtnSecondary:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #fff;
+    box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.45);
+}
+
+/* ── Tablet ── */
+@media (min-width: 600px) {
+    .heroCtas {
+        flex-direction: row;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    .heroBtn {
+        flex: 0 1 auto;
+        min-width: 200px;
+        padding: 0 32px;
+    }
+}
+
+/* ── Desktop ── */
+@media (min-width: 1024px) {
+    .heroContent {
+        padding: 44px 56px;
+    }
+
+    .heroCtas {
+        margin-top: 36px;
+        gap: 20px;
+    }
+
+    .heroBtn {
+        height: 56px;
+        font-size: 16px;
+        min-width: 220px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .heroBtn,
+    .heroBtn:hover,
+    .heroBtn:active {
+        transform: none;
+        transition: none;
+    }
 }

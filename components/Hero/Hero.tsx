@@ -1,8 +1,24 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+
+import {
+    useSetRestaurant,
+    type RestaurantId,
+} from "@/lib/store/restaurantStore";
+
 import css from "@/components/Hero/Hero.module.css";
 
 export default function Hero() {
+    const router = useRouter();
+    const setRestaurant = useSetRestaurant();
+
+    const goToMenu = (restaurant: RestaurantId) => {
+        setRestaurant(restaurant);
+        router.push("/menu");
+    };
+
     return (
         <section className={css.hero}>
             <Image
@@ -24,9 +40,31 @@ export default function Hero() {
                     Čerstvé, rychlé, chutné 🍣
                 </p>
 
-                <Link href="/menu" className={css.heroBtn}>
-                    Objednat
-                </Link>
+                <div className={css.heroCtas}>
+                    <button
+                        type="button"
+                        onClick={() => goToMenu("kolin")}
+                        className={`${css.heroBtn} ${css.heroBtnPrimary}`}
+                        aria-label="Otevřít menu pro Kolín"
+                    >
+                        <span className={css.heroBtnPin} aria-hidden>
+                            📍
+                        </span>
+                        <span className={css.heroBtnLabel}>Menu Kolín</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => goToMenu("jihlava")}
+                        className={`${css.heroBtn} ${css.heroBtnSecondary}`}
+                        aria-label="Otevřít menu pro Jihlavu"
+                    >
+                        <span className={css.heroBtnPin} aria-hidden>
+                            📍
+                        </span>
+                        <span className={css.heroBtnLabel}>Menu Jihlava</span>
+                    </button>
+                </div>
             </div>
         </section>
     );

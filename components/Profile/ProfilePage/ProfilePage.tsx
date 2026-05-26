@@ -11,6 +11,7 @@ import { useHydrated } from "@/hooks/useHydrated";
 
 import ProfileInfoForm from "@/components/Profile/ProfileInfoForm/ProfileInfoForm";
 import DeliveryPreferencesForm from "@/components/Profile/DeliveryPreferencesForm/DeliveryPreferencesForm";
+import ChangePasswordForm from "@/components/Profile/ChangePasswordForm/ChangePasswordForm";
 import OrderHistory from "@/components/Profile/OrderHistory/OrderHistory";
 
 import css from "./ProfilePage.module.css";
@@ -140,6 +141,7 @@ export default function ProfilePage() {
                 <div className={css.grid}>
                     <ProfileInfoForm user={user} />
                     <DeliveryPreferencesForm user={user} />
+                    <ChangePasswordForm />
                 </div>
 
                 <OrderHistory

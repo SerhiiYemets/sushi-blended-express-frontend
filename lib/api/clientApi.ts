@@ -7,9 +7,9 @@ import type {
     RegisterResponse,
 } from "@/types/auth";
 import type { MenuCategory } from "@/types/menu";
-import type { Product } from "@/types/product";
 import type { Order } from "@/types/order";
 import type { ProfileUpdatePayload, User } from "@/types/user";
+import type { RestaurantId } from "@/lib/store/restaurantStore";
 
 const clientApi = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -94,13 +94,13 @@ export const logout = async (): Promise<void> => {
     await clientApi.post("/api/auth/logout");
 };
 
-export const getMenu = async (): Promise<MenuCategory[]> => {
-    const res = await clientApi.get<MenuCategory[]>("/api/menu");
-    return res.data;
-};
+export const getMenu = async (
+    restaurantId: RestaurantId
+): Promise<MenuCategory[]> => {
+    const res = await clientApi.get<MenuCategory[]>(
+        `/api/restaurants/${restaurantId}/menu`
+    );
 
-export const getProducts = async (): Promise<Product[]> => {
-    const res = await clientApi.get<Product[]>("/api/products");
     return res.data;
 };
 
@@ -118,5 +118,20 @@ export const updateMe = async (
 
 export const getMyOrders = async (): Promise<Order[]> => {
     const res = await clientApi.get<Order[]>("/api/users/me/orders");
+    return res.data;
+};
+
+export type ChangePasswordPayload = {
+    currentPassword: string;
+    newPassword: string;
+};
+
+export const changePassword = async (
+    payload: ChangePasswordPayload
+): Promise<{ message: string }> => {
+    const res = await clientApi.patch<{ message: string }>(
+        "/api/users/me/password",
+        payload
+    );
     return res.data;
 };

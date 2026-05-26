@@ -6,7 +6,7 @@ export default function Home() {
     return (
         <>
             <Header />
-              <Hero />
+                <Hero />
             <Footer />
         </>
     );

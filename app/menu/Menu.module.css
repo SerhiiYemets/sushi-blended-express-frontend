@@ -14,9 +14,199 @@
     font-family: var(--font-manrope, system-ui, sans-serif);
     font-size: 28px;
     font-weight: 700;
-    color: var(--color-scheme-2-text, #e0e0e0);
-    margin-bottom: 32px;
+    color: var(--color-text-primary);
+    margin-bottom: 24px;
     text-align: center;
+}
+
+/* ── Restaurant switcher ── */
+.restaurantSwitcher {
+    display: inline-flex;
+    margin: 0 auto 24px;
+    padding: 6px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-warm);
+    border-radius: var(--btn-radius-pill, 999px);
+    gap: 4px;
+    width: 100%;
+    max-width: 340px;
+    box-shadow: inset 0 1px 2px rgba(45, 28, 14, 0.04);
+}
+
+.restaurantSwitcher {
+    display: flex;
+}
+
+.restaurantBtn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 42px;
+    padding: 0 16px;
+    border-radius: var(--btn-radius-pill, 999px);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-family: var(--font-manrope, system-ui, sans-serif);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background-color 0.22s ease, color 0.22s ease,
+        box-shadow 0.22s ease, transform 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.restaurantBtn:hover:not(.restaurantBtnActive) {
+    color: var(--color-text-primary);
+    background: var(--color-surface-light);
+}
+
+.restaurantBtnActive {
+    background: linear-gradient(
+        135deg,
+        var(--color-primary) 0%,
+        var(--color-primary-dark) 100%
+    );
+    color: #fff;
+    box-shadow: 0 6px 18px -6px color-mix(
+        in srgb,
+        var(--color-primary) 65%,
+        transparent
+    );
+}
+
+.restaurantPin {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.restaurantLabel {
+    line-height: 1;
+}
+
+.cartHint {
+    max-width: 540px;
+    margin: 0 auto 24px;
+    padding: 10px 14px;
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 24%, transparent);
+    border-radius: 12px;
+    color: var(--color-text-primary);
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.45;
+}
+
+/* ── Confirmation modal ── */
+.confirmBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: backdropIn 0.18s ease-out;
+}
+
+.confirmDialog {
+    width: 100%;
+    max-width: 440px;
+    background: var(--color-bg-white);
+    border: 1px solid var(--color-border-warm);
+    border-radius: 20px;
+    padding: 28px 24px 24px;
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5);
+    animation: dialogIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.confirmTitle {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+}
+
+.confirmText {
+    color: var(--color-text-primary);
+    font-size: 15px;
+    line-height: 1.55;
+    margin-bottom: 22px;
+}
+
+.confirmActions {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+}
+
+.confirmCancel,
+.confirmAccept {
+    height: 46px;
+    padding: 0 22px;
+    border-radius: var(--btn-radius);
+    font-size: 14px;
+    font-weight: var(--btn-font-weight);
+    letter-spacing: var(--btn-letter-spacing);
+    cursor: pointer;
+    transition: var(--btn-transition);
+    border: 1px solid transparent;
+}
+
+.confirmCancel {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-warm);
+}
+
+.confirmCancel:hover {
+    background: var(--color-surface-light);
+    border-color: var(--color-border);
+}
+
+.confirmAccept {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: var(--btn-shadow);
+}
+
+.confirmAccept:hover {
+    background: var(--color-primary-dark);
+    box-shadow: var(--btn-shadow-hover);
+    opacity: 1;
+}
+
+@keyframes backdropIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes dialogIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .confirmBackdrop,
+    .confirmDialog {
+        animation: none;
+    }
 }
 
 /* ── Category pills ── */
@@ -80,7 +270,7 @@
     font-family: var(--font-manrope, system-ui, sans-serif);
 }
 
-/* ── Tablet (768px) — mirrors Header breakpoint ── */
+/* ── Tablet (768px) ── */
 @media (min-width: 768px) {
     .container {
         max-width: 768px;
@@ -89,7 +279,21 @@
 
     .title {
         font-size: 36px;
-        margin-bottom: 40px;
+        margin-bottom: 28px;
+    }
+
+    .restaurantSwitcher {
+        max-width: 420px;
+        margin-bottom: 32px;
+    }
+
+    .restaurantBtn {
+        height: 46px;
+        font-size: 15px;
+    }
+
+    .restaurantPin {
+        font-size: 15px;
     }
 
     .categories {
@@ -106,9 +310,19 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 20px;
     }
+
+    .confirmActions {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+
+    .confirmCancel,
+    .confirmAccept {
+        min-width: 140px;
+    }
 }
 
-/* ── Desktop (1440px) — mirrors Header breakpoint ── */
+/* ── Desktop (1440px) ── */
 @media (min-width: 1440px) {
     .container {
         max-width: 1440px;
@@ -117,7 +331,17 @@
 
     .title {
         font-size: 44px;
-        margin-bottom: 48px;
+        margin-bottom: 32px;
+    }
+
+    .restaurantSwitcher {
+        max-width: 460px;
+        margin-bottom: 40px;
+    }
+
+    .restaurantBtn {
+        min-height: 48px;
+        font-size: 16px;
     }
 
     .categories {

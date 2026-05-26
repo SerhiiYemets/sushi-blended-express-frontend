@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -14,12 +15,45 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import type { z } from 'zod';
 
-import { useCartStore } from '@/lib/store/cartStore';
+import {
+    useCartStore,
+    useCartRestaurantId,
+} from '@/lib/store/cartStore';
+import { useAuthStore } from '@/lib/store/authStore';
+import {
+    RESTAURANT_LABELS,
+    useSelectedRestaurant,
+} from '@/lib/store/restaurantStore';
 import { useHydrated } from '@/hooks/useHydrated';
 import { createOrder } from '@/lib/api/ordersApi';
 import { orderSchema, type OrderFormData } from '@/lib/validations/orderSchema';
+import type { OrderPayload } from '@/types/order';
+import type { User } from '@/types/user';
 
 type OrderFormInput = z.input<typeof orderSchema>;
+
+const selectUser = (s: ReturnType<typeof useAuthStore.getState>) => s.user;
+const selectAuthHydrated = (s: ReturnType<typeof useAuthStore.getState>) =>
+    s.isHydrated;
+
+function buildDefaultsFromUser(user: User | null): OrderFormInput {
+    return {
+        firstName: user?.name ?? '',
+        lastName: user?.lastName ?? '',
+        phone: user?.phone ?? '',
+        email: user?.email ?? '',
+        deliveryType: user?.defaultDeliveryType ?? 'delivery',
+        address: user?.address
+            ? [user.address, user.apartment].filter(Boolean).join(', ')
+            : '',
+        peopleCount:
+            typeof user?.peopleCount === 'number' && user.peopleCount > 0
+                ? user.peopleCount
+                : 1,
+        notes: user?.deliveryNotes ?? '',
+        paymentMethod: user?.preferredPaymentMethod ?? 'cash',
+    };
+}
 
 import css from './checkout.module.css';
 
@@ -37,6 +71,14 @@ export default function CheckoutClient() {
     const items = useCartStore(selectItems);
     const clearCart = useCartStore(selectClearCart);
 
+    const cartRestaurantId = useCartRestaurantId();
+    const selectedRestaurant = useSelectedRestaurant();
+
+    const orderRestaurantId = cartRestaurantId ?? selectedRestaurant;
+
+    const authUser = useAuthStore(selectUser);
+    const authHydrated = useAuthStore(selectAuthHydrated);
+
     let subtotal = 0;
     let totalQty = 0;
     for (const item of items) {
@@ -48,6 +90,7 @@ export default function CheckoutClient() {
         register,
         handleSubmit,
         control,
+        reset,
         formState: { errors, isSubmitting },
     } = useForm<OrderFormInput, undefined, OrderFormData>({
         resolver: zodResolver(orderSchema),
@@ -65,6 +108,19 @@ export default function CheckoutClient() {
         mode: 'onTouched',
     });
 
+    const prefilledRef = useRef(false);
+
+    useEffect(() => {
+        if (prefilledRef.current) return;
+        if (!authHydrated) return;
+
+        if (authUser) {
+            reset(buildDefaultsFromUser(authUser));
+        }
+
+        prefilledRef.current = true;
+    }, [authHydrated, authUser, reset]);
+
     const deliveryType = useWatch({
         control,
         name: 'deliveryType',
@@ -73,7 +129,9 @@ export default function CheckoutClient() {
     const isDelivery = deliveryType === 'delivery';
 
     const deliveryFee =
-        !isDelivery || subtotal >= FREE_DELIVERY_THRESHOLD || subtotal === 0
+        !isDelivery ||
+        subtotal >= FREE_DELIVERY_THRESHOLD ||
+        subtotal === 0
             ? 0
             : DELIVERY_FEE;
 
@@ -90,30 +148,31 @@ export default function CheckoutClient() {
             return;
         }
 
-        const payload = {
+        const payload: OrderPayload = {
+            restaurantId: orderRestaurantId,
+
             customer: {
                 firstName: values.firstName.trim(),
                 lastName: values.lastName.trim(),
                 phone: values.phone.trim(),
                 email: values.email?.trim() || undefined,
+
+                address:
+                    values.deliveryType === 'delivery'
+                        ? values.address?.trim()
+                        : undefined,
+
+                deliveryNotes: values.notes?.trim() || undefined,
+                peopleCount: Number(values.peopleCount),
             },
+
             deliveryType: values.deliveryType,
-            address:
-                values.deliveryType === 'delivery'
-                    ? values.address?.trim()
-                    : undefined,
-            peopleCount: Number(values.peopleCount),
-            notes: values.notes?.trim() || undefined,
             paymentMethod: values.paymentMethod,
-            items: items.map(item => ({
+
+            items: items.map((item) => ({
                 productId: item._id,
-                name: item.name,
                 quantity: item.quantity,
-                price: item.price,
             })),
-            subtotal,
-            deliveryFee,
-            totalPrice: total,
         };
 
         try {
@@ -181,6 +240,15 @@ export default function CheckoutClient() {
                     <p className={css.subtitle}>
                         Vyplňte své údaje a dokončete objednávku
                     </p>
+
+                    {hydrated && (
+                        <p className={css.subtitle}>
+                            Restaurace:{' '}
+                            <strong>
+                                {RESTAURANT_LABELS[orderRestaurantId]}
+                            </strong>
+                        </p>
+                    )}
                 </header>
 
                 <form

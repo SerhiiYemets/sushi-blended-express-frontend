@@ -1,6 +1,9 @@
 import type { Product } from "./product";
 
 export type MenuCategory = {
-    category: string;
+    _id: string;
+    posterCategoryId: number;
+    name: string;
+    image: string | null;
     products: Product[];
 };

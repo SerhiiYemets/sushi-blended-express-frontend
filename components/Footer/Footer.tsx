@@ -32,6 +32,11 @@ export default function Footer() {
                             <a href="tel:+420777499970" className={css.phone}>
                                 721 479 332
                             </a>
+                            <Link href="https://www.instagram.com/sushi_max.cz/" 
+                                className={css.label}>Instagram</Link>
+                                <svg className={css.instagramIcon} width="24" height="24">
+                                    <use href="/sprite.svg#instagram" />
+                                </svg>
                         </div>
 
                         <div className={css.block}>
