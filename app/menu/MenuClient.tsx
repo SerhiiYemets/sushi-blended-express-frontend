@@ -7,13 +7,12 @@ import { getMenu } from "@/lib/api/clientApi";
 import {
     RESTAURANT_LABELS,
     useSelectedRestaurant,
-    useSetRestaurant,
     type RestaurantId,
 } from "@/lib/store/restaurantStore";
 import {
+    requestRestaurantSwitch,
     useCartCount,
     useCartRestaurantId,
-    useCartStore,
 } from "@/lib/store/cartStore";
 import type { MenuCategory } from "@/types/menu";
 
@@ -26,16 +25,10 @@ export default function MenuClient() {
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-    const [pendingSwitch, setPendingSwitch] = useState<RestaurantId | null>(
-        null
-    );
-
     const selectedRestaurant = useSelectedRestaurant();
-    const setRestaurant = useSetRestaurant();
 
     const cartCount = useCartCount();
     const cartRestaurantId = useCartRestaurantId();
-    const clearCart = useCartStore((s) => s.clearCart);
 
     useEffect(() => {
         let cancelled = false;
@@ -72,30 +65,6 @@ export default function MenuClient() {
         cartRestaurantId !== null &&
         cartRestaurantId !== selectedRestaurant;
 
-    const handleSelectRestaurant = (next: RestaurantId) => {
-        if (next === selectedRestaurant) return;
-
-        if (
-            cartCount > 0 &&
-            cartRestaurantId !== null &&
-            cartRestaurantId !== next
-        ) {
-            setPendingSwitch(next);
-            return;
-        }
-
-        setRestaurant(next);
-    };
-
-    const confirmSwitch = () => {
-        if (!pendingSwitch) return;
-        clearCart();
-        setRestaurant(pendingSwitch);
-        setPendingSwitch(null);
-    };
-
-    const cancelSwitch = () => setPendingSwitch(null);
-
     return (
         <main className={css.page}>
             <div className={css.container}>
@@ -115,7 +84,7 @@ export default function MenuClient() {
                                 role="tab"
                                 aria-selected={isActive}
                                 onClick={() =>
-                                    handleSelectRestaurant(restaurant)
+                                    requestRestaurantSwitch(restaurant)
                                 }
                                 className={`${css.restaurantBtn} ${
                                     isActive ? css.restaurantBtnActive : ""
@@ -135,7 +104,7 @@ export default function MenuClient() {
                     })}
                 </div>
 
-                {cartHasOtherRestaurant && !pendingSwitch && (
+                {cartHasOtherRestaurant && (
                     <p
                         className={css.cartHint}
                         role="status"
@@ -193,61 +162,6 @@ export default function MenuClient() {
                     </>
                 )}
             </div>
-
-            {pendingSwitch && (
-                <div
-                    className={css.confirmBackdrop}
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="restaurant-switch-title"
-                    onClick={cancelSwitch}
-                >
-                    <div
-                        className={css.confirmDialog}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <h2
-                            id="restaurant-switch-title"
-                            className={css.confirmTitle}
-                        >
-                            Přepnout restauraci?
-                        </h2>
-
-                        <p className={css.confirmText}>
-                            Košík obsahuje položky z restaurace{" "}
-                            <strong>
-                                {cartRestaurantId
-                                    ? RESTAURANT_LABELS[cartRestaurantId]
-                                    : ""}
-                            </strong>
-                            . Přepnutím na{" "}
-                            <strong>
-                                {RESTAURANT_LABELS[pendingSwitch]}
-                            </strong>{" "}
-                            bude košík vyprázdněn.
-                        </p>
-
-                        <div className={css.confirmActions}>
-                            <button
-                                type="button"
-                                onClick={cancelSwitch}
-                                className={css.confirmCancel}
-                            >
-                                Zrušit
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={confirmSwitch}
-                                className={css.confirmAccept}
-                                autoFocus
-                            >
-                                Vyprázdnit a přepnout
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </main>
     );
 }

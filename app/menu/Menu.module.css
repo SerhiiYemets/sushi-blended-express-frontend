@@ -21,7 +21,7 @@
 
 /* ── Restaurant switcher ── */
 .restaurantSwitcher {
-    display: inline-flex;
+    display: flex;
     margin: 0 auto 24px;
     padding: 6px;
     background: var(--color-surface);
@@ -31,10 +31,6 @@
     width: 100%;
     max-width: 340px;
     box-shadow: inset 0 1px 2px rgba(45, 28, 14, 0.04);
-}
-
-.restaurantSwitcher {
-    display: flex;
 }
 
 .restaurantBtn {
@@ -97,116 +93,6 @@
     font-size: 13px;
     text-align: center;
     line-height: 1.45;
-}
-
-/* ── Confirmation modal ── */
-.confirmBackdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 1100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background-color: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    animation: backdropIn 0.18s ease-out;
-}
-
-.confirmDialog {
-    width: 100%;
-    max-width: 440px;
-    background: var(--color-bg-white);
-    border: 1px solid var(--color-border-warm);
-    border-radius: 20px;
-    padding: 28px 24px 24px;
-    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.5);
-    animation: dialogIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.confirmTitle {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--color-text-primary);
-    letter-spacing: -0.01em;
-    margin-bottom: 10px;
-}
-
-.confirmText {
-    color: var(--color-text-primary);
-    font-size: 15px;
-    line-height: 1.55;
-    margin-bottom: 22px;
-}
-
-.confirmActions {
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 10px;
-}
-
-.confirmCancel,
-.confirmAccept {
-    height: 46px;
-    padding: 0 22px;
-    border-radius: var(--btn-radius);
-    font-size: 14px;
-    font-weight: var(--btn-font-weight);
-    letter-spacing: var(--btn-letter-spacing);
-    cursor: pointer;
-    transition: var(--btn-transition);
-    border: 1px solid transparent;
-}
-
-.confirmCancel {
-    background: var(--color-surface);
-    color: var(--color-text-primary);
-    border-color: var(--color-border-warm);
-}
-
-.confirmCancel:hover {
-    background: var(--color-surface-light);
-    border-color: var(--color-border);
-}
-
-.confirmAccept {
-    background: var(--color-primary);
-    color: #fff;
-    box-shadow: var(--btn-shadow);
-}
-
-.confirmAccept:hover {
-    background: var(--color-primary-dark);
-    box-shadow: var(--btn-shadow-hover);
-    opacity: 1;
-}
-
-@keyframes backdropIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes dialogIn {
-    from {
-        opacity: 0;
-        transform: translateY(12px) scale(0.98);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .confirmBackdrop,
-    .confirmDialog {
-        animation: none;
-    }
 }
 
 /* ── Category pills ── */
@@ -309,16 +195,6 @@
     .products {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 20px;
-    }
-
-    .confirmActions {
-        flex-direction: row;
-        justify-content: flex-end;
-    }
-
-    .confirmCancel,
-    .confirmAccept {
-        min-width: 140px;
     }
 }
 

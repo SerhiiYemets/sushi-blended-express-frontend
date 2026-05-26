@@ -4,7 +4,12 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { useCartActions } from "@/lib/store/cartStore";
+import {
+    requestReorder,
+    useCartStore,
+    type ReorderItem,
+} from "@/lib/store/cartStore";
+import { useSelectedRestaurant } from "@/lib/store/restaurantStore";
 import type { Order, OrderStatus } from "@/types/order";
 
 import css from "./OrderCard.module.css";
@@ -39,7 +44,7 @@ const dateFormatter = new Intl.DateTimeFormat("cs-CZ", {
 
 export default function OrderCard({ order }: Props) {
     const router = useRouter();
-    const { addToCart } = useCartActions();
+    const currentRestaurant = useSelectedRestaurant();
 
     const formattedDate = useMemo(() => {
         const d = new Date(order.createdAt);
@@ -71,23 +76,33 @@ export default function OrderCard({ order }: Props) {
             return;
         }
 
-        for (const item of order.items) {
-            if (!item.productId) continue;
-            addToCart(
-                {
-                    _id: item.productId,
-                    name: item.name,
-                    price: item.price,
-                    image: item.image ?? null,
-                    weight: item.weight,
-                    restaurantId: order.restaurantId,
-                },
-                item.quantity
-            );
+        const targetRestaurant = order.restaurantId ?? currentRestaurant;
+
+        const reorderItems: ReorderItem[] = order.items
+            .filter((item) => !!item.productId)
+            .map((item) => ({
+                _id: item.productId,
+                name: item.name,
+                price: item.price,
+                image: item.image ?? null,
+                weight: item.weight,
+                restaurantId: targetRestaurant,
+                quantity: item.quantity,
+            }));
+
+        if (reorderItems.length === 0) {
+            toast.error("Tato objednávka neobsahuje žádné položky");
+            return;
         }
 
-        toast.success("Položky byly přidány do košíku");
-        router.push("/cart");
+        requestReorder(targetRestaurant, reorderItems);
+
+        const pending = useCartStore.getState().pendingAction;
+
+        if (!pending) {
+            toast.success("Položky byly přidány do košíku");
+            router.push("/cart");
+        }
     };
 
     return (

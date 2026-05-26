@@ -3,7 +3,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { useCartStore } from "@/lib/store/cartStore";
+import { requestAddToCart, useCartStore } from "@/lib/store/cartStore";
 import type { RestaurantId } from "@/lib/store/restaurantStore";
 
 import css from "./ProductPurchasePanel.module.css";
@@ -18,15 +18,12 @@ type PanelProduct = {
 
 const MAX_QUANTITY = 30;
 
-const selectAdd = (s: ReturnType<typeof useCartStore.getState>) => s.addToCart;
-
 type Props = {
     product: PanelProduct;
     restaurantId: RestaurantId;
 };
 
 export default function ProductPurchasePanel({ product, restaurantId }: Props) {
-    const addToCart = useCartStore(selectAdd);
     const [quantity, setQuantity] = useState(1);
 
     const total = product.price * quantity;
@@ -35,7 +32,7 @@ export default function ProductPurchasePanel({ product, restaurantId }: Props) {
     const increment = () => setQuantity((q) => Math.min(MAX_QUANTITY, q + 1));
 
     const handleAdd = () => {
-        addToCart(
+        requestAddToCart(
             {
                 _id: product._id,
                 name: product.name,
@@ -47,7 +44,11 @@ export default function ProductPurchasePanel({ product, restaurantId }: Props) {
             quantity
         );
 
-        toast.success(`${product.name} přidáno do košíku`);
+        const pending = useCartStore.getState().pendingAction;
+
+        if (!pending) {
+            toast.success(`${product.name} přidáno do košíku`);
+        }
     };
 
     return (

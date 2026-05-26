@@ -3,19 +3,16 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-import {
-    useSetRestaurant,
-    type RestaurantId,
-} from "@/lib/store/restaurantStore";
+import { requestRestaurantSwitch } from "@/lib/store/cartStore";
+import type { RestaurantId } from "@/lib/store/restaurantStore";
 
 import css from "@/components/Hero/Hero.module.css";
 
 export default function Hero() {
     const router = useRouter();
-    const setRestaurant = useSetRestaurant();
 
     const goToMenu = (restaurant: RestaurantId) => {
-        setRestaurant(restaurant);
+        requestRestaurantSwitch(restaurant);
         router.push("/menu");
     };
 

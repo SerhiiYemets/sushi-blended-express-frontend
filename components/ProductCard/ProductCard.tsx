@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import type { Product } from "@/types/product";
 import type { RestaurantId } from "@/lib/store/restaurantStore";
 
-import { useCartStore } from "@/lib/store/cartStore";
+import { requestAddToCart, useCartStore } from "@/lib/store/cartStore";
 
 import css from "./ProductCard.module.css";
 
@@ -17,15 +17,11 @@ type Props = {
     categorySlug?: string;
 };
 
-const selectAdd = (s: ReturnType<typeof useCartStore.getState>) => s.addToCart;
-
 export default function ProductCard({
     item,
     restaurantId,
     categorySlug,
 }: Props) {
-    const addToCart = useCartStore(selectAdd);
-
     const href = `/menu/${encodeURIComponent(
         categorySlug ?? "all"
     )}/${item._id}?r=${restaurantId}`;
@@ -34,7 +30,9 @@ export default function ProductCard({
         e.preventDefault();
         e.stopPropagation();
 
-        addToCart({
+        const before = useCartStore.getState().items.length;
+
+        requestAddToCart({
             _id: item._id,
             name: item.name,
             price: item.price,
@@ -43,7 +41,18 @@ export default function ProductCard({
             restaurantId,
         });
 
-        toast.success(`${item.name} přidáno do košíku`);
+        const after = useCartStore.getState().items.length;
+        const pending = useCartStore.getState().pendingAction;
+
+        if (!pending && after > before) {
+            toast.success(`${item.name} přidáno do košíku`);
+        } else if (
+            !pending &&
+            after === before &&
+            useCartStore.getState().items.some((i) => i._id === item._id)
+        ) {
+            toast.success(`${item.name} přidáno do košíku`);
+        }
     };
 
     return (
