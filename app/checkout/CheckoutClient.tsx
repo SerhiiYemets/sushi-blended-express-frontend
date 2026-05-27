@@ -20,10 +20,8 @@ import {
     useCartRestaurantId,
 } from '@/lib/store/cartStore';
 import { useAuthStore } from '@/lib/store/authStore';
-import {
-    RESTAURANT_LABELS,
-    useSelectedRestaurant,
-} from '@/lib/store/restaurantStore';
+import { useSelectedRestaurant } from '@/lib/store/restaurantStore';
+import { RESTAURANT_LABELS } from '@/lib/restaurants';
 import { useHydrated } from '@/hooks/useHydrated';
 import { createOrder } from '@/lib/api/ordersApi';
 import { orderSchema, type OrderFormData } from '@/lib/validations/orderSchema';
@@ -57,9 +55,6 @@ function buildDefaultsFromUser(user: User | null): OrderFormInput {
 
 import css from './checkout.module.css';
 
-const DELIVERY_FEE = 49;
-const FREE_DELIVERY_THRESHOLD = 599;
-
 const selectItems = (s: ReturnType<typeof useCartStore.getState>) => s.items;
 const selectClearCart = (s: ReturnType<typeof useCartStore.getState>) =>
     s.clearCart;
@@ -79,10 +74,10 @@ export default function CheckoutClient() {
     const authUser = useAuthStore(selectUser);
     const authHydrated = useAuthStore(selectAuthHydrated);
 
-    let subtotal = 0;
+    let estimatedSubtotal = 0;
     let totalQty = 0;
     for (const item of items) {
-        subtotal += item.price * item.quantity;
+        estimatedSubtotal += item.price * item.quantity;
         totalQty += item.quantity;
     }
 
@@ -128,15 +123,6 @@ export default function CheckoutClient() {
 
     const isDelivery = deliveryType === 'delivery';
 
-    const deliveryFee =
-        !isDelivery ||
-        subtotal >= FREE_DELIVERY_THRESHOLD ||
-        subtotal === 0
-            ? 0
-            : DELIVERY_FEE;
-
-    const total = subtotal + deliveryFee;
-
     const onSubmit = async (values: OrderFormData) => {
         if (items.length === 0) {
             toast.error('Košík je prázdný');
@@ -170,7 +156,7 @@ export default function CheckoutClient() {
             paymentMethod: values.paymentMethod,
 
             items: items.map((item) => ({
-                productId: item._id,
+                productId: String(item.posterProductId),
                 quantity: item.quantity,
             })),
         };
@@ -639,33 +625,18 @@ export default function CheckoutClient() {
 
                         <div className={css.summaryRows}>
                             <div className={css.row}>
-                                <span>Mezisoučet</span>
+                                <span>Mezisoučet (odhad)</span>
 
-                                <span>{subtotal} Kč</span>
-                            </div>
-
-                            <div className={css.row}>
-                                <span>
-                                    {isDelivery ? 'Doprava' : 'Vyzvednutí'}
-                                </span>
-
-                                <span>
-                                    {deliveryFee === 0 ? (
-                                        <span className={css.free}>
-                                            Zdarma
-                                        </span>
-                                    ) : (
-                                        `${deliveryFee} Kč`
-                                    )}
-                                </span>
+                                <span>{estimatedSubtotal} Kč</span>
                             </div>
                         </div>
 
-                        <div className={css.totalRow}>
-                            <span>Celkem</span>
-
-                            <strong>{total} Kč</strong>
-                        </div>
+                        <p className={css.subtitle}>
+                            Doprava po Kolíně a Jihlavě zdarma.
+                        </p>
+                        <p className={css.subtitle}>
+                            Mimo město 10 Kč za každý kilometr.
+                        </p>
 
                         <button
                             type="submit"

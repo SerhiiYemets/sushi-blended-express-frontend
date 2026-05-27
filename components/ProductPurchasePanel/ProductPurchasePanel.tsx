@@ -4,12 +4,13 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { requestAddToCart, useCartStore } from "@/lib/store/cartStore";
-import type { RestaurantId } from "@/lib/store/restaurantStore";
+import type { RestaurantId } from "@/lib/restaurants";
 
 import css from "./ProductPurchasePanel.module.css";
 
 type PanelProduct = {
     _id: string;
+    posterProductId: number;
     name: string;
     price: number;
     image?: string | null;
@@ -35,6 +36,7 @@ export default function ProductPurchasePanel({ product, restaurantId }: Props) {
         requestAddToCart(
             {
                 _id: product._id,
+                posterProductId: product.posterProductId,
                 name: product.name,
                 price: product.price,
                 image: product.image ?? null,

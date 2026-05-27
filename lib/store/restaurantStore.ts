@@ -1,12 +1,10 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export type RestaurantId = "kolin" | "jihlava";
-
-export const RESTAURANT_LABELS: Record<RestaurantId, string> = {
-    kolin: "Kolín",
-    jihlava: "Jihlava",
-};
+import {
+    isRestaurantId,
+    type RestaurantId,
+} from "@/lib/restaurants";
 
 type RestaurantState = {
     selectedRestaurant: RestaurantId;
@@ -22,10 +20,18 @@ export const useRestaurantStore = create<RestaurantState>()(
         }),
         {
             name: "restaurant-storage",
+            version: 1,
             storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({
                 selectedRestaurant: state.selectedRestaurant,
             }),
+            migrate: (persisted) => {
+                const value = (persisted as { selectedRestaurant?: unknown })
+                    ?.selectedRestaurant;
+                return {
+                    selectedRestaurant: isRestaurantId(value) ? value : "kolin",
+                };
+            },
         }
     )
 );

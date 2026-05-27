@@ -5,7 +5,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 
 import type { Product } from "@/types/product";
-import type { RestaurantId } from "@/lib/store/restaurantStore";
+import type { RestaurantId } from "@/lib/restaurants";
 
 import { requestAddToCart, useCartStore } from "@/lib/store/cartStore";
 
@@ -34,6 +34,7 @@ export default function ProductCard({
 
         requestAddToCart({
             _id: item._id,
+            posterProductId: item.posterProductId,
             name: item.name,
             price: item.price,
             image: item.image ?? null,

@@ -39,6 +39,27 @@ function safeRedirect(url: string): string {
     return url;
 }
 
+type AuthErrorBody = {
+    message?: string;
+    error?: string;
+    response?: { message?: string; error?: string };
+};
+
+function readErrorMessage(e: unknown): string {
+    if (isAxiosError(e)) {
+        const data = e.response?.data as AuthErrorBody | undefined;
+        return (
+            data?.message ??
+            data?.error ??
+            data?.response?.message ??
+            data?.response?.error ??
+            e.message
+        );
+    }
+    if (e instanceof Error) return e.message;
+    return "Unknown error";
+}
+
 export function useAuth(redirectTo: string = "/") {
     const router = useRouter();
     const setUser = useAuthStore((state) => state.setUser);
@@ -71,21 +92,13 @@ export function useAuth(redirectTo: string = "/") {
             router.push(safeRedirect(redirectTo));
             router.refresh();
         } catch (e: unknown) {
-            const rawMessage = isAxiosError(e)
-                ? e.response?.data?.response?.message ||
-                  e.response?.data?.response?.error ||
-                  e.response?.data?.error ||
-                  e.message
-                : e instanceof Error
-                ? e.message
-                : "Unknown error";
-
+            const rawMessage = readErrorMessage(e);
             const message = mapErrorMessage(rawMessage);
             const lower = rawMessage.toLowerCase();
 
             if (lower.includes("email")) {
                 setFieldError("email", message);
-            } else if (lower.includes("password")) {
+            } else if (lower.includes("password") || lower.includes("heslo")) {
                 setFieldError("password", message);
             } else {
                 toast.error(message);

@@ -3,13 +3,11 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 
 import type { CartItem } from "@/types/cart";
+import { isRestaurantId, type RestaurantId } from "@/lib/restaurants";
 
-import {
-    useRestaurantStore,
-    type RestaurantId,
-} from "./restaurantStore";
+import { useRestaurantStore } from "./restaurantStore";
 
-export type ReorderItem = Omit<CartItem, "quantity"> & { quantity: number };
+export type ReorderItem = CartItem;
 
 export type PendingAction =
     | { kind: "switch"; restaurantId: RestaurantId }
@@ -39,6 +37,20 @@ type CartStore = CartActions & {
     items: CartItem[];
     pendingAction: PendingAction | null;
 };
+
+function isValidCartItem(value: unknown): value is CartItem {
+    if (!value || typeof value !== "object") return false;
+    const i = value as Record<string, unknown>;
+    return (
+        typeof i._id === "string" &&
+        typeof i.name === "string" &&
+        typeof i.price === "number" &&
+        typeof i.quantity === "number" &&
+        i.quantity > 0 &&
+        typeof i.posterProductId === "number" &&
+        isRestaurantId(i.restaurantId)
+    );
+}
 
 export const useCartStore = create<CartStore>()(
     persist(
@@ -101,8 +113,16 @@ export const useCartStore = create<CartStore>()(
         }),
         {
             name: "sushi-cart",
+            version: 1,
             storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({ items: state.items }),
+            migrate: (persisted) => {
+                const rawItems = (persisted as { items?: unknown })?.items;
+                const items = Array.isArray(rawItems)
+                    ? rawItems.filter(isValidCartItem)
+                    : [];
+                return { items };
+            },
         }
     )
 );
@@ -128,20 +148,17 @@ export const useCartCount = () =>
     });
 
 export const useCartRestaurantId = () =>
-    useCartStore(
-        (s) => s.items.find((i) => i.restaurantId)?.restaurantId ?? null
-    );
+    useCartStore((s) => s.items[0]?.restaurantId ?? null);
 
 export const usePendingAction = () =>
     useCartStore((s) => s.pendingAction);
 
 function currentCartRestaurantId(): RestaurantId | null {
-    const items = useCartStore.getState().items;
-    return items.find((i) => i.restaurantId)?.restaurantId ?? null;
+    return useCartStore.getState().items[0]?.restaurantId ?? null;
 }
 
 export function requestAddToCart(
-    item: Omit<CartItem, "quantity"> & { restaurantId: RestaurantId },
+    item: Omit<CartItem, "quantity">,
     quantity: number = 1
 ): void {
     const cart = useCartStore.getState();

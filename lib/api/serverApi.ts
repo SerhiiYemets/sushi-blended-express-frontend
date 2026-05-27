@@ -2,7 +2,14 @@ import "server-only";
 
 import type { MenuCategory } from "@/types/menu";
 import type { Product, ProductDetails } from "@/types/product";
-import type { RestaurantId } from "@/lib/store/restaurantStore";
+import {
+    isRestaurantId,
+    resolveRestaurantId,
+    VALID_RESTAURANTS,
+    type RestaurantId,
+} from "@/lib/restaurants";
+
+export { isRestaurantId, resolveRestaurantId, VALID_RESTAURANTS };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -15,19 +22,6 @@ export class NotFoundError extends Error {
         super(message);
         this.name = "NotFoundError";
     }
-}
-
-export const VALID_RESTAURANTS: readonly RestaurantId[] = ["kolin", "jihlava"];
-
-export function isRestaurantId(value: unknown): value is RestaurantId {
-    return (
-        typeof value === "string" &&
-        (VALID_RESTAURANTS as readonly string[]).includes(value)
-    );
-}
-
-export function resolveRestaurantId(value: unknown): RestaurantId {
-    return isRestaurantId(value) ? value : "kolin";
 }
 
 async function fetchMenu(restaurantId: RestaurantId): Promise<MenuCategory[]> {

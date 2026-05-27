@@ -9,7 +9,7 @@ import type {
 import type { MenuCategory } from "@/types/menu";
 import type { Order } from "@/types/order";
 import type { ProfileUpdatePayload, User } from "@/types/user";
-import type { RestaurantId } from "@/lib/store/restaurantStore";
+import type { RestaurantId } from "@/lib/restaurants";
 
 const clientApi = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,

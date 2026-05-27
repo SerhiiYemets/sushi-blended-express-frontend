@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import {
@@ -10,6 +11,9 @@ import {
     type ReorderItem,
 } from "@/lib/store/cartStore";
 import { useSelectedRestaurant } from "@/lib/store/restaurantStore";
+import { getMenu } from "@/lib/api/clientApi";
+import type { MenuCategory } from "@/types/menu";
+import type { Product } from "@/types/product";
 import type { Order, OrderStatus } from "@/types/order";
 
 import css from "./OrderCard.module.css";
@@ -42,19 +46,27 @@ const dateFormatter = new Intl.DateTimeFormat("cs-CZ", {
     minute: "2-digit",
 });
 
+function lineSubtotal(price: number | undefined, quantity: number): number {
+    if (typeof price !== "number" || !Number.isFinite(price)) return 0;
+    return price * quantity;
+}
+
 export default function OrderCard({ order }: Props) {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const currentRestaurant = useSelectedRestaurant();
+
+    const [isReordering, setIsReordering] = useState(false);
 
     const formattedDate = useMemo(() => {
         const d = new Date(order.createdAt);
         return Number.isNaN(d.getTime()) ? "" : dateFormatter.format(d);
     }, [order.createdAt]);
 
-    const itemsTotal = useMemo(
+    const itemsSubtotal = useMemo(
         () =>
             order.items.reduce(
-                (sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 0),
+                (sum, item) => sum + lineSubtotal(item.price, item.quantity ?? 0),
                 0
             ),
         [order.items]
@@ -63,14 +75,16 @@ export default function OrderCard({ order }: Props) {
     const displayTotal =
         typeof order.totalPrice === "number" && order.totalPrice > 0
             ? order.totalPrice
-            : itemsTotal + (order.deliveryFee ?? 0);
+            : itemsSubtotal + (order.deliveryFee ?? 0);
+
+    const showTotal = displayTotal > 0;
 
     const shortId = order._id?.slice(-6).toUpperCase() ?? "";
     const status: OrderStatus = order.status ?? "new";
     const statusLabel = STATUS_LABEL[status] ?? status;
     const statusClass = STATUS_CLASS[status] ?? css.statusPending;
 
-    const handleReorder = () => {
+    const handleReorder = async () => {
         if (!order.items?.length) {
             toast.error("Tato objednávka neobsahuje žádné položky");
             return;
@@ -78,30 +92,71 @@ export default function OrderCard({ order }: Props) {
 
         const targetRestaurant = order.restaurantId ?? currentRestaurant;
 
-        const reorderItems: ReorderItem[] = order.items
-            .filter((item) => !!item.productId)
-            .map((item) => ({
-                _id: item.productId,
-                name: item.name,
-                price: item.price,
-                image: item.image ?? null,
-                weight: item.weight,
-                restaurantId: targetRestaurant,
-                quantity: item.quantity,
-            }));
+        setIsReordering(true);
+        try {
+            const menu = await queryClient.fetchQuery<MenuCategory[]>({
+                queryKey: ["menu", targetRestaurant],
+                queryFn: () => getMenu(targetRestaurant),
+                staleTime: 60_000,
+            });
 
-        if (reorderItems.length === 0) {
-            toast.error("Tato objednávka neobsahuje žádné položky");
-            return;
-        }
+            const byPoster = new Map<string, Product>();
+            for (const category of menu) {
+                for (const product of category.products) {
+                    byPoster.set(String(product.posterProductId), product);
+                }
+            }
 
-        requestReorder(targetRestaurant, reorderItems);
+            const reorderItems: ReorderItem[] = [];
+            let missing = 0;
 
-        const pending = useCartStore.getState().pendingAction;
+            for (const it of order.items) {
+                const key = it.productId ? String(it.productId) : "";
+                const product = key ? byPoster.get(key) : undefined;
+                const quantity = Math.max(1, it.quantity ?? 1);
 
-        if (!pending) {
-            toast.success("Položky byly přidány do košíku");
-            router.push("/cart");
+                if (!product || !product.available || product.hidden) {
+                    missing++;
+                    continue;
+                }
+
+                reorderItems.push({
+                    _id: product._id,
+                    posterProductId: product.posterProductId,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image ?? null,
+                    weight: product.weight,
+                    restaurantId: targetRestaurant,
+                    quantity,
+                });
+            }
+
+            if (reorderItems.length === 0) {
+                toast.error(
+                    "Položky této objednávky již nejsou v menu dostupné"
+                );
+                return;
+            }
+
+            if (missing > 0) {
+                toast(
+                    `${missing} položek z této objednávky již není v menu dostupných`
+                );
+            }
+
+            requestReorder(targetRestaurant, reorderItems);
+
+            const pending = useCartStore.getState().pendingAction;
+
+            if (!pending) {
+                toast.success("Položky byly přidány do košíku");
+                router.push("/cart");
+            }
+        } catch {
+            toast.error("Nepodařilo se načíst aktuální menu pro restauraci");
+        } finally {
+            setIsReordering(false);
         }
     };
 
@@ -121,39 +176,51 @@ export default function OrderCard({ order }: Props) {
             </header>
 
             <ul className={css.items}>
-                {order.items.map((item, idx) => (
-                    <li
-                        key={`${item.productId ?? "item"}-${idx}`}
-                        className={css.item}
-                    >
-                        <span className={css.itemName}>
-                            <span className={css.itemQty}>
-                                {item.quantity}×
-                            </span>{" "}
-                            {item.name}
-                        </span>
-                        <span className={css.itemPrice}>
-                            {item.price * item.quantity} Kč
-                        </span>
-                    </li>
-                ))}
+                {order.items.map((item, idx) => {
+                    const quantity = item.quantity ?? 0;
+                    const line = lineSubtotal(item.price, quantity);
+                    const showLine = line > 0;
+                    return (
+                        <li
+                            key={`${item.productId ?? "item"}-${idx}`}
+                            className={css.item}
+                        >
+                            <span className={css.itemName}>
+                                <span className={css.itemQty}>
+                                    {quantity}×
+                                </span>{" "}
+                                {item.name ?? "Produkt"}
+                            </span>
+                            {showLine && (
+                                <span className={css.itemPrice}>
+                                    {line} Kč
+                                </span>
+                            )}
+                        </li>
+                    );
+                })}
             </ul>
 
             <footer className={css.footer}>
-                <div className={css.totalWrap}>
-                    <span className={css.totalLabel}>Celkem</span>
-                    <strong className={css.totalValue}>
-                        {displayTotal} Kč
-                    </strong>
-                </div>
+                {showTotal ? (
+                    <div className={css.totalWrap}>
+                        <span className={css.totalLabel}>Celkem</span>
+                        <strong className={css.totalValue}>
+                            {displayTotal} Kč
+                        </strong>
+                    </div>
+                ) : (
+                    <div className={css.totalWrap} />
+                )}
 
                 <button
                     type="button"
                     onClick={handleReorder}
                     className={css.reorderBtn}
-                    disabled={order.items.length === 0}
+                    disabled={order.items.length === 0 || isReordering}
+                    aria-busy={isReordering}
                 >
-                    Objednat znovu
+                    {isReordering ? "Načítání…" : "Objednat znovu"}
                 </button>
             </footer>
         </article>

@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import ProductPurchasePanel from "@/components/ProductPurchasePanel/ProductPurchasePanel";
 import type { ProductDetails as ProductDetailsType } from "@/types/product";
-import type { RestaurantId } from "@/lib/store/restaurantStore";
+import type { RestaurantId } from "@/lib/restaurants";
 
 import css from "./ProductDetails.module.css";
 
@@ -79,6 +79,7 @@ export default function ProductDetails({
                 <ProductPurchasePanel
                     product={{
                         _id: product._id,
+                        posterProductId: product.posterProductId,
                         name: product.name,
                         price: product.price,
                         image: product.image ?? null,

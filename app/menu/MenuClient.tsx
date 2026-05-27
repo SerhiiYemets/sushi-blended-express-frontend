@@ -1,64 +1,60 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import ProductCard from "@/components/ProductCard/ProductCard";
 import { getMenu } from "@/lib/api/clientApi";
+import { useSelectedRestaurant } from "@/lib/store/restaurantStore";
 import {
     RESTAURANT_LABELS,
-    useSelectedRestaurant,
     type RestaurantId,
-} from "@/lib/store/restaurantStore";
+} from "@/lib/restaurants";
 import {
     requestRestaurantSwitch,
     useCartCount,
     useCartRestaurantId,
 } from "@/lib/store/cartStore";
-import type { MenuCategory } from "@/types/menu";
 
 import css from "./Menu.module.css";
 
 const RESTAURANT_OPTIONS: RestaurantId[] = ["kolin", "jihlava"];
 
 export default function MenuClient() {
-    const [data, setData] = useState<MenuCategory[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [activeCategory, setActiveCategory] = useState<string | null>(null);
-
     const selectedRestaurant = useSelectedRestaurant();
 
     const cartCount = useCartCount();
     const cartRestaurantId = useCartRestaurantId();
 
-    useEffect(() => {
-        let cancelled = false;
+    const {
+        data,
+        isLoading,
+        isError,
+        refetch,
+    } = useQuery({
+        queryKey: ["menu", selectedRestaurant],
+        queryFn: () => getMenu(selectedRestaurant),
+        staleTime: 60_000,
+    });
 
-        setLoading(true);
+    const menu = useMemo(() => data ?? [], [data]);
 
-        getMenu(selectedRestaurant)
-            .then((res) => {
-                if (cancelled) return;
-
-                setData(res);
-
-                if (res.length > 0) {
-                    setActiveCategory(res[0].name);
-                }
-            })
-            .finally(() => {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            });
-
-        return () => {
-            cancelled = true;
-        };
-    }, [selectedRestaurant]);
-
-    const current = data.find(
-        (category) => category.name === activeCategory
+    const [requestedCategory, setRequestedCategory] = useState<string | null>(
+        null
     );
+
+    const activeCategory = useMemo(() => {
+        if (menu.length === 0) return null;
+        if (
+            requestedCategory &&
+            menu.some((c) => c.name === requestedCategory)
+        ) {
+            return requestedCategory;
+        }
+        return menu[0].name;
+    }, [menu, requestedCategory]);
+
+    const current = menu.find((category) => category.name === activeCategory);
 
     const cartHasOtherRestaurant =
         cartCount > 0 &&
@@ -120,17 +116,28 @@ export default function MenuClient() {
                     </p>
                 )}
 
-                {loading ? (
+                {isLoading ? (
                     <div className={css.loading}>Načítání…</div>
+                ) : isError ? (
+                    <div className={css.loading}>
+                        Nepodařilo se načíst menu.{" "}
+                        <button
+                            type="button"
+                            onClick={() => refetch()}
+                            className={css.categoryBtn}
+                        >
+                            Zkusit znovu
+                        </button>
+                    </div>
                 ) : (
                     <>
                         <div className={css.categories}>
-                            {data.map((cat) => (
+                            {menu.map((cat) => (
                                 <button
                                     key={cat._id}
                                     type="button"
                                     onClick={() =>
-                                        setActiveCategory(cat.name)
+                                        setRequestedCategory(cat.name)
                                     }
                                     className={`${css.categoryBtn} ${
                                         activeCategory === cat.name

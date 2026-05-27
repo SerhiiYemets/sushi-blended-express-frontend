@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { requestRestaurantSwitch } from "@/lib/store/cartStore";
-import type { RestaurantId } from "@/lib/store/restaurantStore";
+import type { RestaurantId } from "@/lib/restaurants";
 
 import css from "@/components/Hero/Hero.module.css";
 

@@ -11,8 +11,6 @@ import { useHydrated } from '@/hooks/useHydrated';
 import css from './cart.module.css';
 
 const MAX_QUANTITY = 30;
-const DELIVERY_FEE = 49;
-const FREE_DELIVERY_THRESHOLD = 599;
 
 const selectItems = (s: { items: CartItem[] }) => s.items;
 
@@ -104,18 +102,12 @@ export default function CartClient() {
     const { incrementItem, decrementItem, removeFromCart, clearCart } =
         useCartActions();
 
-    let subtotal = 0;
+    let estimatedSubtotal = 0;
     let totalQty = 0;
     for (const item of items) {
-        subtotal += item.price * item.quantity;
+        estimatedSubtotal += item.price * item.quantity;
         totalQty += item.quantity;
     }
-
-    const deliveryFee =
-        subtotal >= FREE_DELIVERY_THRESHOLD || subtotal === 0 ? 0 : DELIVERY_FEE;
-    const total = subtotal + deliveryFee;
-    const remainingForFree = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal);
-    const freeProgress = Math.min(100, (subtotal / FREE_DELIVERY_THRESHOLD) * 100);
 
     const showEmpty = hydrated && items.length === 0;
     const showItems = hydrated && items.length > 0;
@@ -168,48 +160,19 @@ export default function CartClient() {
                         <aside className={css.summary}>
                             <h2 className={css.summaryTitle}>Shrnutí objednávky</h2>
 
-                            {remainingForFree > 0 ? (
-                                <div className={css.freeShip}>
-                                    <p className={css.freeShipText}>
-                                        Přidejte ještě <strong>{remainingForFree} Kč</strong>{' '}
-                                        pro dopravu zdarma
-                                    </p>
-
-                                    <div className={css.progress}>
-                                        <span
-                                            className={css.progressBar}
-                                            style={{ width: `${freeProgress}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className={css.freeShipBadge}>
-                                    🚚 Doprava zdarma aktivována
-                                </div>
-                            )}
-
                             <div className={css.summaryRows}>
                                 <div className={css.row}>
-                                    <span>Produkty</span>
-                                    <span>{subtotal} Kč</span>
-                                </div>
-
-                                <div className={css.row}>
-                                    <span>Doprava</span>
-                                    <span>
-                                        {deliveryFee === 0 ? (
-                                            <span className={css.free}>Zdarma</span>
-                                        ) : (
-                                            `${deliveryFee} Kč`
-                                        )}
-                                    </span>
+                                    <span>Mezisoučet (odhad)</span>
+                                    <span>{estimatedSubtotal} Kč</span>
                                 </div>
                             </div>
 
-                            <div className={css.totalRow}>
-                                <span>Celkem</span>
-                                <strong>{total} Kč</strong>
-                            </div>
+                            <p className={css.subtitle}>
+                                Doprava po Kolíně a Jihlavě zdarma.
+                            </p>
+                            <p className={css.subtitle}>
+                                Mimo město 10 Kč za každý kilometr.
+                            </p>
 
                             <Link href="/checkout" className={css.checkoutBtn}>
                                 Pokračovat k objednávce

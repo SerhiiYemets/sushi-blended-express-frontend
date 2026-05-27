@@ -1,4 +1,4 @@
-import type { RestaurantId } from "@/lib/store/restaurantStore";
+import type { RestaurantId } from "@/lib/restaurants";
 
 export type OrderItemInput = {
     productId: string;
@@ -7,9 +7,9 @@ export type OrderItemInput = {
 
 export type OrderItem = {
     productId: string;
-    name: string;
     quantity: number;
-    price: number;
+    name?: string;
+    price?: number;
     image?: string | null;
     weight?: string;
 };
@@ -55,9 +55,10 @@ export type Order = {
     paymentMethod: OrderPayload["paymentMethod"];
 
     items: OrderItem[];
-    subtotal: number;
-    deliveryFee: number;
-    totalPrice: number;
+
+    subtotal?: number;
+    deliveryFee?: number;
+    totalPrice?: number;
 
     status: OrderStatus;
 

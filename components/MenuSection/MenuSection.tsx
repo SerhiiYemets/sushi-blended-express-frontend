@@ -1,5 +1,5 @@
 import type { MenuCategory } from "@/types/menu";
-import type { RestaurantId } from "@/lib/store/restaurantStore";
+import type { RestaurantId } from "@/lib/restaurants";
 
 import ProductCard from "../ProductCard/ProductCard";
 

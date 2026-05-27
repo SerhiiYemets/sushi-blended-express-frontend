@@ -8,7 +8,7 @@ import {
     useCartRestaurantId,
     usePendingAction,
 } from "@/lib/store/cartStore";
-import { RESTAURANT_LABELS } from "@/lib/store/restaurantStore";
+import { RESTAURANT_LABELS } from "@/lib/restaurants";
 
 import css from "./CartGuardModal.module.css";
 
