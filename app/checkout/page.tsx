@@ -14,7 +14,7 @@ export default function CheckoutPage() {
     return (
         <>
             <Header />
-            <CheckoutClient />
+                <CheckoutClient />
             <Footer />
         </>
     );

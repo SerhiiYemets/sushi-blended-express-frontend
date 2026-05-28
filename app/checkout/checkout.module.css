@@ -96,14 +96,24 @@
     padding: 0 14px;
     border: 1px solid var(--color-border-warm);
     border-radius: 12px;
-    background: var(--color-bg-white);
+    background: var(--color-input-bg);
     color: var(--color-text-primary);
     font-size: 15px;
     font-family: inherit;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
         background-color 0.2s ease;
     appearance: none;
     -webkit-appearance: none;
+}
+
+:root {
+    --color-input-bg: #ab1f1f;
+}
+
+.dark {
+    --color-input-bg: #1f2937;
 }
 
 .textarea {
