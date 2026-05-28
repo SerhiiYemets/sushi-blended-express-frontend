@@ -18,23 +18,37 @@ export default function Hero() {
 
     return (
         <section className={css.hero}>
-            <Image
-                src="/Hero.webp"
-                alt="Sushi hero"
-                fill
-                priority
-                sizes="100vw"
-                className={css.heroImage}
-            />
+            <div className={css.imageLayer}>
+                <Image
+                    src="/Hero.webp"
+                    alt=""
+                    fill
+                    priority
+                    sizes="100vw"
+                    className={css.heroImage}
+                />
+                <div className={css.overlay} aria-hidden />
+                <div className={css.grid} aria-hidden />
+                <div className={css.glow} aria-hidden />
+            </div>
 
+            <div className={css.heroLayout}>
             <div className={css.heroContent}>
+                <span className={css.eyebrow}>
+                    <span className={css.eyebrowDot} aria-hidden />
+                    Sushi delivery · Kolín &amp; Jihlava
+                </span>
+
                 <h1 className={css.heroTitle}>
-                    <span>Nejlepší sushi</span>
-                    <span>v Kolíně a Jihlavě</span>
+                    <span className={css.titleLine}>Japonská chuť.</span>
+                    <span className={`${css.titleLine} ${css.titleLineAccent}`}>
+                        Maximální dopad.
+                    </span>
                 </h1>
 
                 <p className={css.heroSubtitle}>
-                    Čerstvé, rychlé, chutné 🍣
+                    Čerstvé sushi, ostře balené, doručené během minut.
+                    Vaše město. Vaše sushi. Hned teď.
                 </p>
 
                 <div className={css.heroCtas}>
@@ -62,7 +76,43 @@ export default function Hero() {
                         <span className={css.heroBtnLabel}>Menu Jihlava</span>
                     </button>
                 </div>
+
+                <ul className={css.bullets} aria-label="Klíčové výhody">
+                    <li className={css.bullet}>
+                        <span className={css.bulletIcon}>⚡</span>
+                        <span>
+                            <strong>30–45 min</strong> dodání
+                        </span>
+                    </li>
+                    <li className={css.bullet}>
+                        <span className={css.bulletIcon}>🍣</span>
+                        <span>
+                            <strong>Čerstvé denně</strong>, žádné mražené
+                        </span>
+                    </li>
+                    <li className={css.bullet}>
+                        <span className={css.bulletIcon}>🛵</span>
+                        <span>
+                            <strong>Doprava zdarma</strong> ve městě
+                        </span>
+                    </li>
+                </ul>
             </div>
+
+            <div className={css.heroVisual} aria-hidden>
+                <div className={css.heroLogoGlow} />
+                <Image
+                    src="/logoHero.PNG"
+                    alt=""
+                    width={720}
+                    height={720}
+                    priority
+                    sizes="(min-width: 1440px) 560px, (min-width: 1024px) 460px, (min-width: 768px) 380px, 280px"
+                    className={css.heroLogo}
+                />
+            </div>
+            </div>
+
         </section>
     );
 }

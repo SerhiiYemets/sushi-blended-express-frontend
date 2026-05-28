@@ -56,15 +56,18 @@ export default function Footer() {
 
                 <div className={css.bottom}>
                     <span className={css.copy}>
-                        © {year}{" "}
-                        <a
-                            href="https://www.linkedin.com/in/serhii-yemets/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Serhii Yemets
-                        </a>
+                        © {year} SushiMax
                     </span>
+                    <a
+                        className={css.copy}
+                        href="https://www.linkedin.com/in/serhii-yemets/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                    <span className={css.copy}>
+                        Powered by Serhii Yemets
+                    </span>
+                    </a>
                 </div>
             </div>
         </footer>

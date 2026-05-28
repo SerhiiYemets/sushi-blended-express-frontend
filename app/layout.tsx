@@ -14,14 +14,21 @@ const geist = Geist({
 
 const themeInitScript = `(function(){
     try {
-        var t = localStorage.getItem('theme');
-        if (!t && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        var t = null;
+        var raw = localStorage.getItem('theme');
+        if (raw) {
+            try {
+                var parsed = JSON.parse(raw);
+                t = parsed && parsed.state && parsed.state.theme;
+            } catch(_) {}
+        }
+        if (t !== 'dark' && t !== 'light') {
             t = 'dark';
         }
-        if (t) {
-            document.documentElement.setAttribute('data-theme', t);
-        }
-    } catch(e) {}
+        document.documentElement.setAttribute('data-theme', t);
+    } catch(e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
 })();`;
 
 export const metadata: Metadata = {
