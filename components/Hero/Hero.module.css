@@ -395,7 +395,7 @@
 
 @media (min-width: 1024px) {
     .hero {
-        padding: 70px 64px 10px;
+        padding: 70px 64px 40px;
         justify-content: center;
     }
 
