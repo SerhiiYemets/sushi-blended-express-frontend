@@ -4,7 +4,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    padding: 96px 20px 64px;
+    padding: 40px 20px 60px;
     overflow: hidden;
     isolation: isolate;
     background-color: #000;
@@ -20,6 +20,7 @@
     flex-direction: column;
     align-items: center;
     gap: 40px;
+    transform: translateY(var(--hero-shift, 0px));
 }
 
 .heroVisual {
@@ -368,7 +369,7 @@
 
 @media (min-width: 600px) {
     .hero {
-        padding: 120px 32px 80px;
+        padding: 60px 32px 80px;
     }
 
     .heroCtas {
@@ -394,7 +395,7 @@
 
 @media (min-width: 1024px) {
     .hero {
-        padding: 140px 64px 100px;
+        padding: 70px 64px 10px;
         justify-content: center;
     }
 
@@ -436,6 +437,24 @@
     .heroVisual {
         width: 560px;
         max-width: 560px;
+    }
+}
+
+@media (min-width: 600px) and (min-height: 760px) {
+    .heroLayout {
+        --hero-shift: -48px;
+    }
+}
+
+@media (min-width: 1024px) and (min-height: 820px) {
+    .heroLayout {
+        --hero-shift: -88px;
+    }
+}
+
+@media (min-width: 1024px) and (min-height: 980px) {
+    .heroLayout {
+        --hero-shift: -112px;
     }
 }
 

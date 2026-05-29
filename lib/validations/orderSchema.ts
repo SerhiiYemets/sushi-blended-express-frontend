@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidSlotFormat } from '@/lib/deliveryTime';
 
 const nameRegex =
     /^[A-Za-zÀ-ÿĀ-žА-яЁёЇїІіЄєҐґČčŘřŠšŽžÝýÁáÍíÉéÚúŮůŤťĎďŇň\s-]+$/;
@@ -81,6 +82,25 @@ export const orderSchema =
             'cash',
             'card',
         ]),
+
+        deliveryTimeMode: z.enum([
+            'asap',
+            'scheduled',
+        ]),
+
+        deliveryTime:
+            z.string().optional(),
+    })
+    .superRefine((data, ctx) => {
+        if (data.deliveryTimeMode !== 'scheduled') return;
+
+        if (!data.deliveryTime || !isValidSlotFormat(data.deliveryTime)) {
+            ctx.addIssue({
+                code: 'custom',
+                path: ['deliveryTime'],
+                message: 'Vyberte prosím čas doručení',
+            });
+        }
     });
 
 export type OrderFormData =

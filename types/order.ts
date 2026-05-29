@@ -40,6 +40,9 @@ export type OrderPayload = {
     deliveryType: "delivery" | "pickup";
     paymentMethod: "cash" | "card";
 
+    /** "asap" or a "HH:MM" slot within business hours. */
+    deliveryTime: string;
+
     items: OrderItemInput[];
 };
 
@@ -53,6 +56,7 @@ export type Order = {
 
     deliveryType: OrderPayload["deliveryType"];
     paymentMethod: OrderPayload["paymentMethod"];
+    deliveryTime?: string;
 
     items: OrderItem[];
 

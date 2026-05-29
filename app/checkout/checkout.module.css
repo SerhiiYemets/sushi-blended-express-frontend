@@ -96,7 +96,7 @@
     padding: 0 14px;
     border: 1px solid var(--color-border-warm);
     border-radius: 12px;
-    background: var(--color-input-bg);
+    background: var(--color-bg-page);
     color: var(--color-text-primary);
     font-size: 15px;
     font-family: inherit;
@@ -106,14 +106,6 @@
         background-color 0.2s ease;
     appearance: none;
     -webkit-appearance: none;
-}
-
-:root {
-    --color-input-bg: #ab1f1f;
-}
-
-.dark {
-    --color-input-bg: #1f2937;
 }
 
 .textarea {
@@ -207,6 +199,51 @@
 .toggleHint {
     font-size: 12px;
     color: var(--color-text-muted);
+}
+
+.toggleDisabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.select {
+    cursor: pointer;
+    padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+
+.closedWarning {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--color-error) 8%, var(--color-bg-white));
+    border: 1px solid
+        color-mix(in srgb, var(--color-error) 35%, transparent);
+}
+
+.closedIcon {
+    font-size: 22px;
+    line-height: 1.2;
+    flex-shrink: 0;
+}
+
+.closedTitle {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+}
+
+.closedText {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.4;
 }
 
 .srOnly {

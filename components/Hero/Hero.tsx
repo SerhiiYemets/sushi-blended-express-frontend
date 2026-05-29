@@ -40,14 +40,14 @@ export default function Hero() {
                 </span>
 
                 <h1 className={css.heroTitle}>
-                    <span className={css.titleLine}>Japonská chuť.</span>
+                    <span className={css.titleLine}>Japonská chuť</span>
                     <span className={`${css.titleLine} ${css.titleLineAccent}`}>
-                        Maximální dopad.
+                        Maximální dopad
                     </span>
                 </h1>
 
                 <p className={css.heroSubtitle}>
-                    Čerstvé sushi, ostře balené, doručené během minut.
+                    Čerstvé sushi, ostře balené, doručené zdarma během minut.
                     Vaše město. Vaše sushi. Hned teď.
                 </p>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -23,7 +23,14 @@ import { useAuthStore } from '@/lib/store/authStore';
 import { useSelectedRestaurant } from '@/lib/store/restaurantStore';
 import { RESTAURANT_LABELS } from '@/lib/restaurants';
 import { useHydrated } from '@/hooks/useHydrated';
+import { useNow } from '@/hooks/useNow';
 import { createOrder } from '@/lib/api/ordersApi';
+import {
+    ASAP_VALUE,
+    getAvailableSlots,
+    isRestaurantOpen,
+    isSlotSelectable,
+} from '@/lib/deliveryTime';
 import { orderSchema, type OrderFormData } from '@/lib/validations/orderSchema';
 import type { OrderPayload } from '@/types/order';
 import type { User } from '@/types/user';
@@ -50,6 +57,8 @@ function buildDefaultsFromUser(user: User | null): OrderFormInput {
                 : 1,
         notes: user?.deliveryNotes ?? '',
         paymentMethod: user?.preferredPaymentMethod ?? 'cash',
+        deliveryTimeMode: 'asap',
+        deliveryTime: '',
     };
 }
 
@@ -86,6 +95,7 @@ export default function CheckoutClient() {
         handleSubmit,
         control,
         reset,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<OrderFormInput, undefined, OrderFormData>({
         resolver: zodResolver(orderSchema),
@@ -99,6 +109,8 @@ export default function CheckoutClient() {
             peopleCount: 1,
             notes: '',
             paymentMethod: 'cash',
+            deliveryTimeMode: 'asap',
+            deliveryTime: '',
         },
         mode: 'onTouched',
     });
@@ -123,6 +135,33 @@ export default function CheckoutClient() {
 
     const isDelivery = deliveryType === 'delivery';
 
+    const nowTs = useNow(60_000);
+    const now = useMemo(() => (nowTs == null ? null : new Date(nowTs)), [nowTs]);
+
+    const slots = useMemo(() => (now ? getAvailableSlots(now) : []), [now]);
+    const canAsap = now ? isRestaurantOpen(now) : false;
+    const canSchedule = slots.length > 0;
+    const isClosed = now != null && !canAsap && !canSchedule;
+
+    const deliveryTimeMode = useWatch({ control, name: 'deliveryTimeMode' });
+    const scheduledTime = useWatch({ control, name: 'deliveryTime' });
+
+    useEffect(() => {
+        if (!now) return;
+        if (!canAsap && canSchedule && deliveryTimeMode === 'asap') {
+            setValue('deliveryTimeMode', 'scheduled');
+        }
+    }, [now, canAsap, canSchedule, deliveryTimeMode, setValue]);
+
+    useEffect(() => {
+        if (deliveryTimeMode !== 'scheduled' || slots.length === 0) return;
+        const stillValid =
+            scheduledTime && slots.some(s => s.value === scheduledTime);
+        if (!stillValid) {
+            setValue('deliveryTime', slots[0].value);
+        }
+    }, [deliveryTimeMode, scheduledTime, slots, setValue]);
+
     const onSubmit = async (values: OrderFormData) => {
         if (items.length === 0) {
             toast.error('Košík je prázdný');
@@ -132,6 +171,27 @@ export default function CheckoutClient() {
         if (values.deliveryType === 'delivery' && !values.address?.trim()) {
             toast.error('Zadejte prosím adresu doručení');
             return;
+        }
+
+        const submitNow = new Date();
+        let deliveryTime: string;
+
+        if (values.deliveryTimeMode === 'asap') {
+            if (!isRestaurantOpen(submitNow)) {
+                toast.error(
+                    'Restaurace je momentálně zavřená. Vyberte prosím konkrétní čas doručení.'
+                );
+                return;
+            }
+            deliveryTime = ASAP_VALUE;
+        } else {
+            if (!isSlotSelectable(values.deliveryTime ?? '', submitNow)) {
+                toast.error(
+                    'Vybraný čas doručení již není dostupný. Zvolte prosím jiný.'
+                );
+                return;
+            }
+            deliveryTime = values.deliveryTime!;
         }
 
         const payload: OrderPayload = {
@@ -154,6 +214,7 @@ export default function CheckoutClient() {
 
             deliveryType: values.deliveryType,
             paymentMethod: values.paymentMethod,
+            deliveryTime,
 
             items: items.map((item) => ({
                 productId: String(item.posterProductId),
@@ -466,6 +527,167 @@ export default function CheckoutClient() {
 
                         <fieldset className={css.section}>
                             <legend className={css.sectionTitle}>
+                                Čas doručení
+                            </legend>
+
+                            {!hydrated || !now ? (
+                                <p className={css.subtitle}>
+                                    Načítání dostupných časů…
+                                </p>
+                            ) : isClosed ? (
+                                <div
+                                    className={css.closedWarning}
+                                    role="alert"
+                                >
+                                    <span className={css.closedIcon}>⚠️</span>
+
+                                    <div>
+                                        <strong className={css.closedTitle}>
+                                            Restaurace je momentálně zavřená
+                                        </strong>
+
+                                        <p className={css.closedText}>
+                                            Objednávky přijímáme každý den
+                                            10:00–22:00. Zkuste to prosím
+                                            později.
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <div
+                                        className={css.toggle}
+                                        role="radiogroup"
+                                        aria-label="Čas doručení"
+                                    >
+                                        <label
+                                            className={`${css.toggleOption} ${
+                                                deliveryTimeMode === 'asap'
+                                                    ? css.toggleActive
+                                                    : ''
+                                            } ${
+                                                !canAsap
+                                                    ? css.toggleDisabled
+                                                    : ''
+                                            }`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                value="asap"
+                                                className={css.srOnly}
+                                                disabled={!canAsap}
+                                                {...register(
+                                                    'deliveryTimeMode'
+                                                )}
+                                            />
+
+                                            <span className={css.toggleIcon}>
+                                                ⚡
+                                            </span>
+
+                                            <span className={css.toggleLabel}>
+                                                Co nejdříve
+                                            </span>
+
+                                            <span className={css.toggleHint}>
+                                                {canAsap
+                                                    ? 'Doručíme co nejdříve'
+                                                    : 'Mimo otevírací dobu'}
+                                            </span>
+                                        </label>
+
+                                        <label
+                                            className={`${css.toggleOption} ${
+                                                deliveryTimeMode === 'scheduled'
+                                                    ? css.toggleActive
+                                                    : ''
+                                            } ${
+                                                !canSchedule
+                                                    ? css.toggleDisabled
+                                                    : ''
+                                            }`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                value="scheduled"
+                                                className={css.srOnly}
+                                                disabled={!canSchedule}
+                                                {...register(
+                                                    'deliveryTimeMode'
+                                                )}
+                                            />
+
+                                            <span className={css.toggleIcon}>
+                                                🕐
+                                            </span>
+
+                                            <span className={css.toggleLabel}>
+                                                Konkrétní čas
+                                            </span>
+
+                                            <span className={css.toggleHint}>
+                                                Vyberte ze slotů
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    {deliveryTimeMode === 'scheduled' && (
+                                        <div className={css.field}>
+                                            <label
+                                                htmlFor="deliveryTime"
+                                                className={css.label}
+                                            >
+                                                Čas doručení *
+                                            </label>
+
+                                            <select
+                                                id="deliveryTime"
+                                                className={`${css.input} ${
+                                                    css.select
+                                                } ${
+                                                    errors.deliveryTime
+                                                        ? css.inputError
+                                                        : ''
+                                                }`}
+                                                aria-invalid={
+                                                    !!errors.deliveryTime
+                                                }
+                                                {...register('deliveryTime')}
+                                            >
+                                                {slots.map(slot => (
+                                                    <option
+                                                        key={slot.value}
+                                                        value={slot.value}
+                                                    >
+                                                        {slot.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            {errors.deliveryTime && (
+                                                <span className={css.errorText}>
+                                                    {
+                                                        errors.deliveryTime
+                                                            .message
+                                                    }
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {!canAsap && canSchedule && (
+                                        <p className={css.subtitle}>
+                                            Momentálně je zavřeno pro okamžité
+                                            doručení – vyberte prosím konkrétní
+                                            čas.
+                                        </p>
+                                    )}
+                                </>
+                            )}
+                        </fieldset>
+
+                        <fieldset className={css.section}>
+                            <legend className={css.sectionTitle}>
                                 Detaily objednávky
                             </legend>
 
@@ -641,12 +863,14 @@ export default function CheckoutClient() {
                         <button
                             type="submit"
                             className={css.submitBtn}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || isClosed}
                             aria-busy={isSubmitting}
                         >
                             {isSubmitting
                                 ? 'Odesílání...'
-                                : 'Dokončit objednávku'}
+                                : isClosed
+                                  ? 'Restaurace je zavřená'
+                                  : 'Dokončit objednávku'}
                         </button>
 
                         <Link href="/cart" className={css.backLink}>
