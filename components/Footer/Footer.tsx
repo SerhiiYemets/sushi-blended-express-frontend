@@ -15,9 +15,13 @@ export default function Footer() {
 
                     <div className={css.columns}>
                         <div className={css.block}>
-                            <h3 className={css.label}>Adresa</h3>
+                            <h3 className={css.label}>Adresa - Kolín</h3>
                             <p className={css.value}>Karlovo náměstí 72</p>
                             <p className={css.value}>Kolín, 280 02</p>
+
+                            <h3 className={css.label}>Adresa - Jihlava</h3>
+                            <p className={css.value}>Úzká 635/1</p>
+                            <p className={css.value}>Jihlava, 586 01</p>
 
                             <h3 className={css.label} style={{ marginTop: "20px" }}>Akceptujeme</h3>
                             <div className={css.payments}>
@@ -28,15 +32,37 @@ export default function Footer() {
                         </div>
 
                         <div className={css.block}>
-                            <h3 className={css.label}>Telefon</h3>
+                            <h3 className={css.label}>Kolín</h3>
                             <a href="tel:+420777499970" className={css.phone}>
                                 721 479 332
                             </a>
-                            <Link href="https://www.instagram.com/sushi_max.cz/" 
-                                className={css.label}>Instagram</Link>
+                                <div className={css.socials}>
+                                    <Link href="https://www.instagram.com/sushimax_Kolin.cz/">
+                                        <svg className={css.instagramIcon} width="24" height="24">
+                                            <use href="/sprite.svg#instagram" />
+                                        </svg>
+                                    </Link>
+
+                                    <Link href="https://www.facebook.com/profile.php?id=100064335685391">
+                                        <svg className={css.instagramIcon} width="24" height="24">
+                                            <use href="/sprite.svg#facebook" />
+                                        </svg>
+                                    </Link>
+                                </div>
+                            <h3 className={css.label}>Jihlava</h3>
+                            <a href="tel:+420777499970" className={css.phone}>
+                                777 499 970
+                            </a>
+                                <Link href="https://www.instagram.com/sushimax_jihlava.cz/">
+                                    <svg className={css.instagramIcon} width="24" height="24">
+                                        <use href="/sprite.svg#instagram" />
+                                    </svg>
+                                </Link>
+                            {/* <Link href="https://www.facebook.com/profile.php?id=100064335685391&ref=PROFILE_EDIT_xav_ig_profile_page_web#">
                                 <svg className={css.instagramIcon} width="24" height="24">
-                                    <use href="/sprite.svg#instagram" />
+                                    <use href="/sprite.svg#facebook" />
                                 </svg>
+                            </Link> */}
                         </div>
 
                         <div className={css.block}>

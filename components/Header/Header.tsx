@@ -332,9 +332,6 @@ export default function Header() {
                 </nav>
 
                 <div className={css.rightSide}>
-                    <a href="tel:+420721479332" className={css.phone}>
-                        +420 721 479 332
-                    </a>
 
                     <CartBadge />
 

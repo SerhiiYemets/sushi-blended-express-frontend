@@ -7,6 +7,16 @@
     scroll-margin-top: 72px;
 }
 
+.socials {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.instagramIcon {
+    display: block;
+}
+
 .inner {
     max-width: 375px;
     margin: 0 auto;
@@ -126,7 +136,6 @@
     letter-spacing: 0.02em;
 }
 
-/* ── Tablet (768px) — mirrors Header breakpoint ── */
 @media (min-width: 768px) {
     .inner {
         max-width: 768px;
@@ -139,7 +148,6 @@
     }
 }
 
-/* ── Desktop (1440px) — mirrors Header breakpoint ── */
 @media (min-width: 1440px) {
     .inner {
         max-width: 1440px;
