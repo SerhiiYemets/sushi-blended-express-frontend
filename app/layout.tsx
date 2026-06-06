@@ -85,8 +85,8 @@ export const metadata: Metadata = {
     },
 
     icons: {
-        icon: "/sushimaxlogo.png",
-        shortcut: "/sushimaxlogo.png",
+        icon: "/SushiMax.svg",
+        shortcut: "/SushiMax.svg",
     },
 
     category: "food",

@@ -20,7 +20,7 @@ export default function Hero() {
         <section className={css.hero}>
             <div className={css.imageLayer}>
                 <Image
-                    src="/Hero.webp"
+                    src="/Hero.jpg"
                     alt=""
                     fill
                     priority
