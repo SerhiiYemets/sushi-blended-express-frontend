@@ -130,14 +130,37 @@
     box-shadow: var(--btn-shadow);
 }
 
-/* ── Products grid ── */
+
+@media (max-width: 767.98px) {
+    .categories {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px 30px; 
+        justify-content: center;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .categoryBtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 0; 
+        height: 100%; 
+        text-align: center;
+        white-space: normal; 
+        overflow-wrap: anywhere;
+        hyphens: auto;
+    }
+}
+
 .products {
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
 }
 
-/* ── States ── */
 .loading {
     min-height: 320px;
     display: flex;
@@ -156,7 +179,6 @@
     font-family: var(--font-manrope, system-ui, sans-serif);
 }
 
-/* ── Tablet (768px) ── */
 @media (min-width: 768px) {
     .container {
         max-width: 768px;
@@ -198,7 +220,6 @@
     }
 }
 
-/* ── Desktop (1440px) ── */
 @media (min-width: 1440px) {
     .container {
         max-width: 1440px;

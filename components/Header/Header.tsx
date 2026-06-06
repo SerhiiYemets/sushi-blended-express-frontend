@@ -13,35 +13,17 @@ import ThemeToggle from "@/components/ThemeToggle/ThemeToggle";
 
 import { useAuthStore } from "@/lib/store/authStore";
 import { useCartCount } from "@/lib/store/cartStore";
+import { useHydrated } from "@/hooks/useHydrated";
 
 const NAV_LINKS = [
     { href: "/", label: "Domů" },
     { href: "/menu", label: "Menu" },
+    { href: "/alergeny", label: "Seznam alergenů" },
 ] as const;
 
 const selectUser = (s: ReturnType<typeof useAuthStore.getState>) => s.user;
 const selectAuthHydrated = (s: ReturnType<typeof useAuthStore.getState>) =>
     s.isHydrated;
-
-const SearchIcon = memo(function SearchIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            className={className}
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-        >
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-3.5-3.5" />
-        </svg>
-    );
-});
 
 const CartIcon = memo(function CartIcon({ className }: { className?: string }) {
     return (
@@ -81,60 +63,6 @@ const ProfileIcon = memo(function ProfileIcon({ className }: { className?: strin
             <circle cx="12" cy="8" r="4" />
             <path d="M4 21a8 8 0 0 1 16 0" />
         </svg>
-    );
-});
-
-const SearchBox = memo(function SearchBox({
-    onSubmit,
-    variant,
-}: {
-    onSubmit: (query: string) => void;
-    variant: "desktop" | "mobile";
-}) {
-    const [query, setQuery] = useState("");
-
-    const submit = () => {
-        const trimmed = query.trim();
-        if (!trimmed) return;
-        onSubmit(trimmed);
-        setQuery("");
-    };
-
-    if (variant === "mobile") {
-        return (
-            <div className={css.mobileSearch}>
-                <SearchIcon className={css.mobileSearchIcon} />
-                <input
-                    type="search"
-                    placeholder="Hledat sushi..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && submit()}
-                    className={css.mobileSearchInput}
-                    aria-label="Hledat sushi"
-                />
-            </div>
-        );
-    }
-
-    return (
-        <div className={css.searchBox}>
-            <span className={css.searchIcon} aria-hidden>
-                <SearchIcon />
-            </span>
-            <input
-                type="search"
-                placeholder="Hledat sushi..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && submit()}
-                className={css.searchInput}
-                aria-label="Hledat sushi"
-            />
-            <button type="button" onClick={submit} className={css.searchBtn}>
-                Hledat
-            </button>
-        </div>
     );
 });
 
@@ -230,25 +158,27 @@ function MobileAuthArea({
 }
 
 function CartBadge() {
+    const hydrated = useHydrated();
     const totalCount = useCartCount();
+
+    const count = hydrated ? totalCount : 0;
 
     return (
         <Link
             href="/cart"
             className={css.cart}
-            aria-label={`Košík (${totalCount})`}
+            aria-label={`Košík (${count})`}
         >
             <CartIcon />
-            {totalCount > 0 && (
-                <span className={css.cartCount}>{totalCount}</span>
-            )}
+            {count > 0 && <span className={css.cartCount}>{count}</span>}
         </Link>
     );
 }
 
 function MobileCartCount() {
+    const hydrated = useHydrated();
     const totalCount = useCartCount();
-    if (totalCount === 0) return null;
+    if (!hydrated || totalCount === 0) return null;
     return <span className={css.mobileCount}>{totalCount}</span>;
 }
 
@@ -256,6 +186,7 @@ export default function Header() {
     const pathname = usePathname();
     const router = useRouter();
     const isHydrated = useAuthStore(selectAuthHydrated);
+    const hydrated = useHydrated();
 
     const [menuOpenAt, setMenuOpenAt] = useState<string | null>(null);
     const menuOpen = menuOpenAt === pathname;
@@ -282,14 +213,6 @@ export default function Header() {
         };
     }, [menuOpen]);
 
-    const handleSearch = useCallback(
-        (query: string) => {
-            router.push(`/menu?search=${encodeURIComponent(query)}`);
-            setMenuOpenAt(null);
-        },
-        [router]
-    );
-
     const scrollToContacts = useCallback(() => {
         setMenuOpenAt(null);
         if (pathname !== "/") {
@@ -300,6 +223,8 @@ export default function Header() {
         if (el) el.scrollIntoView({ behavior: "smooth" });
     }, [pathname, router]);
 
+    const isActive = (href: string) => hydrated && pathname === href;
+
     return (
         <header className={css.header}>
             <div className={css.inner}>
@@ -307,16 +232,17 @@ export default function Header() {
                     <Logo priority />
                 </Link>
 
-                <SearchBox onSubmit={handleSearch} variant="desktop" />
-
                 <nav className={css.nav}>
                     {NAV_LINKS.map(({ href, label }) => (
                         <Link
                             key={href}
                             href={href}
-                            className={`${css.navLink} ${
-                                pathname === href ? css.active : ""
-                            }`}
+                            aria-current={isActive(href) ? "page" : undefined}
+                            className={
+                                isActive(href)
+                                    ? `${css.navLink} ${css.active}`
+                                    : css.navLink
+                            }
                         >
                             {label}
                         </Link>
@@ -332,7 +258,6 @@ export default function Header() {
                 </nav>
 
                 <div className={css.rightSide}>
-
                     <CartBadge />
 
                     <div className={css.auth} aria-busy={!isHydrated}>
@@ -361,16 +286,17 @@ export default function Header() {
                 className={`${css.mobileMenu} ${menuOpen ? css.mobileMenuOpen : ""}`}
                 aria-hidden={!menuOpen}
             >
-                <SearchBox onSubmit={handleSearch} variant="mobile" />
-
                 <nav className={css.mobileNav}>
                     {NAV_LINKS.map(({ href, label }) => (
                         <Link
                             key={href}
                             href={href}
-                            className={`${css.mobileLink} ${
-                                pathname === href ? css.mobileLinkActive : ""
-                            }`}
+                            aria-current={isActive(href) ? "page" : undefined}
+                            className={
+                                isActive(href)
+                                    ? `${css.mobileLink} ${css.mobileLinkActive}`
+                                    : css.mobileLink
+                            }
                             onClick={closeMenu}
                         >
                             {label}

@@ -6,7 +6,7 @@ import type {
     RegisterPayload,
     RegisterResponse,
 } from "@/types/auth";
-import type { MenuCategory } from "@/types/menu";
+import type { Category } from "@/types/menu";
 import type { Order } from "@/types/order";
 import type { ProfileUpdatePayload, User } from "@/types/user";
 import type { RestaurantId } from "@/lib/restaurants";
@@ -96,8 +96,8 @@ export const logout = async (): Promise<void> => {
 
 export const getMenu = async (
     restaurantId: RestaurantId
-): Promise<MenuCategory[]> => {
-    const res = await clientApi.get<MenuCategory[]>(
+): Promise<Category[]> => {
+    const res = await clientApi.get<Category[]>(
         `/api/restaurants/${restaurantId}/menu`
     );
 

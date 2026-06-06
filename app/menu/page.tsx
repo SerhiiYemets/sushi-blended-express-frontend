@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
@@ -14,7 +15,9 @@ export default function MenuPage() {
     return (
         <>
             <Header />
+            <Suspense>
                 <MenuClient />
+            </Suspense>
             <Footer />
         </>
     );

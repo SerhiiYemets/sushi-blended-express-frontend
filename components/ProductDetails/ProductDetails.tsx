@@ -1,13 +1,13 @@
 import Image from "next/image";
 
 import ProductPurchasePanel from "@/components/ProductPurchasePanel/ProductPurchasePanel";
-import type { ProductDetails as ProductDetailsType } from "@/types/product";
+import type { Product } from "@/types/product";
 import type { RestaurantId } from "@/lib/restaurants";
 
 import css from "./ProductDetails.module.css";
 
 type Props = {
-    product: ProductDetailsType;
+    product: Product;
     restaurantId: RestaurantId;
     titleId?: string;
     priority?: boolean;
@@ -19,13 +19,6 @@ export default function ProductDetails({
     titleId,
     priority = false,
 }: Props) {
-    const ingredients =
-        product.ingredients ??
-        product.description
-            ?.split(",")
-            .map((s) => s.trim())
-            .filter(Boolean) ??
-        [];
 
     return (
         <article className={css.layout}>
@@ -63,18 +56,35 @@ export default function ProductDetails({
                     </section>
                 )}
 
-                {ingredients.length > 0 && (
+                {product.composition?.length ? (
                     <section className={css.section}>
-                        <h2 className={css.subtitle}>Ingredience</h2>
-                        <ul className={css.ingredients}>
-                            {ingredients.map((item) => (
-                                <li key={item} className={css.ingredient}>
-                                    {item}
-                                </li>
-                            ))}
-                        </ul>
+                        <h2 className={css.subtitle}>
+                            Ingredience
+                        </h2>
+
+                        {product.composition.map((roll) => (
+                            <div
+                                key={roll.name}
+                                style={{ marginBottom: 16 }}
+                            >
+                                <strong>{roll.name}</strong>
+
+                                <ul className={css.ingredients}>
+                                    {roll.ingredients.map(
+                                        (ingredient) => (
+                                            <li
+                                                key={ingredient}
+                                                className={css.ingredient}
+                                            >
+                                                {ingredient}
+                                            </li>
+                                        )
+                                    )}
+                                </ul>
+                            </div>
+                        ))}
                     </section>
-                )}
+                ) : null}
 
                 <ProductPurchasePanel
                     product={{

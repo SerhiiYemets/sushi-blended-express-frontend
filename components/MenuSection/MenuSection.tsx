@@ -1,10 +1,10 @@
-import type { MenuCategory } from "@/types/menu";
+import type { Category } from "@/types/menu";
 import type { RestaurantId } from "@/lib/restaurants";
 
 import ProductCard from "../ProductCard/ProductCard";
 
 type Props = {
-    data: MenuCategory[];
+    data: Category[];
     restaurantId: RestaurantId;
 };
 

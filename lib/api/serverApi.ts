@@ -1,7 +1,7 @@
 import "server-only";
 
-import type { MenuCategory } from "@/types/menu";
-import type { Product, ProductDetails } from "@/types/product";
+import type { Category } from "@/types/menu";
+import type { Product } from "@/types/product";
 import {
     isRestaurantId,
     resolveRestaurantId,
@@ -24,7 +24,7 @@ export class NotFoundError extends Error {
     }
 }
 
-async function fetchMenu(restaurantId: RestaurantId): Promise<MenuCategory[]> {
+async function fetchMenu(restaurantId: RestaurantId): Promise<Category[]> {
     const res = await fetch(
         `${API_URL}/api/restaurants/${restaurantId}/menu`,
         {
@@ -51,12 +51,12 @@ async function fetchMenu(restaurantId: RestaurantId): Promise<MenuCategory[]> {
 }
 
 function findProductInMenu(
-    menu: MenuCategory[],
+    menu: Category[],
     productId: string
-): { product: Product; category: MenuCategory } | null {
+): Product | null {
     for (const category of menu) {
         const product = category.products.find((p) => p._id === productId);
-        if (product) return { product, category };
+        if (product) return product;
     }
     return null;
 }
@@ -64,21 +64,15 @@ function findProductInMenu(
 export async function getProductFromMenu(
     restaurantId: RestaurantId,
     productId: string
-): Promise<ProductDetails> {
+): Promise<Product> {
     const menu = await fetchMenu(restaurantId);
-    const match = findProductInMenu(menu, productId);
+    const product = findProductInMenu(menu, productId);
 
-    if (!match) {
+    if (!product) {
         throw new NotFoundError(
             `Product ${productId} not found in ${restaurantId}`
         );
     }
 
-    const { product, category } = match;
-
-    return {
-        ...product,
-        categoryId: product.categoryId ?? category._id,
-        description: product.description ?? "",
-    };
+    return product;
 }

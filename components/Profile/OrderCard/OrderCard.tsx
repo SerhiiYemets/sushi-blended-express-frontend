@@ -12,7 +12,7 @@ import {
 } from "@/lib/store/cartStore";
 import { useSelectedRestaurant } from "@/lib/store/restaurantStore";
 import { getMenu } from "@/lib/api/clientApi";
-import type { MenuCategory } from "@/types/menu";
+import type { Category } from "@/types/menu";
 import type { Product } from "@/types/product";
 import type { Order, OrderStatus } from "@/types/order";
 
@@ -94,7 +94,7 @@ export default function OrderCard({ order }: Props) {
 
         setIsReordering(true);
         try {
-            const menu = await queryClient.fetchQuery<MenuCategory[]>({
+            const menu = await queryClient.fetchQuery<Category[]>({
                 queryKey: ["menu", targetRestaurant],
                 queryFn: () => getMenu(targetRestaurant),
                 staleTime: 60_000,
@@ -115,7 +115,7 @@ export default function OrderCard({ order }: Props) {
                 const product = key ? byPoster.get(key) : undefined;
                 const quantity = Math.max(1, it.quantity ?? 1);
 
-                if (!product || !product.available || product.hidden) {
+                if (!product) {
                     missing++;
                     continue;
                 }

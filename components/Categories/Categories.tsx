@@ -1,13 +1,15 @@
-import type { MenuCategory } from "@/types/menu";
+import type { Category } from "@/types/menu";
 
-export default function Categories({ data }: { data: MenuCategory[] }) {
+import css from "./Categories.module.css";
+
+export default function Categories({ data }: { data: Category[] }) {
     return (
-        <div>
+        <nav className={css.categories} aria-label="Kategorie">
             {data.map((cat) => (
                 <a key={cat._id} href={`#${cat.name}`}>
                     {cat.name}
                 </a>
             ))}
-        </div>
+        </nav>
     );
 }

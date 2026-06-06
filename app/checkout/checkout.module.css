@@ -29,6 +29,10 @@
     font-size: 14px;
 }
 
+.subtitletext {
+    color: rgb(184, 29, 2);
+}
+
 .layout {
     display: grid;
     grid-template-columns: 1fr;

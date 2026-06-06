@@ -10,6 +10,8 @@ import {
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
+import { useHydrated } from "@/hooks/useHydrated";
+
 import css from "./Modal.module.css";
 
 const FOCUSABLE_SELECTOR = [
@@ -40,7 +42,7 @@ export default function Modal({
     closeAriaLabel = "Zavřít",
 }: Props) {
     const router = useRouter();
-    const [mounted, setMounted] = useState(false);
+    const mounted = useHydrated();
     const [closing, setClosing] = useState(false);
     const closingRef = useRef(false);
     const dialogRef = useRef<HTMLDivElement>(null);
@@ -55,8 +57,6 @@ export default function Modal({
     }, [router]);
 
     useEffect(() => {
-        setMounted(true);
-
         const previouslyFocused =
             (document.activeElement as HTMLElement | null) ?? null;
 

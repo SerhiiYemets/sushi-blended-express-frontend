@@ -26,10 +26,12 @@ import { useHydrated } from '@/hooks/useHydrated';
 import { useNow } from '@/hooks/useNow';
 import { createOrder } from '@/lib/api/ordersApi';
 import {
-    ASAP_VALUE,
-    getAvailableSlots,
+    getDefaultDeliveryDate,
+    getSlotsForDate,
+    isDateSelectable,
     isRestaurantOpen,
-    isSlotSelectable,
+    isSlotSelectableOnDate,
+    toDateString,
 } from '@/lib/deliveryTime';
 import { orderSchema, type OrderFormData } from '@/lib/validations/orderSchema';
 import type { OrderPayload } from '@/types/order';
@@ -57,7 +59,8 @@ function buildDefaultsFromUser(user: User | null): OrderFormInput {
                 : 1,
         notes: user?.deliveryNotes ?? '',
         paymentMethod: user?.preferredPaymentMethod ?? 'cash',
-        deliveryTimeMode: 'asap',
+        deliveryMode: 'asap',
+        deliveryDate: '',
         deliveryTime: '',
     };
 }
@@ -109,7 +112,8 @@ export default function CheckoutClient() {
             peopleCount: 1,
             notes: '',
             paymentMethod: 'cash',
-            deliveryTimeMode: 'asap',
+            deliveryMode: 'asap',
+            deliveryDate: '',
             deliveryTime: '',
         },
         mode: 'onTouched',
@@ -138,29 +142,41 @@ export default function CheckoutClient() {
     const nowTs = useNow(60_000);
     const now = useMemo(() => (nowTs == null ? null : new Date(nowTs)), [nowTs]);
 
-    const slots = useMemo(() => (now ? getAvailableSlots(now) : []), [now]);
-    const canAsap = now ? isRestaurantOpen(now) : false;
-    const canSchedule = slots.length > 0;
-    const isClosed = now != null && !canAsap && !canSchedule;
-
-    const deliveryTimeMode = useWatch({ control, name: 'deliveryTimeMode' });
+    const deliveryMode = useWatch({ control, name: 'deliveryMode' });
+    const scheduledDate = useWatch({ control, name: 'deliveryDate' });
     const scheduledTime = useWatch({ control, name: 'deliveryTime' });
+
+    const canAsap = now ? isRestaurantOpen(now) : false;
+
+    const minDate = now ? toDateString(now) : '';
+
+    const slots = useMemo(
+        () => (now && scheduledDate ? getSlotsForDate(scheduledDate, now) : []),
+        [now, scheduledDate]
+    );
 
     useEffect(() => {
         if (!now) return;
-        if (!canAsap && canSchedule && deliveryTimeMode === 'asap') {
-            setValue('deliveryTimeMode', 'scheduled');
+        if (!canAsap && deliveryMode === 'asap') {
+            setValue('deliveryMode', 'scheduled');
         }
-    }, [now, canAsap, canSchedule, deliveryTimeMode, setValue]);
+    }, [now, canAsap, deliveryMode, setValue]);
 
     useEffect(() => {
-        if (deliveryTimeMode !== 'scheduled' || slots.length === 0) return;
+        if (!now || deliveryMode !== 'scheduled') return;
+        if (!scheduledDate || !isDateSelectable(scheduledDate, now)) {
+            setValue('deliveryDate', getDefaultDeliveryDate(now));
+        }
+    }, [now, deliveryMode, scheduledDate, setValue]);
+
+    useEffect(() => {
+        if (deliveryMode !== 'scheduled') return;
         const stillValid =
             scheduledTime && slots.some(s => s.value === scheduledTime);
         if (!stillValid) {
-            setValue('deliveryTime', slots[0].value);
+            setValue('deliveryTime', slots[0]?.value ?? '');
         }
-    }, [deliveryTimeMode, scheduledTime, slots, setValue]);
+    }, [deliveryMode, scheduledTime, slots, setValue]);
 
     const onSubmit = async (values: OrderFormData) => {
         if (items.length === 0) {
@@ -174,24 +190,40 @@ export default function CheckoutClient() {
         }
 
         const submitNow = new Date();
-        let deliveryTime: string;
 
-        if (values.deliveryTimeMode === 'asap') {
+        let deliveryMode: 'asap' | 'scheduled' = values.deliveryMode;
+        let deliveryDate: string | undefined;
+        let deliveryTime: string | undefined;
+
+        if (values.deliveryMode === 'asap') {
             if (!isRestaurantOpen(submitNow)) {
                 toast.error(
                     'Restaurace je momentálně zavřená. Vyberte prosím konkrétní čas doručení.'
                 );
                 return;
             }
-            deliveryTime = ASAP_VALUE;
+            deliveryMode = 'asap';
         } else {
-            if (!isSlotSelectable(values.deliveryTime ?? '', submitNow)) {
+            const date = values.deliveryDate ?? '';
+            const time = values.deliveryTime ?? '';
+
+            if (!isDateSelectable(date, submitNow)) {
+                toast.error(
+                    'Vybrané datum doručení již není dostupné. Zvolte prosím jiné.'
+                );
+                return;
+            }
+
+            if (!isSlotSelectableOnDate(date, time, submitNow)) {
                 toast.error(
                     'Vybraný čas doručení již není dostupný. Zvolte prosím jiný.'
                 );
                 return;
             }
-            deliveryTime = values.deliveryTime!;
+
+            deliveryMode = 'scheduled';
+            deliveryDate = date;
+            deliveryTime = time;
         }
 
         const payload: OrderPayload = {
@@ -214,7 +246,12 @@ export default function CheckoutClient() {
 
             deliveryType: values.deliveryType,
             paymentMethod: values.paymentMethod,
-            deliveryTime,
+
+            deliveryMode,
+            // Only sent for scheduled orders; ASAP omits both fields.
+            ...(deliveryMode === 'scheduled'
+                ? { deliveryDate, deliveryTime }
+                : {}),
 
             items: items.map((item) => ({
                 productId: String(item.posterProductId),
@@ -534,25 +571,6 @@ export default function CheckoutClient() {
                                 <p className={css.subtitle}>
                                     Načítání dostupných časů…
                                 </p>
-                            ) : isClosed ? (
-                                <div
-                                    className={css.closedWarning}
-                                    role="alert"
-                                >
-                                    <span className={css.closedIcon}>⚠️</span>
-
-                                    <div>
-                                        <strong className={css.closedTitle}>
-                                            Restaurace je momentálně zavřená
-                                        </strong>
-
-                                        <p className={css.closedText}>
-                                            Objednávky přijímáme každý den
-                                            10:00–22:00. Zkuste to prosím
-                                            později.
-                                        </p>
-                                    </div>
-                                </div>
                             ) : (
                                 <>
                                     <div
@@ -562,7 +580,7 @@ export default function CheckoutClient() {
                                     >
                                         <label
                                             className={`${css.toggleOption} ${
-                                                deliveryTimeMode === 'asap'
+                                                deliveryMode === 'asap'
                                                     ? css.toggleActive
                                                     : ''
                                             } ${
@@ -576,9 +594,7 @@ export default function CheckoutClient() {
                                                 value="asap"
                                                 className={css.srOnly}
                                                 disabled={!canAsap}
-                                                {...register(
-                                                    'deliveryTimeMode'
-                                                )}
+                                                {...register('deliveryMode')}
                                             />
 
                                             <span className={css.toggleIcon}>
@@ -598,12 +614,8 @@ export default function CheckoutClient() {
 
                                         <label
                                             className={`${css.toggleOption} ${
-                                                deliveryTimeMode === 'scheduled'
+                                                deliveryMode === 'scheduled'
                                                     ? css.toggleActive
-                                                    : ''
-                                            } ${
-                                                !canSchedule
-                                                    ? css.toggleDisabled
                                                     : ''
                                             }`}
                                         >
@@ -611,75 +623,130 @@ export default function CheckoutClient() {
                                                 type="radio"
                                                 value="scheduled"
                                                 className={css.srOnly}
-                                                disabled={!canSchedule}
-                                                {...register(
-                                                    'deliveryTimeMode'
-                                                )}
+                                                {...register('deliveryMode')}
                                             />
 
                                             <span className={css.toggleIcon}>
-                                                🕐
+                                                🗓️
                                             </span>
 
                                             <span className={css.toggleLabel}>
-                                                Konkrétní čas
+                                                Naplánovat
                                             </span>
 
                                             <span className={css.toggleHint}>
-                                                Vyberte ze slotů
+                                                Vyberte datum a čas
                                             </span>
                                         </label>
                                     </div>
 
-                                    {deliveryTimeMode === 'scheduled' && (
-                                        <div className={css.field}>
-                                            <label
-                                                htmlFor="deliveryTime"
-                                                className={css.label}
-                                            >
-                                                Čas doručení *
-                                            </label>
+                                    {deliveryMode === 'scheduled' && (
+                                        <div className={css.grid2}>
+                                            <div className={css.field}>
+                                                <label
+                                                    htmlFor="deliveryDate"
+                                                    className={css.label}
+                                                >
+                                                    Datum doručení *
+                                                </label>
 
-                                            <select
-                                                id="deliveryTime"
-                                                className={`${css.input} ${
-                                                    css.select
-                                                } ${
-                                                    errors.deliveryTime
-                                                        ? css.inputError
-                                                        : ''
-                                                }`}
-                                                aria-invalid={
-                                                    !!errors.deliveryTime
-                                                }
-                                                {...register('deliveryTime')}
-                                            >
-                                                {slots.map(slot => (
-                                                    <option
-                                                        key={slot.value}
-                                                        value={slot.value}
-                                                    >
-                                                        {slot.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-
-                                            {errors.deliveryTime && (
-                                                <span className={css.errorText}>
-                                                    {
-                                                        errors.deliveryTime
-                                                            .message
+                                                <input
+                                                    id="deliveryDate"
+                                                    type="date"
+                                                    min={minDate}
+                                                    className={`${css.input} ${
+                                                        errors.deliveryDate
+                                                            ? css.inputError
+                                                            : ''
+                                                    }`}
+                                                    aria-invalid={
+                                                        !!errors.deliveryDate
                                                     }
-                                                </span>
-                                            )}
+                                                    {...register('deliveryDate')}
+                                                />
+
+                                                {errors.deliveryDate && (
+                                                    <span
+                                                        className={css.errorText}
+                                                    >
+                                                        {
+                                                            errors.deliveryDate
+                                                                .message
+                                                        }
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div className={css.field}>
+                                                <label
+                                                    htmlFor="deliveryTime"
+                                                    className={css.label}
+                                                >
+                                                    Čas doručení *
+                                                </label>
+
+                                                <select
+                                                    id="deliveryTime"
+                                                    className={`${css.input} ${
+                                                        css.select
+                                                    } ${
+                                                        errors.deliveryTime
+                                                            ? css.inputError
+                                                            : ''
+                                                    }`}
+                                                    aria-invalid={
+                                                        !!errors.deliveryTime
+                                                    }
+                                                    disabled={
+                                                        slots.length === 0
+                                                    }
+                                                    {...register('deliveryTime')}
+                                                >
+                                                    {slots.length === 0 ? (
+                                                        <option value="">
+                                                            Žádné volné časy
+                                                        </option>
+                                                    ) : (
+                                                        slots.map(slot => (
+                                                            <option
+                                                                key={slot.value}
+                                                                value={
+                                                                    slot.value
+                                                                }
+                                                            >
+                                                                {slot.label}
+                                                            </option>
+                                                        ))
+                                                    )}
+                                                </select>
+
+                                                {errors.deliveryTime && (
+                                                    <span
+                                                        className={css.errorText}
+                                                    >
+                                                        {
+                                                            errors.deliveryTime
+                                                                .message
+                                                        }
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     )}
 
-                                    {!canAsap && canSchedule && (
+                                    {deliveryMode === 'scheduled' &&
+                                        slots.length === 0 && (
+                                            <p className={css.subtitle}>
+                                                Pro tento den už nejsou volné
+                                                časy. Vyberte prosím jiný den.
+                                            </p>
+                                        )}
+
+                                    {!canAsap && (
                                         <p className={css.subtitle}>
                                             Momentálně je zavřeno pro okamžité
-                                            doručení – vyberte prosím konkrétní
-                                            čas.
+                                            doručení – naplánujte prosím datum
+                                            a čas.
                                         </p>
                                     )}
                                 </>
@@ -856,21 +923,20 @@ export default function CheckoutClient() {
                         <p className={css.subtitle}>
                             Doprava po Kolíně a Jihlavě zdarma.
                         </p>
-                        <p className={css.subtitle}>
-                            Mimo město 10 Kč za každý kilometr.
+                        <p className={css.subtitletext}>
+                            !!! Mimo město 10 Kč za každý kilometr. Příplatek za dopravu mimo město není zahrnut v ceně objednávky. 
+                            Kurýr při doručení vypočítá cenu podle skutečně ujetých kilometrů a zákazník ji doplatí při převzetí objednávky !!!
                         </p>
 
                         <button
                             type="submit"
                             className={css.submitBtn}
-                            disabled={isSubmitting || isClosed}
+                            disabled={isSubmitting}
                             aria-busy={isSubmitting}
                         >
                             {isSubmitting
                                 ? 'Odesílání...'
-                                : isClosed
-                                  ? 'Restaurace je zavřená'
-                                  : 'Dokončit objednávku'}
+                                : 'Dokončit objednávku'}
                         </button>
 
                         <Link href="/cart" className={css.backLink}>

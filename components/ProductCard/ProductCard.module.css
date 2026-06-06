@@ -109,6 +109,18 @@
     overflow: hidden;
 }
 
+.pieces {
+    align-self: flex-start;
+    margin-top: 8px;
+    border-radius: 999px;
+    color: var(--color-text-primary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
 .weight {
     font-size: 12px;
     color: var(--color-text-muted);

@@ -67,7 +67,7 @@ export const metadata: Metadata = {
         description:
             "Objednávejte čerstvé sushi online – rychlé doručení a moderní objednávkový systém.",
         url: "https://sushi-blended-express-frontend.vercel.app",
-        siteName: "SushiRoom",
+        siteName: "SushiMax",
         locale: "cs_CZ",
         type: "website",
     },
@@ -85,8 +85,8 @@ export const metadata: Metadata = {
     },
 
     icons: {
-        icon: "/icon.svg",
-        shortcut: "/icon.svg",
+        icon: "/sushimaxlogo.png",
+        shortcut: "/sushimaxlogo.png",
     },
 
     category: "food",

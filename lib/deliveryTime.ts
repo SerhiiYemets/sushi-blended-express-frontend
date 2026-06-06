@@ -6,7 +6,7 @@ export const ORDER_LEAD_MINUTES = 30;
 
 export const ASAP_VALUE = 'asap';
 
-export type DeliveryTimeMode = 'asap' | 'scheduled';
+export type DeliveryMode = 'asap' | 'scheduled';
 
 export type TimeSlot = {
     value: string;
@@ -14,13 +14,31 @@ export type TimeSlot = {
 };
 
 const HHMM_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 export function isValidSlotFormat(value: string): boolean {
     return HHMM_REGEX.test(value);
 }
 
+export function isValidDateFormat(value: string): boolean {
+    return DATE_REGEX.test(value);
+}
+
 function minutesNow(now: Date): number {
     return now.getHours() * 60 + now.getMinutes();
+}
+
+function minutesFromLabel(label: string): number {
+    const [h, m] = label.split(':').map(Number);
+    return h * 60 + m;
+}
+
+/** Local YYYY-MM-DD (NOT UTC — avoids off-by-one day near midnight). */
+export function toDateString(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
 }
 
 export function formatMinutes(totalMinutes: number): string {
@@ -56,4 +74,67 @@ export function isSlotSelectable(
 ): boolean {
     if (!isValidSlotFormat(value)) return false;
     return getAvailableSlots(now).some(slot => slot.value === value);
+}
+
+/** Every business-hours slot (10:00–22:00, 30-min step), date-independent. */
+export function getAllSlots(): TimeSlot[] {
+    const slots: TimeSlot[] = [];
+    for (
+        let m = BUSINESS_OPEN_MINUTES;
+        m <= BUSINESS_CLOSE_MINUTES;
+        m += SLOT_STEP_MINUTES
+    ) {
+        const label = formatMinutes(m);
+        slots.push({ value: label, label });
+    }
+    return slots;
+}
+
+/** True when `dateStr` (YYYY-MM-DD) is today or later relative to `now`. */
+export function isDateSelectable(
+    dateStr: string,
+    now: Date = new Date()
+): boolean {
+    return isValidDateFormat(dateStr) && dateStr >= toDateString(now);
+}
+
+/**
+ * Slots available for a given date:
+ * - past date  → none
+ * - today      → only times still in the future
+ * - future day → all business-hours slots
+ */
+export function getSlotsForDate(
+    dateStr: string,
+    now: Date = new Date()
+): TimeSlot[] {
+    if (!isValidDateFormat(dateStr)) return [];
+
+    const today = toDateString(now);
+    if (dateStr < today) return [];
+
+    const all = getAllSlots();
+    if (dateStr > today) return all;
+
+    const cutoff = minutesNow(now);
+    return all.filter(slot => minutesFromLabel(slot.value) > cutoff);
+}
+
+export function isSlotSelectableOnDate(
+    dateStr: string,
+    time: string,
+    now: Date = new Date()
+): boolean {
+    if (!isValidSlotFormat(time)) return false;
+    return getSlotsForDate(dateStr, now).some(slot => slot.value === time);
+}
+
+/** First date that still has selectable slots (today if possible, else tomorrow). */
+export function getDefaultDeliveryDate(now: Date = new Date()): string {
+    const today = toDateString(now);
+    if (getSlotsForDate(today, now).length > 0) return today;
+
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return toDateString(tomorrow);
 }
