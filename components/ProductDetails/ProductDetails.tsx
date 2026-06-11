@@ -12,6 +12,7 @@ type CompositionItem = {
 };
 
 type ExtendedProduct = Product & {
+    categoryName?: string; 
     category?: string;
     composition?: CompositionItem[];
     ingredients?: string[];
@@ -30,10 +31,12 @@ export default function ProductDetails({
     titleId,
     priority = false,
 }: Props) {
-
     const extendedProduct = product as ExtendedProduct;
 
-    const hasComposition = Array.isArray(extendedProduct.composition) && extendedProduct.composition.length > 0;
+    const isBowl = extendedProduct.categoryName?.toLowerCase().trim().includes("bowl") ?? false;
+
+
+    const hasComposition = !isBowl && Array.isArray(extendedProduct.composition) && extendedProduct.composition.length > 0;
     const hasIngredients = Array.isArray(extendedProduct.ingredients) && extendedProduct.ingredients.length > 0;
 
     const isNotHiddenItem = (text: string | undefined) => {
@@ -103,6 +106,7 @@ export default function ProductDetails({
                             ))}
                     </section>
                 ) : 
+
                 hasIngredients && extendedProduct.ingredients ? (
                     <section className={css.section}>
                         <h2 className={css.subtitle}>Ingredience</h2>
