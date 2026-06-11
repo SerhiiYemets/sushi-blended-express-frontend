@@ -6,13 +6,11 @@ import type { RestaurantId } from "@/lib/restaurants";
 
 import css from "./ProductDetails.module.css";
 
-// Описываем структуру тех-карты (ролла), которая приходит из Poster
 type CompositionItem = {
     name: string;
     ingredients?: string[];
 };
 
-// Расширяем стандартный тип Product нужными нам полями
 type ExtendedProduct = Product & {
     category?: string;
     composition?: CompositionItem[];
@@ -32,13 +30,12 @@ export default function ProductDetails({
     titleId,
     priority = false,
 }: Props) {
-    // Безопасно приводим продукт к расширенному типу вместо any
+
     const extendedProduct = product as ExtendedProduct;
 
     const hasComposition = Array.isArray(extendedProduct.composition) && extendedProduct.composition.length > 0;
     const hasIngredients = Array.isArray(extendedProduct.ingredients) && extendedProduct.ingredients.length > 0;
 
-    // Универсальная функция для проверки названий
     const isNotHiddenItem = (text: string | undefined) => {
         if (!text) return false;
         const name = text.toLowerCase().trim();
@@ -81,7 +78,6 @@ export default function ProductDetails({
                     </section>
                 )}
 
-                {/* 1. Если у товара есть сложная структура (сет) */}
                 {hasComposition && extendedProduct.composition ? (
                     <section className={css.section}>
                         <h2 className={css.subtitle}>Ingredience</h2>
@@ -106,7 +102,7 @@ export default function ProductDetails({
                                 </div>
                             ))}
                     </section>
-                ) : /* 2. Если сложного состава нет, но есть обычные ингредиенты (салаты и т.д.) */
+                ) : 
                 hasIngredients && extendedProduct.ingredients ? (
                     <section className={css.section}>
                         <h2 className={css.subtitle}>Ingredience</h2>
