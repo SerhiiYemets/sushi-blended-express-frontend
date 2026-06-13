@@ -54,8 +54,14 @@ export default function ProductDetails({
             name === "wasabi" || 
             name.includes("масло") || 
             name.includes("olej") ||
-            name.includes("sul") ||
-            name.includes("cоль");
+            name.includes("sul") ||  
+            name.includes("соль") ||
+            name.includes("чеснок") ||
+            name.includes("cesnek") || 
+            name.includes("майонез") ||
+            name.includes("majonez") || 
+            name.includes("крем") ||
+            name.includes("krem");     
 
         return !isHidden;
     };
