@@ -61,7 +61,11 @@ export default function ProductDetails({
             name.includes("майонез") ||
             name.includes("majonez") || 
             name.includes("крем") ||
-            name.includes("krem");     
+            name.includes("krem") ||
+            name.includes("мука") ||
+            name.includes("mouka") || 
+            name.includes("сахар") ||
+            name.includes("cukr");   
 
         return !isHidden;
     };
