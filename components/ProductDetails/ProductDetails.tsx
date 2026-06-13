@@ -53,7 +53,9 @@ export default function ProductDetails({
             name === "васаби" || 
             name === "wasabi" || 
             name.includes("масло") || 
-            name.includes("olej");    
+            name.includes("olej") ||
+            name.includes("sůl") ||
+            name.includes("cоль");
 
         return !isHidden;
     };
