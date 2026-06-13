@@ -43,10 +43,24 @@ export default function ProductDetails({
             .trim();
     };
 
+    const productNameCleaned = cleanText(extendedProduct.name);
+    const categoryNameCleaned = cleanText(extendedProduct.categoryName);
+
+    const isSalad = 
+        categoryNameCleaned.includes("salat") || 
+        productNameCleaned.includes("salat") ||
+        categoryNameCleaned.includes("салат") || 
+        productNameCleaned.includes("салат");
+
     const isNotHiddenItem = (text: string | undefined) => {
         if (!text) return false;
         
         const name = cleanText(text);
+
+
+        if (name.includes("ryze") || name.includes("рис")) {
+            return !isSalad; 
+        }
         
         const isHidden = 
             name === "vasabi" || 
@@ -70,9 +84,35 @@ export default function ProductDetails({
         return !isHidden;
     };
 
-    const productNameCleaned = cleanText(extendedProduct.name);
-    const categoryNameCleaned = cleanText(extendedProduct.categoryName);
 
+    const isCeburek = 
+        categoryNameCleaned.includes("ceburek") || 
+        categoryNameCleaned.includes("чебурек") ||
+        productNameCleaned.includes("ceburek") ||
+        productNameCleaned.includes("чебурек");
+
+
+    const isSushiOrRoll = 
+        categoryNameCleaned.includes("role") ||
+        categoryNameCleaned.includes("kalifornia") || 
+        categoryNameCleaned.includes("philadelphia") ||
+        categoryNameCleaned.includes("futomaki") ||
+        categoryNameCleaned.includes("maki") ||
+        categoryNameCleaned.includes("tepli rolky") ||
+        categoryNameCleaned.includes("sushi") ||
+        categoryNameCleaned.includes("vip") ||     
+        categoryNameCleaned.includes("вип") ||
+        productNameCleaned.includes("role") ||
+        productNameCleaned.includes("kalifornia") ||
+        productNameCleaned.includes("philadelphia") ||
+        productNameCleaned.includes("futomaki") ||
+        productNameCleaned.includes("maki") ||
+        productNameCleaned.includes("tepli rolky") ||
+        productNameCleaned.includes("sushi") ||
+        productNameCleaned.includes("vip") ||      
+        productNameCleaned.includes("вип");
+
+    // Категории для плоского списка
     const isPastaOrBowl = 
         categoryNameCleaned.includes("testovin") || 
         categoryNameCleaned.includes("pasta") ||
@@ -81,31 +121,25 @@ export default function ProductDetails({
         categoryNameCleaned.includes("obed") ||
         categoryNameCleaned.includes("gril") ||
         categoryNameCleaned.includes("vip") ||
-        categoryNameCleaned.includes("role") ||
-        categoryNameCleaned.includes("kalifornia") || 
-        categoryNameCleaned.includes("philadelphia") ||
-        categoryNameCleaned.includes("futomaki") ||
-        categoryNameCleaned.includes("maki") ||
-        categoryNameCleaned.includes("tepli rolky") ||
         categoryNameCleaned.includes("sladke") ||
-        categoryNameCleaned.includes("sushi") ||
+        categoryNameCleaned.includes("snidane") ||  
+        categoryNameCleaned.includes("zavtrak") ||  
+        isSalad ||                                       
+        isSushiOrRoll || 
+        isCeburek ||                                
 
         productNameCleaned.includes("testovin") ||
         productNameCleaned.includes("pasta") ||
+        productNameCleaned.includes("fast") ||
         productNameCleaned.includes("spaghet") ||
         productNameCleaned.includes("bowl") ||
         productNameCleaned.includes("burger") ||
         productNameCleaned.includes("obed") ||
         productNameCleaned.includes("gril") ||
         productNameCleaned.includes("vip") ||
-        productNameCleaned.includes("role") ||
-        productNameCleaned.includes("kalifornia") ||
-        productNameCleaned.includes("philadelphia") ||
-        productNameCleaned.includes("futomaki") ||
-        productNameCleaned.includes("maki") ||
-        productNameCleaned.includes("tepli rolky") ||
         productNameCleaned.includes("sladke") ||
-        productNameCleaned.includes("sushi");
+        productNameCleaned.includes("snidane") ||  
+        productNameCleaned.includes("zavtrak");
 
     const cleanComposition = (extendedProduct.composition || []).filter((roll) => {
         return isNotHiddenItem(roll.name);
@@ -116,7 +150,25 @@ export default function ProductDetails({
     );
 
     const showComposition = isRealSet;
-    const hasIngredients = Array.isArray(extendedProduct.ingredients) && extendedProduct.ingredients.length > 0;
+
+    let finalIngredients: string[] = [];
+
+    if (isCeburek) {
+        finalIngredients = ["фарш из краковицы", "лук"];
+    } else {
+        finalIngredients = (extendedProduct.ingredients || []).filter(isNotHiddenItem);
+        
+        if (isSushiOrRoll && !isSalad) {
+            const hasRice = finalIngredients.some(ing => {
+                const cleaned = cleanText(ing);
+                return cleaned.includes("ryze") || cleaned.includes("рис");
+            });
+            
+            if (!hasRice) {
+                finalIngredients.unshift("rýže"); 
+            }
+        }
+    }
 
     return (
         <article className={css.layout}>
@@ -158,38 +210,47 @@ export default function ProductDetails({
                     <section className={css.section}>
                         <h2 className={css.subtitle}>Ingredience</h2>
 
-                        {cleanComposition.map((roll) => (
-                            <div key={roll.name} style={{ marginBottom: 16 }}>
-                                <strong>{roll.name}</strong>
+                        {cleanComposition.map((roll) => {
+                            const rollIngredients = Array.isArray(roll.ingredients) 
+                                ? roll.ingredients.filter(isNotHiddenItem) 
+                                : [];
+                                
+                            const hasRiceInRoll = rollIngredients.some(ing => {
+                                const cleaned = cleanText(ing);
+                                return cleaned.includes("ryze") || cleaned.includes("рис");
+                            });
+                            
+                            if (!hasRiceInRoll && !isSalad) {
+                                rollIngredients.unshift("rýže");
+                            }
 
-                                <ul className={css.ingredients}>
-                                    {Array.isArray(roll.ingredients) && 
-                                        roll.ingredients
-                                            .filter(isNotHiddenItem)
-                                            .map((ingredient) => (
-                                                <li key={ingredient} className={css.ingredient}>
-                                                    {ingredient}
-                                                </li>
-                                            ))
-                                    }
-                                </ul>
-                            </div>
-                        ))}
+                            return (
+                                <div key={roll.name} style={{ marginBottom: 16 }}>
+                                    <strong>{roll.name}</strong>
+
+                                    <ul className={css.ingredients}>
+                                        {rollIngredients.map((ingredient) => (
+                                            <li key={ingredient} className={css.ingredient}>
+                                                {ingredient}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            );
+                        })}
                     </section>
                 ) : 
 
-                hasIngredients && extendedProduct.ingredients ? (
+                finalIngredients.length > 0 ? (
                     <section className={css.section}>
                         <h2 className={css.subtitle}>Ingredience</h2>
 
                         <ul className={css.ingredients}>
-                            {extendedProduct.ingredients
-                                .filter(isNotHiddenItem)
-                                .map((ingredient) => (
-                                    <li key={ingredient} className={css.ingredient}>
-                                        {ingredient}
-                                    </li>
-                                ))}
+                            {finalIngredients.map((ingredient) => (
+                                <li key={ingredient} className={css.ingredient}>
+                                    {ingredient}
+                                </li>
+                            ))}
                         </ul>
                     </section>
                 ) : null}
