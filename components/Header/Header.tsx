@@ -242,8 +242,9 @@ export default function Header() {
     const isActive = (href: string) => hydrated && pathname === href;
 
     return (
-        <header className={css.header}>
-            <div className={css.inner}>
+        <>
+            <header className={css.header}>
+                <div className={css.inner}>
                 <Link href="/" className={css.logoWrapper} onClick={closeMenu}>
                     <Logo priority />
                 </Link>
@@ -296,8 +297,15 @@ export default function Header() {
                     <span className={css.burgerLine}></span>
                     <span className={css.burgerLine}></span>
                 </button>
-            </div>
+                </div>
+            </header>
 
+            {/* Rendered as a sibling of <header>, NOT a child: the header's
+                backdrop-filter establishes a containing block, which would make
+                this position:fixed panel resolve against the header box instead
+                of the viewport. Kept out of that filtered ancestor, `fixed`
+                anchors to the viewport so the menu always opens under the
+                burger regardless of scroll position. */}
             <div
                 ref={menuRef}
                 id="mobile-menu"
@@ -350,6 +358,6 @@ export default function Header() {
                     <MobileAuthArea isHydrated={isHydrated} onClose={closeMenu} />
                 </div>
             </div>
-        </header>
+        </>
     );
 }
