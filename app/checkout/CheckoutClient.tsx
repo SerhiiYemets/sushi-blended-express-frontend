@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -11,6 +12,7 @@ import {
     type SubmitErrorHandler,
 } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import type { z } from 'zod';
@@ -34,7 +36,9 @@ import {
     toDateString,
 } from '@/lib/deliveryTime';
 import { orderSchema, type OrderFormData } from '@/lib/validations/orderSchema';
+import { calculateDelivery } from '@/lib/api/deliveryApi';
 import type { OrderPayload } from '@/types/order';
+import type { SelectedLocation } from '@/types/delivery';
 import type { User } from '@/types/user';
 
 type OrderFormInput = z.input<typeof orderSchema>;
@@ -66,6 +70,17 @@ function buildDefaultsFromUser(user: User | null): OrderFormInput {
 }
 
 import css from './checkout.module.css';
+
+// Leaflet only runs in the browser. Lazy-load it with SSR disabled so the map
+// bundle is fetched on demand and never participates in server rendering /
+// hydration. It is rendered only when the delivery flow is active.
+const DeliveryMap = dynamic(
+    () => import('@/components/DeliveryMap/DeliveryMap'),
+    {
+        ssr: false,
+        loading: () => <div className={css.mapLoading}>Načítání mapy…</div>,
+    }
+);
 
 const selectItems = (s: ReturnType<typeof useCartStore.getState>) => s.items;
 const selectClearCart = (s: ReturnType<typeof useCartStore.getState>) =>
@@ -139,6 +154,68 @@ export default function CheckoutClient() {
 
     const isDelivery = deliveryType === 'delivery';
 
+    // ---- Map-based delivery location + backend-calculated fee ----
+    const [selectedLocation, setSelectedLocation] =
+        useState<SelectedLocation | null>(null);
+
+    const handleLocationSelected = (location: SelectedLocation) => {
+        setSelectedLocation(location);
+        // Mirror the resolved address into the form field so it is submitted
+        // and validated like a normally-typed address.
+        setValue('address', location.address, {
+            shouldValidate: true,
+            shouldDirty: true,
+        });
+    };
+
+    // The backend owns the fee — we only display what it returns and never
+    // submit a fee. Refetches whenever the chosen point or restaurant changes.
+    const {
+        data: deliveryResult,
+        isFetching: calculatingFee,
+        isError: feeError,
+    } = useQuery({
+        queryKey: [
+            'delivery-fee',
+            orderRestaurantId,
+            selectedLocation?.lat,
+            selectedLocation?.lng,
+        ],
+        queryFn: () =>
+            calculateDelivery({
+                restaurantId: orderRestaurantId,
+                lat: selectedLocation!.lat,
+                lng: selectedLocation!.lng,
+            }),
+        enabled: isDelivery && selectedLocation != null,
+        staleTime: 60 * 1000,
+        retry: 1,
+    });
+
+    const deliveryAvailable = deliveryResult ? deliveryResult.available : null;
+    const deliveryFee = deliveryResult?.available
+        ? deliveryResult.deliveryFee
+        : null;
+    const deliveryZoneName = deliveryResult?.available
+        ? deliveryResult.zoneName
+        : null;
+
+    const outsideArea = isDelivery && deliveryAvailable === false;
+
+    const appliedDeliveryFee =
+        isDelivery && deliveryAvailable === true && deliveryFee != null
+            ? deliveryFee
+            : 0;
+
+    const orderTotal = estimatedSubtotal + appliedDeliveryFee;
+
+    // Delivery orders can only be submitted once a deliverable point is chosen.
+    const deliveryReady =
+        !isDelivery ||
+        (selectedLocation != null &&
+            deliveryAvailable === true &&
+            !calculatingFee);
+
     const nowTs = useNow(60_000);
     const now = useMemo(() => (nowTs == null ? null : new Date(nowTs)), [nowTs]);
 
@@ -184,9 +261,21 @@ export default function CheckoutClient() {
             return;
         }
 
-        if (values.deliveryType === 'delivery' && !values.address?.trim()) {
-            toast.error('Zadejte prosím adresu doručení');
-            return;
+        if (values.deliveryType === 'delivery') {
+            if (!values.address?.trim() || !selectedLocation) {
+                toast.error('Vyberte prosím místo doručení na mapě');
+                return;
+            }
+
+            if (calculatingFee) {
+                toast.error('Počkejte prosím na ověření dostupnosti doručení');
+                return;
+            }
+
+            if (deliveryAvailable !== true) {
+                toast.error('Tato adresa je mimo naši oblast doručení');
+                return;
+            }
         }
 
         const submitNow = new Date();
@@ -251,6 +340,17 @@ export default function CheckoutClient() {
             // Only sent for scheduled orders; ASAP omits both fields.
             ...(deliveryMode === 'scheduled'
                 ? { deliveryDate, deliveryTime }
+                : {}),
+
+            // Map-selected coordinates for delivery orders. The backend uses
+            // these to compute the fee itself — we never send deliveryFee.
+            ...(values.deliveryType === 'delivery' && selectedLocation
+                ? {
+                      deliveryLocation: {
+                          lat: selectedLocation.lat,
+                          lng: selectedLocation.lng,
+                      },
+                  }
                 : {}),
 
             items: items.map((item) => ({
@@ -533,32 +633,43 @@ export default function CheckoutClient() {
                             </div>
 
                             {isDelivery && (
-                                <div className={css.field}>
-                                    <label
-                                        htmlFor="address"
-                                        className={css.label}
-                                    >
-                                        Adresa doručení *
-                                    </label>
-
-                                    <input
-                                        id="address"
-                                        type="text"
-                                        autoComplete="street-address"
-                                        placeholder="Ulice, č.p., město"
-                                        className={`${css.input} ${
-                                            errors.address ? css.inputError : ''
-                                        }`}
-                                        aria-invalid={!!errors.address}
-                                        {...register('address')}
+                                <>
+                                    <DeliveryMap
+                                        restaurantId={orderRestaurantId}
+                                        onLocationSelected={
+                                            handleLocationSelected
+                                        }
                                     />
 
-                                    {errors.address && (
-                                        <span className={css.errorText}>
-                                            Zadejte adresu doručení
-                                        </span>
-                                    )}
-                                </div>
+                                    <div className={css.field}>
+                                        <label
+                                            htmlFor="address"
+                                            className={css.label}
+                                        >
+                                            Adresa doručení *
+                                        </label>
+
+                                        <input
+                                            id="address"
+                                            type="text"
+                                            autoComplete="street-address"
+                                            placeholder="Vyberte adresu výše nebo na mapě"
+                                            className={`${css.input} ${
+                                                errors.address
+                                                    ? css.inputError
+                                                    : ''
+                                            }`}
+                                            aria-invalid={!!errors.address}
+                                            {...register('address')}
+                                        />
+
+                                        {errors.address && (
+                                            <span className={css.errorText}>
+                                                Zadejte adresu doručení
+                                            </span>
+                                        )}
+                                    </div>
+                                </>
                             )}
                         </fieldset>
 
@@ -914,30 +1025,77 @@ export default function CheckoutClient() {
 
                         <div className={css.summaryRows}>
                             <div className={css.row}>
-                                <span>Mezisoučet (odhad)</span>
+                                <span>Produkty</span>
 
                                 <span>{estimatedSubtotal} Kč</span>
                             </div>
+
+                            {isDelivery && (
+                                <div className={css.row}>
+                                    <span>Doprava</span>
+
+                                    <span>
+                                        {calculatingFee
+                                            ? 'Výpočet…'
+                                            : outsideArea
+                                              ? 'Mimo oblast'
+                                              : deliveryAvailable === true &&
+                                                  deliveryFee != null
+                                                ? `${deliveryFee} Kč`
+                                                : '—'}
+                                    </span>
+                                </div>
+                            )}
+
+                            {isDelivery &&
+                                deliveryAvailable === true &&
+                                deliveryZoneName && (
+                                    <p className={css.zoneNote}>
+                                        Zóna doručení: {deliveryZoneName}
+                                    </p>
+                                )}
                         </div>
 
-                        <p className={css.subtitle}>
-                            Doprava po Kolíně a Jihlavě zdarma.
-                        </p>
-                        <p className={css.subtitletext}>
-                            !!! Mimo město 10 Kč za každý kilometr. Příplatek za dopravu mimo město není zahrnut v ceně objednávky. 
-                            Kurýr při doručení vypočítá cenu podle skutečně ujetých kilometrů a zákazník ji doplatí při převzetí objednávky !!!
-                        </p>
+                        <div className={css.totalRow}>
+                            <span>Celkem</span>
 
-                        <button
-                            type="submit"
-                            className={css.submitBtn}
-                            disabled={isSubmitting}
-                            aria-busy={isSubmitting}
-                        >
-                            {isSubmitting
-                                ? 'Odesílání...'
-                                : 'Dokončit objednávku'}
-                        </button>
+                            <strong>{orderTotal} Kč</strong>
+                        </div>
+
+                        {isDelivery && feeError && (
+                            <p className={css.errorText}>
+                                Nepodařilo se ověřit dostupnost doručení. Zkuste
+                                to prosím znovu.
+                            </p>
+                        )}
+
+                        {outsideArea ? (
+                            <div className={css.outsideArea} role="alert">
+                                <span
+                                    className={css.outsideIcon}
+                                    aria-hidden="true"
+                                >
+                                    🚫
+                                </span>
+
+                                <p className={css.outsideText}>
+                                    Tuto adresu bohužel nedoručujeme – je mimo
+                                    naši oblast doručení. Zvolte prosím jinou
+                                    adresu.
+                                </p>
+                            </div>
+                        ) : (
+                            <button
+                                type="submit"
+                                className={css.submitBtn}
+                                disabled={isSubmitting || !deliveryReady}
+                                aria-busy={isSubmitting}
+                            >
+                                {isSubmitting
+                                    ? 'Odesílání...'
+                                    : 'Dokončit objednávku'}
+                            </button>
+                        )}
 
                         <Link href="/cart" className={css.backLink}>
                             Zpět do košíku

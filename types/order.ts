@@ -49,6 +49,15 @@ export type OrderPayload = {
     /** Scheduled "HH:MM" slot within business hours; omitted/empty for ASAP. */
     deliveryTime?: string;
 
+    /**
+     * Map-selected delivery coordinates. Sent for delivery orders so the
+     * backend can compute the delivery fee itself; omitted for pickup.
+     */
+    deliveryLocation?: {
+        lat: number;
+        lng: number;
+    };
+
     items: OrderItemInput[];
 };
 

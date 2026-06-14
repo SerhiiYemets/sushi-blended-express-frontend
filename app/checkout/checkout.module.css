@@ -548,6 +548,56 @@
     opacity: 1;
 }
 
+/* ---- Delivery map / fee ---- */
+
+.mapLoading {
+    width: 100%;
+    height: 300px;
+    border-radius: 16px;
+    border: 1px solid var(--color-border-warm);
+    background: var(--color-surface-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+.zoneNote {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-top: -2px;
+}
+
+.outsideArea {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--color-error) 8%, var(--color-bg-white));
+    border: 1px solid color-mix(in srgb, var(--color-error) 35%, transparent);
+}
+
+.outsideIcon {
+    font-size: 20px;
+    line-height: 1.2;
+    flex-shrink: 0;
+}
+
+.outsideText {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-error);
+    line-height: 1.4;
+}
+
+@media (min-width: 1024px) {
+    .mapLoading {
+        height: 500px;
+    }
+}
+
 .empty {
     background: var(--color-bg-white);
     border: 1px solid var(--color-border-warm);
