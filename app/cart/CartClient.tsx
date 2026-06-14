@@ -171,8 +171,7 @@ export default function CartClient() {
                                 Doprava po Kolíně a Jihlavě zdarma.
                             </p>
                             <p className={css.subtitletext}>
-                                !!! Mimo město 10 Kč za každý kilometr. Příplatek za dopravu mimo město není zahrnut v ceně objednávky. 
-                                Kurýr při doručení vypočítá cenu podle skutečně ujetých kilometrů a zákazník ji doplatí při převzetí objednávky !!!
+                                !!! Mimo město 10 Kč za každý kilometr !!!
                             </p>
 
                             <Link href="/checkout" className={css.checkoutBtn}>

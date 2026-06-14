@@ -345,12 +345,12 @@ export default function CheckoutClient() {
             // Map-selected coordinates for delivery orders. The backend uses
             // these to compute the fee itself — we never send deliveryFee.
             ...(values.deliveryType === 'delivery' && selectedLocation
-                ? {
-                      deliveryLocation: {
-                          lat: selectedLocation.lat,
-                          lng: selectedLocation.lng,
-                      },
-                  }
+                    ? {
+                        deliveryLocation: {
+                            lat: selectedLocation.lat,
+                            lng: selectedLocation.lng,
+                        },
+                    }
                 : {}),
 
             items: items.map((item) => ({
@@ -1038,9 +1038,9 @@ export default function CheckoutClient() {
                                         {calculatingFee
                                             ? 'Výpočet…'
                                             : outsideArea
-                                              ? 'Mimo oblast'
-                                              : deliveryAvailable === true &&
-                                                  deliveryFee != null
+                                                ? 'Mimo oblast'
+                                                : deliveryAvailable === true &&
+                                                    deliveryFee != null
                                                 ? `${deliveryFee} Kč`
                                                 : '—'}
                                     </span>
