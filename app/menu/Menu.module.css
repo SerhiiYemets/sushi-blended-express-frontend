@@ -155,10 +155,49 @@
     }
 }
 
+/* Scroll target for "scroll to category". scroll-margin-top keeps the first
+   card clear of the 72px sticky header when scrollIntoView lands here. */
+.productsAnchor {
+    scroll-margin-top: 88px;
+}
+
 .products {
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
+}
+
+/* Lazy-load sentinel + indicator shown while more products remain. */
+.loadMore {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 28px 16px;
+    color: var(--color-text-muted, #a0a0a0);
+    font-size: 14px;
+    font-family: var(--font-manrope, system-ui, sans-serif);
+}
+
+.loadMoreSpinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: menuLoadSpin 0.7s linear infinite;
+}
+
+@keyframes menuLoadSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loadMoreSpinner {
+        animation-duration: 1.5s;
+    }
 }
 
 .loading {

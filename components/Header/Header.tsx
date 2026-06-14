@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -191,6 +191,9 @@ export default function Header() {
     const [menuOpenAt, setMenuOpenAt] = useState<string | null>(null);
     const menuOpen = menuOpenAt === pathname;
 
+    const menuRef = useRef<HTMLDivElement | null>(null);
+    const burgerRef = useRef<HTMLButtonElement | null>(null);
+
     const closeMenu = useCallback(() => setMenuOpenAt(null), []);
     const toggleMenu = useCallback(
         () => setMenuOpenAt((prev) => (prev === pathname ? null : pathname)),
@@ -205,11 +208,24 @@ export default function Header() {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === "Escape") setMenuOpenAt(null);
         };
+
+        // Close when tapping/clicking outside the panel and the burger toggle.
+        // pointerdown covers both touch and mouse on iOS, Android and tablets.
+        const onPointerDown = (e: PointerEvent) => {
+            const target = e.target as Node | null;
+            if (!target) return;
+            if (menuRef.current?.contains(target)) return;
+            if (burgerRef.current?.contains(target)) return;
+            setMenuOpenAt(null);
+        };
+
         window.addEventListener("keydown", onKey);
+        document.addEventListener("pointerdown", onPointerDown);
 
         return () => {
             document.body.style.overflow = original;
             window.removeEventListener("keydown", onKey);
+            document.removeEventListener("pointerdown", onPointerDown);
         };
     }, [menuOpen]);
 
@@ -268,6 +284,7 @@ export default function Header() {
                 </div>
 
                 <button
+                    ref={burgerRef}
                     type="button"
                     className={`${css.burger} ${menuOpen ? css.burgerOpen : ""}`}
                     onClick={toggleMenu}
@@ -282,6 +299,7 @@ export default function Header() {
             </div>
 
             <div
+                ref={menuRef}
                 id="mobile-menu"
                 className={`${css.mobileMenu} ${menuOpen ? css.mobileMenuOpen : ""}`}
                 aria-hidden={!menuOpen}

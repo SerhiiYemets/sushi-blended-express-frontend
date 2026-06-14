@@ -1,6 +1,13 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import {
+    memo,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
@@ -27,10 +34,20 @@ const RESTAURANT_OPTIONS: RestaurantId[] = ["kolin", "jihlava"];
 const SEARCH_PARAM = "search";
 const SEARCH_DEBOUNCE_MS = 300;
 
+// Lazy-load products in batches of 9 to keep the initial render light.
+const PAGE_SIZE = 9;
+
 /**
- * Memoized product grid. Re-renders only when the `products` array reference
- * or `restaurantId` actually change — so typing (which only changes the input
- * buffer) never re-renders the cards between debounce ticks.
+ * Memoized product grid with incremental (lazy) rendering. Re-renders only when
+ * the `products` array reference or `restaurantId` actually change — so typing
+ * (which only changes the input buffer) never re-renders the cards between
+ * debounce ticks.
+ *
+ * Only the first {@link PAGE_SIZE} cards render initially; an IntersectionObserver
+ * watching a sentinel below the grid reveals the next batch as the user scrolls,
+ * until the whole list is shown. This keeps large categories cheap to mount
+ * without paginating away from search / category filtering (the full `products`
+ * array is still the source of truth — we only limit how many we paint).
  */
 const MenuProducts = memo(function MenuProducts({
     products,
@@ -39,17 +56,68 @@ const MenuProducts = memo(function MenuProducts({
     products: Product[];
     restaurantId: RestaurantId;
 }) {
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+    // Reset pagination whenever the source list changes (category switch,
+    // search results change, restaurant switch). Adjusting state during render
+    // — instead of in an effect — is React's recommended pattern and mirrors
+    // the search-input/URL sync below; it avoids a cascading re-render.
+    const [trackedProducts, setTrackedProducts] = useState(products);
+    if (products !== trackedProducts) {
+        setTrackedProducts(products);
+        setVisibleCount(PAGE_SIZE);
+    }
+
+    const sentinelRef = useRef<HTMLDivElement | null>(null);
+    const hasMore = visibleCount < products.length;
+
+    useEffect(() => {
+        if (!hasMore) return;
+
+        const node = sentinelRef.current;
+        if (!node) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0]?.isIntersecting) {
+                    setVisibleCount((count) =>
+                        Math.min(count + PAGE_SIZE, products.length)
+                    );
+                }
+            },
+            // Start loading slightly before the sentinel enters the viewport.
+            { rootMargin: "200px 0px" }
+        );
+
+        observer.observe(node);
+        return () => observer.disconnect();
+    }, [hasMore, visibleCount, products.length]);
+
     return (
-        <div className={css.products}>
-            {products.map((product) => (
-                <ProductCard
-                    key={product._id}
-                    item={product}
-                    restaurantId={restaurantId}
-                    categorySlug={product.categoryName}
-                />
-            ))}
-        </div>
+        <>
+            <div className={css.products}>
+                {products.slice(0, visibleCount).map((product) => (
+                    <ProductCard
+                        key={product._id}
+                        item={product}
+                        restaurantId={restaurantId}
+                        categorySlug={product.categoryName}
+                    />
+                ))}
+            </div>
+
+            {hasMore && (
+                <div
+                    ref={sentinelRef}
+                    className={css.loadMore}
+                    role="status"
+                    aria-live="polite"
+                >
+                    <span className={css.loadMoreSpinner} aria-hidden="true" />
+                    Načítání dalších produktů…
+                </div>
+            )}
+        </>
     );
 });
 
@@ -140,6 +208,27 @@ export default function MenuClient() {
     }, [menu, requestedCategory]);
 
     const current = menu.find((category) => category.name === activeCategory);
+
+    // ── Scroll-to-category ────────────────────────────────────────
+    // Smooth-scroll to the first product card after the user picks a category.
+    // `shouldScrollRef` gates the scroll so it only fires on an explicit click —
+    // never on first load, a restaurant switch, or a search-driven change.
+    const productsRef = useRef<HTMLDivElement | null>(null);
+    const shouldScrollRef = useRef(false);
+
+    const handleSelectCategory = useCallback((name: string) => {
+        shouldScrollRef.current = true;
+        setRequestedCategory(name);
+    }, []);
+
+    useEffect(() => {
+        if (!shouldScrollRef.current) return;
+        shouldScrollRef.current = false;
+        productsRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
+    }, [activeCategory]);
 
     const cartHasOtherRestaurant =
         cartCount > 0 &&
@@ -233,7 +322,7 @@ export default function MenuClient() {
                                     key={cat._id}
                                     type="button"
                                     onClick={() =>
-                                        setRequestedCategory(cat.name)
+                                        handleSelectCategory(cat.name)
                                     }
                                     className={`${css.categoryBtn} ${
                                         activeCategory === cat.name
@@ -246,16 +335,22 @@ export default function MenuClient() {
                             ))}
                         </div>
 
-                        {current && current.products.length > 0 ? (
-                            <MenuProducts
-                                products={current.products}
-                                restaurantId={selectedRestaurant}
-                            />
-                        ) : (
-                            <p className={css.empty}>
-                                V této kategorii zatím nejsou žádné produkty.
-                            </p>
-                        )}
+                        <div
+                            ref={productsRef}
+                            className={css.productsAnchor}
+                        >
+                            {current && current.products.length > 0 ? (
+                                <MenuProducts
+                                    products={current.products}
+                                    restaurantId={selectedRestaurant}
+                                />
+                            ) : (
+                                <p className={css.empty}>
+                                    V této kategorii zatím nejsou žádné
+                                    produkty.
+                                </p>
+                            )}
+                        </div>
                     </>
                 )}
             </div>
