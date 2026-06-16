@@ -78,6 +78,10 @@ export default function ProductCard({
 
                 {item.weight && <p className={css.weight}>{item.weight}</p>}
 
+                {item.description && (
+                    <p className={css.description}>{item.description}</p>
+                )}
+
                 <div className={css.bottom}>
                     <span className={css.price}>{item.price} Kč</span>
 

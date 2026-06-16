@@ -34,7 +34,6 @@ const RESTAURANT_OPTIONS: RestaurantId[] = ["kolin", "jihlava"];
 const SEARCH_PARAM = "search";
 const SEARCH_DEBOUNCE_MS = 300;
 
-// Lazy-load products in batches of 9 to keep the initial render light.
 const PAGE_SIZE = 9;
 
 /**
@@ -58,10 +57,6 @@ const MenuProducts = memo(function MenuProducts({
 }) {
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-    // Reset pagination whenever the source list changes (category switch,
-    // search results change, restaurant switch). Adjusting state during render
-    // — instead of in an effect — is React's recommended pattern and mirrors
-    // the search-input/URL sync below; it avoids a cascading re-render.
     const [trackedProducts, setTrackedProducts] = useState(products);
     if (products !== trackedProducts) {
         setTrackedProducts(products);
@@ -85,7 +80,6 @@ const MenuProducts = memo(function MenuProducts({
                     );
                 }
             },
-            // Start loading slightly before the sentinel enters the viewport.
             { rootMargin: "200px 0px" }
         );
 
@@ -139,23 +133,16 @@ export default function MenuClient() {
 
     const menu = useMemo(() => data ?? [], [data]);
 
-    // ── Search state ──────────────────────────────────────────────
-    // The URL (`?search=`) is the single source of truth for the committed
-    // query; `searchInput` is just the controlled input buffer.
     const urlSearch = searchParams.get(SEARCH_PARAM) ?? "";
     const [searchInput, setSearchInput] = useState(urlSearch);
     const debouncedSearch = useDebouncedValue(searchInput, SEARCH_DEBOUNCE_MS);
 
-    // Keep the input in sync when the URL changes externally (header search,
-    // back/forward, shared link). Adjusting state during render — instead of in
-    // an effect — is React's recommended pattern and avoids a cascading render.
     const [syncedUrlSearch, setSyncedUrlSearch] = useState(urlSearch);
     if (urlSearch !== syncedUrlSearch) {
         setSyncedUrlSearch(urlSearch);
         setSearchInput(urlSearch);
     }
 
-    // Push the debounced value into the URL (replace → no history spam).
     useEffect(() => {
         const next = debouncedSearch.trim();
         if (next === urlSearch) return;
@@ -172,7 +159,6 @@ export default function MenuClient() {
 
     const handleClearSearch = useCallback(() => setSearchInput(""), []);
 
-    // ── Fuzzy search (scoped to the selected restaurant's menu only) ──
     const allProducts = useMemo(
         () =>
             menu
@@ -183,8 +169,6 @@ export default function MenuClient() {
         [menu]
     );
 
-    // Build the Fuse index once per menu (restaurant switch / data load),
-    // never on every render or keystroke.
     const fuse = useMemo(() => createProductFuse(allProducts), [allProducts]);
 
     const searchResults = useMemo(() => {
@@ -194,7 +178,6 @@ export default function MenuClient() {
 
     const isSearching = searchResults !== null;
 
-    // ── Category view (only used when not searching) ──────────────
     const [requestedCategory, setRequestedCategory] = useState<string | null>(
         null
     );
