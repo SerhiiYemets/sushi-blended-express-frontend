@@ -57,7 +57,6 @@ export default function ProductDetails({
         
         const name = cleanText(text);
 
-
         if (name.includes("ryze") || name.includes("рис")) {
             return !isSalad; 
         }
@@ -84,13 +83,11 @@ export default function ProductDetails({
         return !isHidden;
     };
 
-
     const isCeburek = 
         categoryNameCleaned.includes("ceburek") || 
         categoryNameCleaned.includes("чебурек") ||
         productNameCleaned.includes("ceburek") ||
         productNameCleaned.includes("чебурек");
-
 
     const isSushiOrRoll = 
         categoryNameCleaned.includes("role") ||
@@ -112,7 +109,6 @@ export default function ProductDetails({
         productNameCleaned.includes("vip") ||      
         productNameCleaned.includes("вип");
 
-    // Категории для плоского списка
     const isPastaOrBowl = 
         categoryNameCleaned.includes("testovin") || 
         categoryNameCleaned.includes("pasta") ||
@@ -153,8 +149,10 @@ export default function ProductDetails({
 
     let finalIngredients: string[] = [];
 
+    // Изменение логики тут:
     if (isCeburek) {
-        finalIngredients = ["фарш из краковицы", "лук"];
+        // Для чебуреков возвращаем пустой массив, чтобы блок ингредиентов вообще не рендерился
+        finalIngredients = [];
     } else {
         finalIngredients = (extendedProduct.ingredients || []).filter(isNotHiddenItem);
         
@@ -241,6 +239,7 @@ export default function ProductDetails({
                     </section>
                 ) : 
 
+                /* Сюда попадают чебуреки, но так как массив пустой, блок полностью проигнорируется */
                 finalIngredients.length > 0 ? (
                     <section className={css.section}>
                         <h2 className={css.subtitle}>Ingredience</h2>
