@@ -7,13 +7,13 @@
 
 .description {
     font-size: 14px;
-    color: #ffffff; /* или любой твой цвет текста */
+    color: #ffffff; 
     margin: 8px 0;
     line-height: 1.4;
     
-    /* Эффект троеточия для длинного текста */
+
     display: -webkit-box;
-    -webkit-line-clamp: 3; /* Максимальное количество строк */
+    -webkit-line-clamp: 3; 
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
