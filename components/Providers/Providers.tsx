@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import CartGuardModal from "@/components/CartGuardModal/CartGuardModal";
+import SocketProvider from "@/providers/SocketProvider";
 
 import styles from "./Providers.module.css";
 
@@ -52,7 +53,9 @@ export default function Providers({
 
     return (
         <QueryClientProvider client={queryClient}>
-            {children}
+            <SocketProvider>
+                {children}
+            </SocketProvider>
             <CartGuardModal />
             <Toaster
                 position="top-right"
