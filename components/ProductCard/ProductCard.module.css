@@ -7,7 +7,8 @@
 
 .description {
     font-size: 14px;
-    color: #ffffff; 
+    /* Theme-aware: near-white in dark mode, primary dark text in light mode. */
+    color: var(--color-text-primary);
     margin: 8px 0;
     line-height: 1.4;
     

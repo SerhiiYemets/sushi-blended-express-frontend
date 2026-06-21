@@ -1,0 +1,62 @@
+.button {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 900;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md, 16px);
+
+    /* Semi-transparent, theme-aware surface with a frosted-glass blur. */
+    background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid var(--color-border-strong);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-card-soft);
+
+    /* Hidden state: faded out + slid down, ignores pointer + tab order. */
+    opacity: 0;
+    transform: translateY(16px);
+    pointer-events: none;
+    transition: opacity var(--duration-base) var(--ease-out),
+        transform var(--duration-base) var(--ease-out),
+        background-color var(--duration-base) var(--ease-out),
+        border-color var(--duration-base) var(--ease-out),
+        color var(--duration-base) var(--ease-out),
+        box-shadow var(--duration-base) var(--ease-out);
+}
+
+.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.button:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+    box-shadow: var(--shadow-accent-strong);
+    transform: translateY(-2px);
+}
+
+.button:active {
+    transform: scale(0.94);
+}
+
+.button:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+    .button {
+        right: 32px;
+        bottom: 32px;
+    }
+}

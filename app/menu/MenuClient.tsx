@@ -11,6 +11,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
+import BackToCategories from "@/components/BackToCategories/BackToCategories";
 import ProductCard from "@/components/ProductCard/ProductCard";
 import SearchBox from "@/components/SearchBox/SearchBox";
 import { getMenu } from "@/lib/api/clientApi";
@@ -337,6 +338,8 @@ export default function MenuClient() {
                     </>
                 )}
             </div>
+
+            <BackToCategories />
         </main>
     );
 }

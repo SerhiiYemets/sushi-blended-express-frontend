@@ -19,7 +19,6 @@
     text-align: center;
 }
 
-/* ── Restaurant switcher ── */
 .restaurantSwitcher {
     display: flex;
     margin: 0 auto 24px;
@@ -135,13 +134,13 @@
     .categories {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 20px 20px; 
+        gap: 25px 20px; 
         justify-content: center;
         align-items: stretch;
         width: 100%;
     }
 
-    
+
     .categoryBtn {
         display: inline-flex;
         align-items: center;

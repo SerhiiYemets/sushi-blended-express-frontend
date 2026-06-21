@@ -74,9 +74,9 @@ export default function ProductDetails({
                     <h1 id={titleId} className={css.title}>
                         {product.name}
                     </h1>
-                    {product.weight && (
+                    {/* {product.weight && (
                         <span className={css.weight}>{product.weight}</span>
-                    )}
+                    )} */}
                 </header>
 
                 {product.description && (
@@ -119,7 +119,7 @@ export default function ProductDetails({
                         name: product.name,
                         price: product.price,
                         image: product.image ?? null,
-                        weight: product.weight,
+                        // weight: product.weight,
                     }}
                     restaurantId={restaurantId}
                 />

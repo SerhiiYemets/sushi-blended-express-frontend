@@ -76,7 +76,7 @@ export default function ProductCard({
 
                 <h3 className={css.title}>{item.name}</h3>
 
-                {item.weight && <p className={css.weight}>{item.weight}</p>}
+                {/* {item.weight && <p className={css.weight}>{item.weight}</p>} */}
 
                 {item.description && (
                     <p className={css.description}>{item.description}</p>
