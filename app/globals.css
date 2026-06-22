@@ -296,3 +296,71 @@ svg {
     scroll-behavior: auto !important;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   react-datepicker popup — theme-aware overrides.
+   The library uses fixed global class names (not CSS-module-scoped), so these
+   live here and map onto the existing design tokens to preserve the look in
+   both Light and Dark mode. Only the popup calendar is themed; the trigger
+   input keeps its own .input styling from checkout.module.css.
+   ────────────────────────────────────────────────────────────────────────── */
+.react-datepicker {
+  font-family: var(--font-display);
+  background-color: var(--color-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-card-strong);
+}
+
+.react-datepicker__header {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker__day-name,
+.react-datepicker__day,
+.react-datepicker__time-name {
+  color: var(--color-text-primary);
+}
+
+.react-datepicker__day:hover {
+  background-color: var(--color-surface-light);
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__day--selected:hover {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.react-datepicker__day--today {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.react-datepicker__day--disabled {
+  color: var(--color-text-faint);
+  cursor: not-allowed;
+}
+
+.react-datepicker__day--disabled:hover {
+  background-color: transparent;
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: var(--color-text-muted);
+}
+
+.react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  border-color: var(--color-primary);
+}
+
+/* Match the popup connector arrow to the themed surfaces. */
+.react-datepicker__triangle::before,
+.react-datepicker__triangle::after {
+  border-bottom-color: var(--color-surface) !important;
+}

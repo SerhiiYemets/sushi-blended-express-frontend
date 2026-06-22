@@ -126,6 +126,13 @@
     opacity: 0.7;
 }
 
+/* react-datepicker wraps its <input> in a div; keep it block-level + full width
+   so the field lays out exactly like the previous native date input. */
+.datepickerWrapper {
+    display: block;
+    width: 100%;
+}
+
 .input:hover,
 .textarea:hover {
     border-color: var(--color-border);

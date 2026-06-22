@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import {
+    Controller,
     useForm,
     useWatch,
     type SubmitErrorHandler,
@@ -16,6 +17,9 @@ import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import type { z } from 'zod';
+import DatePicker, { registerLocale, setDefaultLocale } from 'react-datepicker';
+import { cs } from 'date-fns/locale/cs';
+import 'react-datepicker/dist/react-datepicker.css';
 
 import {
     useCartStore,
@@ -42,6 +46,23 @@ import type { SelectedLocation } from '@/types/delivery';
 import type { User } from '@/types/user';
 
 type OrderFormInput = z.input<typeof orderSchema>;
+
+// Force the calendar to Czech (month + weekday names) regardless of the user's
+// browser / OS language. Done at module scope so it runs once.
+registerLocale('cs', cs);
+setDefaultLocale('cs');
+
+/**
+ * Parse a local `YYYY-MM-DD` string into a local-midnight Date (no UTC shift,
+ * mirroring {@link toDateString}). Used only to bridge the string form value to
+ * react-datepicker's Date API — the stored value stays a `YYYY-MM-DD` string.
+ */
+function parseLocalDate(value: string | undefined): Date | null {
+    if (!value) return null;
+    const [y, m, d] = value.split('-').map(Number);
+    if (!y || !m || !d) return null;
+    return new Date(y, m - 1, d);
+}
 
 const selectUser = (s: ReturnType<typeof useAuthStore.getState>) => s.user;
 const selectAuthHydrated = (s: ReturnType<typeof useAuthStore.getState>) =>
@@ -761,19 +782,53 @@ export default function CheckoutClient() {
                                                     Datum doručení *
                                                 </label>
 
-                                                <input
-                                                    id="deliveryDate"
-                                                    type="date"
-                                                    min={minDate}
-                                                    className={`${css.input} ${
-                                                        errors.deliveryDate
-                                                            ? css.inputError
-                                                            : ''
-                                                    }`}
-                                                    aria-invalid={
-                                                        !!errors.deliveryDate
-                                                    }
-                                                    {...register('deliveryDate')}
+                                                <Controller
+                                                    control={control}
+                                                    name="deliveryDate"
+                                                    render={({ field }) => (
+                                                        <DatePicker
+                                                            id="deliveryDate"
+                                                            locale="cs"
+                                                            dateFormat="dd.MM.yyyy"
+                                                            placeholderText="DD.MM.RRRR"
+                                                            selected={parseLocalDate(
+                                                                field.value
+                                                            )}
+                                                            onChange={(
+                                                                date: Date | null
+                                                            ) =>
+                                                                field.onChange(
+                                                                    date
+                                                                        ? toDateString(
+                                                                              date
+                                                                          )
+                                                                        : ''
+                                                                )
+                                                            }
+                                                            onBlur={field.onBlur}
+                                                            minDate={
+                                                                parseLocalDate(
+                                                                    minDate
+                                                                ) ?? undefined
+                                                            }
+                                                            autoComplete="off"
+                                                            className={`${
+                                                                css.input
+                                                            } ${
+                                                                errors.deliveryDate
+                                                                    ? css.inputError
+                                                                    : ''
+                                                            }`}
+                                                            wrapperClassName={
+                                                                css.datepickerWrapper
+                                                            }
+                                                            ariaInvalid={
+                                                                errors.deliveryDate
+                                                                    ? 'true'
+                                                                    : 'false'
+                                                            }
+                                                        />
+                                                    )}
                                                 />
 
                                                 {errors.deliveryDate && (
