@@ -58,7 +58,7 @@ export default function Providers({
             </SocketProvider>
             <CartGuardModal />
             <Toaster
-                position="top-right"
+                position="bottom-center"
                 gutter={10}
                 toastOptions={toastOptions}
             />
