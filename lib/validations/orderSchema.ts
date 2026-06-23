@@ -4,8 +4,15 @@ import { isValidDateFormat, isValidSlotFormat } from '@/lib/deliveryTime';
 const nameRegex =
     /^[A-Za-zÀ-ÿĀ-žА-яЁёЇїІіЄєҐґČčŘřŠšŽžÝýÁáÍíÉéÚúŮůŤťĎďŇň\s-]+$/;
 
-const phoneRegex =
-    /^[0-9+\s()\-]+$/;
+// Phone numbers must match the required international format EXACTLY: a "+"
+// followed by exactly 12 digits (e.g. +420123456789 — 13 chars total). One
+// digit too few or too many, a missing "+", spaces, hyphens, letters or any
+// other character are all rejected. Mirrors the backend Joi validation.
+const PHONE_FORMAT = /^\+\d{12}$/;
+
+export function isValidPhone(raw: string): boolean {
+    return PHONE_FORMAT.test(raw.trim());
+}
 
 export const orderSchema =
     z.object({
@@ -41,18 +48,7 @@ export const orderSchema =
         phone: z
             .string()
             .trim()
-            .min(
-                6,
-                'Zadejte telefonní číslo'
-            )
-            .max(
-                15,
-                'Telefonní číslo je příliš dlouhé'
-            )
-            .regex(
-                phoneRegex,
-                'Telefon může obsahovat pouze čísla'
-            ),
+            .refine(isValidPhone, 'Zadejte telefon ve formátu +420123456789'),
 
         email: z
             .string()

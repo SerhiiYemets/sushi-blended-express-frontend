@@ -39,7 +39,11 @@ import {
     isSlotSelectableOnDate,
     toDateString,
 } from '@/lib/deliveryTime';
-import { orderSchema, type OrderFormData } from '@/lib/validations/orderSchema';
+import {
+    orderSchema,
+    isValidPhone,
+    type OrderFormData,
+} from '@/lib/validations/orderSchema';
 import { calculateDelivery } from '@/lib/api/deliveryApi';
 import type { OrderPayload } from '@/types/order';
 import type { SelectedLocation } from '@/types/delivery';
@@ -135,6 +139,7 @@ export default function CheckoutClient() {
         control,
         reset,
         setValue,
+        setFocus,
         formState: { errors, isSubmitting },
     } = useForm<OrderFormInput, undefined, OrderFormData>({
         resolver: zodResolver(orderSchema),
@@ -236,6 +241,14 @@ export default function CheckoutClient() {
         (selectedLocation != null &&
             deliveryAvailable === true &&
             !calculatingFee);
+
+    // Real-time phone validation. `phoneValid` gates submission; the invalid
+    // state is only *shown* once the user has typed something, so the field
+    // doesn't start out red on an empty form.
+    const phoneValue = useWatch({ control, name: 'phone' }) ?? '';
+    const phoneValid = isValidPhone(phoneValue);
+    const showPhoneError =
+        !phoneValid && (phoneValue.trim().length > 0 || !!errors.phone);
 
     const nowTs = useNow(60_000);
     const now = useMemo(() => (nowTs == null ? null : new Date(nowTs)), [nowTs]);
@@ -404,6 +417,13 @@ export default function CheckoutClient() {
     };
 
     const onInvalid: SubmitErrorHandler<OrderFormInput> = formErrors => {
+        // An invalid phone never reaches the backend: handleSubmit blocks the
+        // submit and we move focus straight to the phone input so the red
+        // helper message is in view.
+        if (formErrors.phone) {
+            setFocus('phone');
+        }
+
         const firstField = Object.keys(formErrors)[0];
 
         toast.error(
@@ -554,17 +574,39 @@ export default function CheckoutClient() {
                                         autoComplete="tel"
                                         placeholder="+420123456789"
                                         className={`${css.input} ${
-                                            errors.phone ? css.inputError : ''
+                                            showPhoneError || errors.phone
+                                                ? css.inputError
+                                                : ''
                                         }`}
-                                        aria-invalid={!!errors.phone}
+                                        aria-invalid={showPhoneError}
+                                        aria-describedby="phone-help"
                                         {...register('phone')}
                                     />
 
-                                    {errors.phone && (
-                                        <span className={css.errorText}>
-                                            Zadejte platné telefonní číslo
-                                        </span>
-                                    )}
+                                    {/* Permanent helper text. Turns red and
+                                        swaps to the error variant in real time
+                                        when the typed number is invalid. */}
+                                    <p
+                                        id="phone-help"
+                                        className={`${css.phoneHelp} ${
+                                            showPhoneError
+                                                ? css.phoneHelpError
+                                                : ''
+                                        }`}
+                                    >
+                                        {showPhoneError ? (
+                                            <>
+                                                ❌ Zadejte telefon ve formátu
+                                                +420123456789
+                                            </>
+                                        ) : (
+                                            <>
+                                                Formát:
+                                                {'\n'}
+                                                +420123456789
+                                            </>
+                                        )}
+                                    </p>
                                 </div>
 
                                 <div className={css.field}>
