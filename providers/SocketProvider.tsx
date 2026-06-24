@@ -1,5 +1,11 @@
 "use client";
 
+import { createContext, type ReactNode } from "react";
+
+/*
+Socket.IO disabled.
+Original code preserved.
+
 import {
     createContext,
     useEffect,
@@ -18,9 +24,11 @@ import {
 } from "@/lib/notificationSound";
 import { RESTAURANT_LABELS, isRestaurantId } from "@/lib/restaurants";
 import type { NewOrderEvent } from "@/types/order";
+*/
 
 type SocketContextValue = {
-    socket: Socket | null;
+    // Socket.IO disabled — always null now; the field is kept for API stability.
+    socket: null;
     isConnected: boolean;
 };
 
@@ -29,7 +37,11 @@ export const SocketContext = createContext<SocketContextValue>({
     isConnected: false,
 });
 
-/** Resolve the restaurant label shown in the toast, defensively. */
+/*
+Socket.IO disabled.
+Original code preserved.
+
+// Resolve the restaurant label shown in the toast, defensively.
 function resolveRestaurantLabel(order: NewOrderEvent): string {
     if (isRestaurantId(order.restaurantId)) {
         return RESTAURANT_LABELS[order.restaurantId];
@@ -37,21 +49,27 @@ function resolveRestaurantLabel(order: NewOrderEvent): string {
     return order.restaurant ?? "—";
 }
 
-/** Resolve the order number/id shown in the toast, defensively. */
+// Resolve the order number/id shown in the toast, defensively.
 function resolveOrderNumber(order: NewOrderEvent): string {
     return String(order.orderNumber ?? order._id ?? "—");
 }
+*/
 
 /**
- * Global Socket.IO provider. Mounted once near the app root, it owns the single
- * connection, listens for `"new-order"`, and on each new order: plays a sound
- * (once per order), shows a toast, and logs the payload.
+ * Global provider mounted once near the app root. Socket.IO has been disabled,
+ * so it no longer opens a connection or listens for events — it now simply
+ * provides a static, disconnected context and renders its children. The
+ * realtime original implementation is preserved in the comment below.
  */
 export default function SocketProvider({
     children,
 }: {
     children: ReactNode;
 }) {
+    /*
+    Socket.IO disabled.
+    Original code preserved.
+
     // Create the singleton once via a lazy initializer (same pattern this
     // project uses for its QueryClient). Stable across renders, so it can be
     // exposed through context without touching a ref during render.
@@ -124,9 +142,10 @@ export default function SocketProvider({
             socket.off("new-order", handleNewOrder);
         };
     }, [socket]);
+    */
 
     return (
-        <SocketContext.Provider value={{ socket, isConnected }}>
+        <SocketContext.Provider value={{ socket: null, isConnected: false }}>
             {children}
         </SocketContext.Provider>
     );
