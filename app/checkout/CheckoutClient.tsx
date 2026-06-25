@@ -194,6 +194,18 @@ export default function CheckoutClient() {
         });
     };
 
+    // The user edited the address search text without picking a result, so any
+    // previously committed location is now stale. Clear it (and the address
+    // field) so there is never a divergent address value and checkout stays
+    // blocked until a real address is selected again.
+    const handleLocationCleared = () => {
+        setSelectedLocation(null);
+        setValue('address', '', {
+            shouldValidate: true,
+            shouldDirty: true,
+        });
+    };
+
     // The backend owns the fee — we only display what it returns and never
     // submit a fee. Refetches whenever the chosen point or restaurant changes.
     const {
@@ -356,7 +368,8 @@ export default function CheckoutClient() {
                 firstName: values.firstName.trim(),
                 lastName: values.lastName.trim(),
                 phone: values.phone.trim(),
-                email: values.email?.trim() || undefined,
+                // E-mail is mandatory now — always submitted.
+                email: values.email.trim(),
 
                 address:
                     values.deliveryType === 'delivery'
@@ -394,10 +407,27 @@ export default function CheckoutClient() {
         };
 
         try {
-            await createOrder(payload);
+            const result = await createOrder(payload);
 
-            toast.success('Objednávka byla úspěšně odeslána');
             clearCart();
+
+            // The order is always persisted server-side; only the POS (Poster)
+            // sync can lag/fail. Surface a friendly, non-blocking notice in that
+            // case instead of a misleading "all good" — the restaurant is also
+            // notified by e-mail as a fallback.
+            const posterFailed =
+                result.order?.posterSyncStatus === 'failed' ||
+                Boolean(result.posterWarning);
+
+            if (posterFailed) {
+                toast(
+                    'Objednávku jsme přijali, ale zatím se ji nepodařilo odeslat do pokladního systému. Restauraci jsme informovali e-mailem a brzy se vám ozve.',
+                    { icon: '⚠️', duration: 8000 }
+                );
+            } else {
+                toast.success('Objednávka byla úspěšně odeslána');
+            }
+
             router.push('/success');
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -614,7 +644,7 @@ export default function CheckoutClient() {
                                         htmlFor="email"
                                         className={css.label}
                                     >
-                                        E-mail
+                                        E-mail *
                                     </label>
 
                                     <input
@@ -626,12 +656,13 @@ export default function CheckoutClient() {
                                             errors.email ? css.inputError : ''
                                         }`}
                                         aria-invalid={!!errors.email}
+                                        aria-required="true"
                                         {...register('email')}
                                     />
 
                                     {errors.email && (
                                         <span className={css.errorText}>
-                                            Zadejte platný e-mail
+                                            {errors.email.message}
                                         </span>
                                     )}
                                 </div>
@@ -696,43 +727,17 @@ export default function CheckoutClient() {
                             </div>
 
                             {isDelivery && (
-                                <>
-                                    <DeliveryMap
-                                        restaurantId={orderRestaurantId}
-                                        onLocationSelected={
-                                            handleLocationSelected
-                                        }
-                                    />
-
-                                    <div className={css.field}>
-                                        <label
-                                            htmlFor="address"
-                                            className={css.label}
-                                        >
-                                            Adresa doručení *
-                                        </label>
-
-                                        <input
-                                            id="address"
-                                            type="text"
-                                            autoComplete="street-address"
-                                            placeholder="Vyberte adresu výše nebo na mapě"
-                                            className={`${css.input} ${
-                                                errors.address
-                                                    ? css.inputError
-                                                    : ''
-                                            }`}
-                                            aria-invalid={!!errors.address}
-                                            {...register('address')}
-                                        />
-
-                                        {errors.address && (
-                                            <span className={css.errorText}>
-                                                Zadejte adresu doručení
-                                            </span>
-                                        )}
-                                    </div>
-                                </>
+                                // Single, mandatory address input lives INSIDE
+                                // the map component (autocomplete + map click
+                                // feed the same value). The form's `address`
+                                // field is kept in sync via setValue, so there
+                                // is exactly one address the user ever sees.
+                                <DeliveryMap
+                                    restaurantId={orderRestaurantId}
+                                    onLocationSelected={handleLocationSelected}
+                                    onLocationCleared={handleLocationCleared}
+                                    addressError={errors.address?.message}
+                                />
                             )}
                         </fieldset>
 

@@ -11,6 +11,24 @@
     width: 100%;
 }
 
+.fieldLabel {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.fieldError {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--color-error, #c0392b);
+}
+
+.searchInputError {
+    border-color: var(--color-error, #c0392b);
+}
+
 .searchInputRow {
     position: relative;
     display: flex;

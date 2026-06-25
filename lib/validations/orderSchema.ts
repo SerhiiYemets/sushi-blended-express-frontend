@@ -4,10 +4,6 @@ import { isValidDateFormat, isValidSlotFormat } from '@/lib/deliveryTime';
 const nameRegex =
     /^[A-Za-zÀ-ÿĀ-žА-яЁёЇїІіЄєҐґČčŘřŠšŽžÝýÁáÍíÉéÚúŮůŤťĎďŇň\s-]+$/;
 
-// Phone numbers must match the required international format EXACTLY: a "+"
-// followed by exactly 12 digits (e.g. +420123456789 — 13 chars total). One
-// digit too few or too many, a missing "+", spaces, hyphens, letters or any
-// other character are all rejected. Mirrors the backend Joi validation.
 const PHONE_FORMAT = /^\+\d{12}$/;
 
 export function isValidPhone(raw: string): boolean {
@@ -52,11 +48,9 @@ export const orderSchema =
 
         email: z
             .string()
-            .email(
-                'Neplatný email'
-            )
-            .optional()
-            .or(z.literal('')),
+            .trim()
+            .min(1, 'Zadejte e-mail')
+            .pipe(z.email('Neplatný email')),
 
         deliveryType: z.enum([
             'delivery',
@@ -91,6 +85,16 @@ export const orderSchema =
             z.string().optional(),
     })
     .superRefine((data, ctx) => {
+        if (data.deliveryType === 'delivery') {
+            if (!data.address || data.address.trim().length < 3) {
+                ctx.addIssue({
+                    code: 'custom',
+                    path: ['address'],
+                    message: 'Zadejte adresu doručení',
+                });
+            }
+        }
+
         if (data.deliveryMode !== 'scheduled') return;
 
         if (!data.deliveryDate || !isValidDateFormat(data.deliveryDate)) {

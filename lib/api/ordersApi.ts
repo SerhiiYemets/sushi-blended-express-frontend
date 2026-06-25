@@ -1,10 +1,22 @@
 import clientApi from "@/lib/api/clientApi";
-import type { Order, OrderPayload } from "@/types/order";
+import type { OrderPayload } from "@/types/order";
+
+type CreateOrderResult = {
+    id: string;
+    restaurantId: string;
+    status: string;
+    subtotal: number;
+    deliveryFee: number;
+    totalPrice: number;
+    posterSyncStatus?: "success" | "failed" | "pending";
+    posterOrderId?: number | null;
+};
 
 type CreateOrderResponse = {
     message: string;
-    order: Order;
+    order: CreateOrderResult;
     emailSent?: boolean;
+    posterWarning?: string;
 };
 
 export async function createOrder(

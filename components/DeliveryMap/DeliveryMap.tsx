@@ -26,6 +26,15 @@ import css from "./DeliveryMap.module.css";
 type Props = {
     restaurantId: RestaurantId;
     onLocationSelected: (location: SelectedLocation) => void;
+    /**
+     * Called when the user invalidates a previously selected location (e.g. by
+     * editing the search text after picking a result). Lets the parent clear
+     * the committed address/coordinates so a typed-but-unconfirmed value can
+     * never be submitted — there is only ever ONE address value.
+     */
+    onLocationCleared?: () => void;
+    /** Validation error for the (single, mandatory) delivery address field. */
+    addressError?: string;
 };
 
 const DEFAULT_ZOOM = 13;
@@ -72,6 +81,8 @@ function Recenter({ target }: { target: LatLng | null }) {
 export default function DeliveryMap({
     restaurantId,
     onLocationSelected,
+    onLocationCleared,
+    addressError,
 }: Props) {
     const center = RESTAURANT_COORDS[restaurantId];
 
@@ -130,8 +141,8 @@ export default function DeliveryMap({
     return (
         <div className={css.wrap}>
             <div className={css.searchBox}>
-                <label htmlFor="deliveryAddressSearch" className={css.srOnly}>
-                    Vyhledat adresu
+                <label htmlFor="deliveryAddressSearch" className={css.fieldLabel}>
+                    Adresa doručení *
                 </label>
 
                 <div className={css.searchInputRow}>
@@ -143,12 +154,20 @@ export default function DeliveryMap({
                         id="deliveryAddressSearch"
                         type="text"
                         autoComplete="off"
-                        className={css.searchInput}
-                        placeholder="Vyhledat adresu (ulice, č.p., město)"
+                        className={`${css.searchInput} ${
+                            addressError ? css.searchInputError : ''
+                        }`}
+                        placeholder="Začněte psát adresu (ulice, č.p., město)"
                         value={query}
                         onChange={(event) => {
                             setQuery(event.target.value);
                             setSearchActive(true);
+                            // Editing the text invalidates any previously picked
+                            // location: drop the marker and tell the parent to
+                            // clear the committed address/coordinates, so the
+                            // submitted address always matches a real selection.
+                            setPosition(null);
+                            onLocationCleared?.();
                         }}
                         onFocus={() => {
                             if (query.trim().length >= 3) setSearchActive(true);
@@ -156,12 +175,17 @@ export default function DeliveryMap({
                         role="combobox"
                         aria-expanded={showResults}
                         aria-controls="deliveryAddressResults"
+                        aria-invalid={!!addressError}
                     />
 
                     {searching && (
                         <span className={css.searchSpinner} aria-hidden="true" />
                     )}
                 </div>
+
+                {addressError && (
+                    <p className={css.fieldError}>{addressError}</p>
+                )}
 
                 {searchError && (
                     <p className={css.searchError}>
