@@ -349,9 +349,9 @@ export default function Header() {
                         <MobileCartCount />
                     </Link>
 
-                    <a href="tel:+420721479332" className={css.mobileLink}>
+                    {/* <a href="tel:+420721479332" className={css.mobileLink}>
                         +420 721 479 332
-                    </a>
+                    </a> */}
                 </nav>
 
                 <div className={css.mobileAuth}>

@@ -90,7 +90,7 @@ export default function Footer() {
 
                 <div className={css.bottom}>
                     <span className={css.copy}>
-                        © {year} SushiMax
+                        © {year} SushiMax. Všechna práva vyhrazena.
                     </span>
 
                     <a
@@ -99,7 +99,7 @@ export default function Footer() {
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        Powered by Serhii Yemets
+                        Web vytvořil Serhii Yemets.
                     </a>
                 </div>
             </div>
