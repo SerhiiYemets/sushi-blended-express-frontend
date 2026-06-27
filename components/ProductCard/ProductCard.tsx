@@ -17,11 +17,31 @@ type Props = {
     categorySlug?: string;
 };
 
+const BLACKLIST_PRODUCT_IDS = [
+    "363", 
+    "364", 
+    "351", 
+    "352", 
+    "372", 
+    "353", 
+    "365", 
+    "366", 
+    "368", 
+    "367"
+];
+
 export default function ProductCard({
     item,
     restaurantId,
     categorySlug,
 }: Props) {
+
+    const isExcluded = BLACKLIST_PRODUCT_IDS.includes(String(item._id || ""));
+
+    if (isExcluded) {
+        return null;
+    }
+
     const href = `/menu/${encodeURIComponent(
         categorySlug ?? "all"
     )}/${item._id}?r=${restaurantId}`;
