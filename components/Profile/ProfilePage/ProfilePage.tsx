@@ -138,11 +138,6 @@ export default function ProfilePage() {
                     </div>
                 </header>
 
-                <div className={css.grid}>
-                    <ProfileInfoForm user={user} />
-                    <DeliveryPreferencesForm user={user} />
-                    <ChangePasswordForm />
-                </div>
 
                 <OrderHistory
                     orders={orders}
@@ -150,6 +145,11 @@ export default function ProfilePage() {
                     isError={ordersQuery.isError}
                     onRetry={() => ordersQuery.refetch()}
                 />
+                <div className={css.grid}>
+                    <ProfileInfoForm user={user} />
+                    <DeliveryPreferencesForm user={user} />
+                    <ChangePasswordForm />
+                </div>
             </section>
         </main>
     );
