@@ -51,7 +51,7 @@ export default function Footer() {
                                     </svg>
                                 </Link>
                             </div>
-
+                            
                             <h3 className={css.label}>Jihlava</h3>
 
                             <a href="tel:+420777499970" className={css.phone}>

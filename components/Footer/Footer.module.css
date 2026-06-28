@@ -9,7 +9,7 @@
 
 .socials {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     align-items: center;
 }
 
@@ -54,6 +54,7 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-accent, #9c0000);
+    margin-top: 8px;
 }
 
 .value {
