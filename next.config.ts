@@ -56,6 +56,20 @@ const nextConfig: NextConfig = {
             "swiper",
         ],
     },
+        async redirects() {
+        return [
+            {
+                source: "/kolin",
+                destination: "/",
+                permanent: true,
+            },
+            {
+                source: "/jihlava",
+                destination: "/",
+                permanent: true,
+            },
+        ];
+    },
 };
 
 export default nextConfig;
