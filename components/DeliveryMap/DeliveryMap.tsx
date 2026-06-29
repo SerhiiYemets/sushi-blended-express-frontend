@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type Ref } from "react";
 import {
     MapContainer,
     Marker,
@@ -33,8 +33,15 @@ type Props = {
      * never be submitted — there is only ever ONE address value.
      */
     onLocationCleared?: () => void;
-    /** Validation error for the (single, mandatory) delivery address field. */
+    /** Validation error message for the delivery address field (shown in red). */
     addressError?: string;
+    /**
+     * Force the error highlight (red border) on the input even when no specific
+     * message is shown — e.g. an empty address blocked at submit.
+     */
+    addressInvalid?: boolean;
+    /** Forwarded to the address input so the parent can scroll to / focus it. */
+    inputRef?: Ref<HTMLInputElement>;
 };
 
 const DEFAULT_ZOOM = 13;
@@ -83,6 +90,8 @@ export default function DeliveryMap({
     onLocationSelected,
     onLocationCleared,
     addressError,
+    addressInvalid,
+    inputRef,
 }: Props) {
     const center = RESTAURANT_COORDS[restaurantId];
 
@@ -116,7 +125,11 @@ export default function DeliveryMap({
         setQuery(result.label);
         const point = { lat: result.lat, lng: result.lng };
         setPosition(point);
-        onLocationSelected({ ...point, address: result.label });
+        onLocationSelected({
+            ...point,
+            address: result.label,
+            houseNumber: result.houseNumber,
+        });
     }
 
     function handleMapClick(point: LatLng) {
@@ -129,9 +142,9 @@ export default function DeliveryMap({
         });
 
         reverseGeocode(point)
-            .then((address) => {
+            .then(({ address, houseNumber }) => {
                 setQuery(address);
-                onLocationSelected({ ...point, address });
+                onLocationSelected({ ...point, address, houseNumber });
             })
             .catch(() => {
                 /* keep the coordinate fallback already reported */
@@ -152,12 +165,15 @@ export default function DeliveryMap({
 
                     <input
                         id="deliveryAddressSearch"
+                        ref={inputRef}
                         type="text"
                         autoComplete="off"
                         className={`${css.searchInput} ${
-                            addressError ? css.searchInputError : ''
+                            addressError || addressInvalid
+                                ? css.searchInputError
+                                : ''
                         }`}
-                        placeholder="Začněte psát adresu (ulice, č.p., město)"
+                        placeholder="Zadejte ulici a číslo domu (např. Na Magistrále 709, Kolín)"
                         value={query}
                         onChange={(event) => {
                             setQuery(event.target.value);
@@ -175,7 +191,7 @@ export default function DeliveryMap({
                         role="combobox"
                         aria-expanded={showResults}
                         aria-controls="deliveryAddressResults"
-                        aria-invalid={!!addressError}
+                        aria-invalid={!!(addressError || addressInvalid)}
                     />
 
                     {searching && (
@@ -186,6 +202,12 @@ export default function DeliveryMap({
                 {addressError && (
                     <p className={css.fieldError}>{addressError}</p>
                 )}
+
+                <p className={css.fieldWarning}>
+                    ⚠️ Pro dokončení objednávky musíte zadat ulici a číslo domu
+                    nebo vybrat přesnou adresu na mapě. Bez čísla domu nelze
+                    objednávku odeslat.
+                </p>
 
                 {searchError && (
                     <p className={css.searchError}>

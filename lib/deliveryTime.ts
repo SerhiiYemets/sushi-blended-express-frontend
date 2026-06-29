@@ -2,7 +2,10 @@ export const BUSINESS_OPEN_MINUTES = 10 * 60;
 export const BUSINESS_CLOSE_MINUTES = 22 * 60; 
 export const SLOT_STEP_MINUTES = 30;
 
-export const ORDER_LEAD_MINUTES = 30;
+// Minimum lead time for a scheduled order: the first selectable slot must be at
+// least this many minutes after "now". Guarantees Poster always receives a
+// delivery_time safely in the future (avoids api.errorMessage.dateNotInTheFuture).
+export const ORDER_LEAD_MINUTES = 60;
 
 export const ASAP_VALUE = 'asap';
 
@@ -26,11 +29,6 @@ export function isValidDateFormat(value: string): boolean {
 
 function minutesNow(now: Date): number {
     return now.getHours() * 60 + now.getMinutes();
-}
-
-function minutesFromLabel(label: string): number {
-    const [h, m] = label.split(':').map(Number);
-    return h * 60 + m;
 }
 
 /** Local YYYY-MM-DD (NOT UTC — avoids off-by-one day near midnight). */
@@ -101,7 +99,7 @@ export function isDateSelectable(
 /**
  * Slots available for a given date:
  * - past date  → none
- * - today      → only times still in the future
+ * - today      → only slots respecting the {@link ORDER_LEAD_MINUTES} lead time
  * - future day → all business-hours slots
  */
 export function getSlotsForDate(
@@ -113,11 +111,12 @@ export function getSlotsForDate(
     const today = toDateString(now);
     if (dateStr < today) return [];
 
-    const all = getAllSlots();
-    if (dateStr > today) return all;
+    if (dateStr > today) return getAllSlots();
 
-    const cutoff = minutesNow(now);
-    return all.filter(slot => minutesFromLabel(slot.value) > cutoff);
+    // Today: enforce the minimum lead time so the user can never pick a slot
+    // that is too close to now. Reuses the single lead-time-aware generator so
+    // the dropdown and the submit-time guard (isSlotSelectableOnDate) agree.
+    return getAvailableSlots(now);
 }
 
 export function isSlotSelectableOnDate(

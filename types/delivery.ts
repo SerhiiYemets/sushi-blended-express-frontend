@@ -20,4 +20,10 @@ export type LatLng = {
 
 export type SelectedLocation = LatLng & {
     address: string;
+    /**
+     * House number from the geocoded address, when available. Presence marks
+     * the address as complete (street + number) for delivery validation. Does
+     * not affect coordinates or delivery-fee calculation.
+     */
+    houseNumber?: string;
 };

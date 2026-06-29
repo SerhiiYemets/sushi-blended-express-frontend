@@ -111,6 +111,10 @@ const selectItems = (s: ReturnType<typeof useCartStore.getState>) => s.items;
 const selectClearCart = (s: ReturnType<typeof useCartStore.getState>) =>
     s.clearCart;
 
+// Shown (in red) when a chosen address has no house number.
+const ADDRESS_NO_NUMBER_MSG =
+    '⚠️ Zadejte prosím ulici i číslo domu. Bez čísla domu nelze objednávku dokončit.';
+
 export default function CheckoutClient() {
     const router = useRouter();
     const hydrated = useHydrated();
@@ -184,6 +188,27 @@ export default function CheckoutClient() {
     const [selectedLocation, setSelectedLocation] =
         useState<SelectedLocation | null>(null);
 
+    // Specific red message under the address field (missing house number).
+    // Kept here (not in RHF) because completeness depends on the geocoded
+    // houseNumber. The permanent address warning is rendered by DeliveryMap.
+    const [addressErrorMsg, setAddressErrorMsg] = useState<string | null>(null);
+
+    // Forces the red error highlight on the address input (e.g. empty address
+    // blocked on submit) independently of whether a message is shown.
+    const [addressInvalid, setAddressInvalid] = useState(false);
+
+    // Lets us scroll to & focus the address input on failed submit.
+    const addressInputRef = useRef<HTMLInputElement>(null);
+
+    const focusAddressField = () => {
+        const el = addressInputRef.current;
+        if (!el) return;
+        // Smooth scroll so the user sees where the problem is; focus without a
+        // second (instant) scroll so the two don't fight.
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.focus({ preventScroll: true });
+    };
+
     const handleLocationSelected = (location: SelectedLocation) => {
         setSelectedLocation(location);
         // Mirror the resolved address into the form field so it is submitted
@@ -192,6 +217,10 @@ export default function CheckoutClient() {
             shouldValidate: true,
             shouldDirty: true,
         });
+        // Live completeness feedback: a usable delivery address needs a house
+        // number. Show the message + highlight when missing, clear otherwise.
+        setAddressErrorMsg(location.houseNumber ? null : ADDRESS_NO_NUMBER_MSG);
+        setAddressInvalid(!location.houseNumber);
     };
 
     // The user edited the address search text without picking a result, so any
@@ -204,6 +233,9 @@ export default function CheckoutClient() {
             shouldValidate: true,
             shouldDirty: true,
         });
+        // Don't nag while the user is mid-typing; the submit guard re-checks.
+        setAddressErrorMsg(null);
+        setAddressInvalid(false);
     };
 
     // The backend owns the fee — we only display what it returns and never
@@ -308,8 +340,20 @@ export default function CheckoutClient() {
         }
 
         if (values.deliveryType === 'delivery') {
+            // No address selected/entered → block, highlight, scroll to & focus
+            // the field. The permanent red warning stays visible as the message.
             if (!values.address?.trim() || !selectedLocation) {
-                toast.error('Vyberte prosím místo doručení na mapě');
+                setAddressErrorMsg(null);
+                setAddressInvalid(true);
+                focusAddressField();
+                return;
+            }
+
+            // Address selected but missing a house number → block with message.
+            if (!selectedLocation.houseNumber) {
+                setAddressErrorMsg(ADDRESS_NO_NUMBER_MSG);
+                setAddressInvalid(true);
+                focusAddressField();
                 return;
             }
 
@@ -447,6 +491,16 @@ export default function CheckoutClient() {
     };
 
     const onInvalid: SubmitErrorHandler<OrderFormInput> = formErrors => {
+        // Missing delivery address is the most common blocker: highlight, then
+        // scroll to & focus the address field before anything else, so the user
+        // is taken straight to the problem (permanent red warning stays shown).
+        if (isDelivery && (formErrors.address || !selectedLocation)) {
+            setAddressErrorMsg(null);
+            setAddressInvalid(true);
+            focusAddressField();
+            return;
+        }
+
         // An invalid phone never reaches the backend: handleSubmit blocks the
         // submit and we move focus straight to the phone input so the red
         // helper message is in view.
@@ -736,7 +790,9 @@ export default function CheckoutClient() {
                                     restaurantId={orderRestaurantId}
                                     onLocationSelected={handleLocationSelected}
                                     onLocationCleared={handleLocationCleared}
-                                    addressError={errors.address?.message}
+                                    addressError={addressErrorMsg ?? undefined}
+                                    addressInvalid={addressInvalid}
+                                    inputRef={addressInputRef}
                                 />
                             )}
                         </fieldset>

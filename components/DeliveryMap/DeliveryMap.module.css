@@ -22,7 +22,16 @@
 .fieldError {
     margin: 6px 0 0;
     font-size: 13px;
-    color: var(--color-error, #c0392b);
+    color: var(--color-error);
+}
+
+/* Permanent address warning — always visible, uses the app error color. */
+.fieldWarning {
+    margin: 6px 0 0;
+    font-size: 12.5px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: var(--color-error);
 }
 
 .searchInputError {
