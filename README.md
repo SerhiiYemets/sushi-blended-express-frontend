@@ -6,8 +6,9 @@
 
 SushiMax.cz je moderní webová aplikace pro online objednávky restaurace SushiMax v České republice.
 Projekt byl kompletně navržen a vyvinut s důrazem na výkon, bezpečnost, jednoduchou správu a budoucí rozšiřitelnost. Zákazníkům umožňuje pohodlně objednávat jídlo online, zatímco všechny objednávky jsou automaticky synchronizovány se systémem Poster POS prostřednictvím Poster API.
-Použité technologie
 
+
+Použité technologie:
 Frontend
 Next.js
 React
