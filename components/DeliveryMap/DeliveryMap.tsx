@@ -33,13 +33,12 @@ type Props = {
      * never be submitted — there is only ever ONE address value.
      */
     onLocationCleared?: () => void;
-    /** Validation error message for the delivery address field (shown in red). */
-    addressError?: string;
     /**
-     * Force the error highlight (red border) on the input even when no specific
-     * message is shown — e.g. an empty address blocked at submit.
+     * Validation message for the delivery address field. When set, the message
+     * is shown (in red) and the input gets the error highlight; when undefined
+     * the field is treated as valid (no message, no helper text, no red style).
      */
-    addressInvalid?: boolean;
+    addressError?: string;
     /** Forwarded to the address input so the parent can scroll to / focus it. */
     inputRef?: Ref<HTMLInputElement>;
 };
@@ -90,7 +89,6 @@ export default function DeliveryMap({
     onLocationSelected,
     onLocationCleared,
     addressError,
-    addressInvalid,
     inputRef,
 }: Props) {
     const center = RESTAURANT_COORDS[restaurantId];
@@ -169,9 +167,7 @@ export default function DeliveryMap({
                         type="text"
                         autoComplete="off"
                         className={`${css.searchInput} ${
-                            addressError || addressInvalid
-                                ? css.searchInputError
-                                : ''
+                            addressError ? css.searchInputError : ''
                         }`}
                         placeholder="Zadejte ulici a číslo domu (např. Na Magistrále 709, Kolín)"
                         value={query}
@@ -191,7 +187,7 @@ export default function DeliveryMap({
                         role="combobox"
                         aria-expanded={showResults}
                         aria-controls="deliveryAddressResults"
-                        aria-invalid={!!(addressError || addressInvalid)}
+                        aria-invalid={!!addressError}
                     />
 
                     {searching && (
@@ -202,12 +198,6 @@ export default function DeliveryMap({
                 {addressError && (
                     <p className={css.fieldError}>{addressError}</p>
                 )}
-
-                <p className={css.fieldWarning}>
-                    ⚠️ Pro dokončení objednávky musíte zadat ulici a číslo domu
-                    nebo vybrat přesnou adresu na mapě. Bez čísla domu nelze
-                    objednávku odeslat.
-                </p>
 
                 {searchError && (
                     <p className={css.searchError}>
@@ -264,10 +254,14 @@ export default function DeliveryMap({
                 </MapContainer>
             </div>
 
-            <p className={css.hint}>
-                Vyhledejte adresu výše nebo klepněte na mapu pro výběr místa
-                doručení.
-            </p>
+            {/* Entry guidance is shown only while the address is still
+                incomplete; once it's valid only the address + map remain. */}
+            {addressError && (
+                <p className={css.hint}>
+                    Vyhledejte adresu výše nebo klepněte na mapu pro výběr místa
+                    doručení.
+                </p>
+            )}
         </div>
     );
 }

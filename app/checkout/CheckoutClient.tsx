@@ -111,7 +111,8 @@ const selectItems = (s: ReturnType<typeof useCartStore.getState>) => s.items;
 const selectClearCart = (s: ReturnType<typeof useCartStore.getState>) =>
     s.clearCart;
 
-// Shown (in red) when a chosen address has no house number.
+// Existing Czech address message. Shown (in red) while the delivery address is
+// incomplete/invalid; hidden the moment it becomes valid. Text unchanged.
 const ADDRESS_NO_NUMBER_MSG =
     '⚠️ Zadejte prosím ulici i číslo domu. Bez čísla domu nelze objednávku dokončit.';
 
@@ -188,15 +189,6 @@ export default function CheckoutClient() {
     const [selectedLocation, setSelectedLocation] =
         useState<SelectedLocation | null>(null);
 
-    // Specific red message under the address field (missing house number).
-    // Kept here (not in RHF) because completeness depends on the geocoded
-    // houseNumber. The permanent address warning is rendered by DeliveryMap.
-    const [addressErrorMsg, setAddressErrorMsg] = useState<string | null>(null);
-
-    // Forces the red error highlight on the address input (e.g. empty address
-    // blocked on submit) independently of whether a message is shown.
-    const [addressInvalid, setAddressInvalid] = useState(false);
-
     // Lets us scroll to & focus the address input on failed submit.
     const addressInputRef = useRef<HTMLInputElement>(null);
 
@@ -217,10 +209,9 @@ export default function CheckoutClient() {
             shouldValidate: true,
             shouldDirty: true,
         });
-        // Live completeness feedback: a usable delivery address needs a house
-        // number. Show the message + highlight when missing, clear otherwise.
-        setAddressErrorMsg(location.houseNumber ? null : ADDRESS_NO_NUMBER_MSG);
-        setAddressInvalid(!location.houseNumber);
+        // The inline validation message/highlight are derived from
+        // `selectedLocation` (see `deliveryAddressIncomplete`), so they update
+        // reactively here without any extra state to set.
     };
 
     // The user edited the address search text without picking a result, so any
@@ -233,10 +224,13 @@ export default function CheckoutClient() {
             shouldValidate: true,
             shouldDirty: true,
         });
-        // Don't nag while the user is mid-typing; the submit guard re-checks.
-        setAddressErrorMsg(null);
-        setAddressInvalid(false);
     };
+
+    // Reactive delivery-address validity: a usable address must be selected AND
+    // carry a house number. Drives the inline validation message + error style,
+    // updating immediately as the user types or selects (no submit needed).
+    const deliveryAddressIncomplete =
+        !selectedLocation || !selectedLocation.houseNumber;
 
     // The backend owns the fee — we only display what it returns and never
     // submit a fee. Refetches whenever the chosen point or restaurant changes.
@@ -340,19 +334,15 @@ export default function CheckoutClient() {
         }
 
         if (values.deliveryType === 'delivery') {
-            // No address selected/entered → block, highlight, scroll to & focus
-            // the field. The permanent red warning stays visible as the message.
+            // No address selected/entered → block & take the user to the field.
+            // The (reactive) inline validation message is already shown.
             if (!values.address?.trim() || !selectedLocation) {
-                setAddressErrorMsg(null);
-                setAddressInvalid(true);
                 focusAddressField();
                 return;
             }
 
-            // Address selected but missing a house number → block with message.
+            // Address selected but missing a house number → block submission.
             if (!selectedLocation.houseNumber) {
-                setAddressErrorMsg(ADDRESS_NO_NUMBER_MSG);
-                setAddressInvalid(true);
                 focusAddressField();
                 return;
             }
@@ -495,8 +485,6 @@ export default function CheckoutClient() {
         // scroll to & focus the address field before anything else, so the user
         // is taken straight to the problem (permanent red warning stays shown).
         if (isDelivery && (formErrors.address || !selectedLocation)) {
-            setAddressErrorMsg(null);
-            setAddressInvalid(true);
             focusAddressField();
             return;
         }
@@ -790,8 +778,11 @@ export default function CheckoutClient() {
                                     restaurantId={orderRestaurantId}
                                     onLocationSelected={handleLocationSelected}
                                     onLocationCleared={handleLocationCleared}
-                                    addressError={addressErrorMsg ?? undefined}
-                                    addressInvalid={addressInvalid}
+                                    addressError={
+                                        deliveryAddressIncomplete
+                                            ? ADDRESS_NO_NUMBER_MSG
+                                            : undefined
+                                    }
                                     inputRef={addressInputRef}
                                 />
                             )}
