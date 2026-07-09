@@ -48,23 +48,74 @@ type NominatimReverseItem = {
 };
 
 /**
+ * Extract the municipality from a Czech `display_name`.
+ *
+ * Nominatim orders CZ components from most to least specific and always places
+ * the district (`okres …`) right after the municipality, e.g.:
+ *
+ *   "43, Pražská, Vítězov, Velim, okres Kolín, Středočeský kraj, 281 01, Česko"
+ *                          ▲──────┘ ▲───────┘
+ *                       municipality  district
+ *
+ * The component immediately before `okres …` is therefore the municipality
+ * (Velim), while the structured `village` is only the local settlement
+ * (Vítězov, a část obce). Returns `null` when the pattern isn't present, so the
+ * caller can fall back to the structured component.
+ */
+function municipalityFromDisplayName(displayName?: string): string | null {
+    if (!displayName) return null;
+
+    const parts = displayName.split(",").map((p) => p.trim());
+
+    const okresIndex = parts.findIndex((p) =>
+        p.toLowerCase().startsWith("okres ")
+    );
+
+    // `> 0` guards both "not found" (-1) and the impossible leading position.
+    return okresIndex > 0 ? parts[okresIndex - 1] : null;
+}
+
+/**
+ * Pick the best city/municipality component for the short label.
+ *
+ * Structured `city` / `town` / `municipality` are municipality-level and always
+ * trusted first. `village` is the exception: it is often a local settlement
+ * rather than the municipality users expect, so when it's the only structured
+ * option we prefer the municipality parsed from `display_name` and fall back to
+ * the village only if that parse fails.
+ */
+function resolveCity(
+    address: NominatimAddress,
+    displayName?: string
+): string | undefined {
+    const municipality = address.city ?? address.town ?? address.municipality;
+    if (municipality) return municipality;
+
+    if (address.village) {
+        return municipalityFromDisplayName(displayName) ?? address.village;
+    }
+
+    return undefined;
+}
+
+/**
  * Build a concise, user-facing address ("Street house_number, City") from
- * Nominatim's structured components — e.g. "Na Magistrále 709, Kolín" instead
- * of the verbose `display_name`. Returns `null` when there isn't enough data,
- * so callers can fall back to `display_name`.
+ * Nominatim's structured components — e.g. "Pražská 43, Velim" instead of the
+ * verbose `display_name`. `displayName` is used only to refine the city (see
+ * `resolveCity`). Returns `null` when there isn't enough data, so callers can
+ * fall back to `display_name`.
  *
  * NOTE: display text only — coordinates / delivery data are never derived here.
  */
-function buildShortAddress(address?: NominatimAddress): string | null {
+function buildShortAddress(
+    address?: NominatimAddress,
+    displayName?: string
+): string | null {
     if (!address) return null;
 
     const street =
         address.road ?? address.pedestrian ?? address.footway ?? address.suburb;
-    const city =
-        address.city ??
-        address.town ??
-        address.village ??
-        address.municipality;
+    const city = resolveCity(address, displayName);
 
     const streetPart = [street, address.house_number]
         .filter(Boolean)
@@ -112,7 +163,7 @@ export async function searchAddress(
         ),
         // Short "Street number, City" label for display; full display_name is
         // the fallback when components are missing. Coordinates are unchanged.
-        label: buildShortAddress(item.address) ?? item.display_name,
+        label: buildShortAddress(item.address, item.display_name) ?? item.display_name,
         lat: Number(item.lat),
         lng: Number(item.lon),
         houseNumber: item.address?.house_number,
@@ -132,33 +183,21 @@ export async function reverseGeocode(
         "accept-language": "cs",
     });
 
-    try {
-        const res = await fetch(
-            `${NOMINATIM_BASE}/reverse?${params.toString()}`,
-            {
-                signal,
-                headers: { Accept: "application/json" },
-            }
-        );
+    const res = await fetch(`${NOMINATIM_BASE}/reverse?${params.toString()}`, {
+        signal,
+        headers: { Accept: "application/json" },
+    });
 
-        if (!res.ok) throw new Error(`Reverse geocoding failed (${res.status})`);
+    if (!res.ok) throw new Error(`Reverse geocoding failed (${res.status})`);
 
-        const data = (await res.json()) as NominatimReverseItem;
-        const houseNumber = data.address?.house_number;
-        // Short "Street number, City"; fall back to the full name, then coords.
-        const short = buildShortAddress(data.address);
-        if (short) return { address: short, houseNumber };
-        if (data.display_name) {
-            return { address: data.display_name, houseNumber };
-        }
-    } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-            throw error;
-        }
+    const data = (await res.json()) as NominatimReverseItem;
+
+    const address =
+        buildShortAddress(data.address, data.display_name) ?? data.display_name;
+
+    if (!address) {
+        throw new Error("Reverse geocoding returned no address");
     }
 
-    return {
-        address: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
-        houseNumber: undefined,
-    };
+    return { address, houseNumber: data.address?.house_number };
 }
