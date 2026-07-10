@@ -95,7 +95,7 @@ export default function Footer() {
 
                     <a
                         className={css.copy}
-                        href="https://www.linkedin.com/in/serhii-yemets/"
+                        href="https://serhii-yemets-portfolio.vercel.app/"
                         target="_blank"
                         rel="noopener noreferrer"
                     >
