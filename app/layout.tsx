@@ -33,25 +33,29 @@ const themeInitScript = `(function(){
 
 export const metadata: Metadata = {
     metadataBase: new URL(
-        "https://sushi-blended-express-frontend.vercel.app"
+        "https://sushimax.cz"
     ),
 
     title: {
-        default: "SushiMax",
+        default: "SushiMax – Rozvoz sushi Kolín a Jihlava",
         template: "%s | SushiMax",
     },
 
     description:
-        "Objednávejte čerstvé sushi online. Rychlé doručení, moderní objednávkový systém a skvělá chuť.",
+        "Čerstvé sushi s rozvozem v Kolíně a Jihlavě. Objednejte online sushi, sushi sety, maki, nigiri a další speciality s rychlým doručením.",
 
     keywords: [
         "sushi",
         "sushi delivery",
+        "sushi Kolín",
+        "sushi Jihlava",
+        "rozvoz sushi",
         "online sushi",
-        "restaurant",
-        "food delivery",
-        "japanese food",
-        "takeaway",
+        "sushi sety",
+        "maki",
+        "nigiri",
+        "japonská kuchyně",
+        "SushiMax",
     ],
 
     authors: [
@@ -66,7 +70,7 @@ export const metadata: Metadata = {
         title: "SushiMax",
         description:
             "Objednávejte čerstvé sushi online – rychlé doručení a moderní objednávkový systém.",
-        url: "https://sushi-blended-express-frontend.vercel.app",
+        url: "https://sushimax.cz",
         siteName: "SushiMax",
         locale: "cs_CZ",
         type: "website",
@@ -85,8 +89,9 @@ export const metadata: Metadata = {
     },
 
     icons: {
-        icon: "/SushiMax.svg",
-        shortcut: "/SushiMax.svg",
+        icon: "/sushimaxlogo.png",
+        shortcut: "/sushimaxlogo.png",
+        apple: "/sushimaxlogo.png",
     },
 
     category: "food",
