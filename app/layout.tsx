@@ -89,8 +89,8 @@ export const metadata: Metadata = {
     },
 
     icons: {
-        icon: "/sushimaxlogo.png",
-        shortcut: "/sushimaxlogo.png",
+        icon: "/favicon.ion",
+        shortcut: "/favicon.ion",
         apple: "/sushimaxlogo.png",
     },
 
