@@ -51,8 +51,6 @@ import type { User } from '@/types/user';
 
 type OrderFormInput = z.input<typeof orderSchema>;
 
-// Force the calendar to Czech (month + weekday names) regardless of the user's
-// browser / OS language. Done at module scope so it runs once.
 registerLocale('cs', cs);
 setDefaultLocale('cs');
 
@@ -550,7 +548,7 @@ export default function CheckoutClient() {
 
                 <form
                     className={css.layout}
-                    onSubmit={handleSubmit(onSubmit, onInvalid)}
+                    onSubmit={e => handleSubmit(onSubmit, onInvalid)(e)}
                     noValidate
                 >
                     <div className={css.formColumn}>
@@ -666,18 +664,17 @@ export default function CheckoutClient() {
                                                 : ''
                                         }`}
                                     >
-                                        {showPhoneError ? (
-                                            <>
-                                                ❌ Zadejte telefon ve formátu
-                                                +420123456789
-                                            </>
-                                        ) : (
-                                            <>
-                                                Formát:
-                                                {'\n'}
-                                                +420123456789
-                                            </>
-                                        )}
+                                        <span
+                                            key={
+                                                showPhoneError
+                                                    ? 'invalid'
+                                                    : 'hint'
+                                            }
+                                        >
+                                            {showPhoneError
+                                                ? '❌ Zadejte telefon ve formátu +420123456789'
+                                                : 'Formát:\n+420123456789'}
+                                        </span>
                                     </p>
                                 </div>
 
