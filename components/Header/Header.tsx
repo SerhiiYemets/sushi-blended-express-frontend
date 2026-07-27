@@ -202,8 +202,15 @@ export default function Header() {
 
     useEffect(() => {
         if (!menuOpen) return;
-        const original = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
+        const root = document.documentElement;
+        const originalOverflow = root.style.overflow;
+        const originalPaddingRight = root.style.paddingRight;
+        const scrollbarWidth = window.innerWidth - root.clientWidth;
+
+        root.style.overflow = "hidden";
+        if (scrollbarWidth > 0) {
+            root.style.paddingRight = `${scrollbarWidth}px`;
+        }
 
         const onKey = (e: KeyboardEvent) => {
             if (e.key === "Escape") setMenuOpenAt(null);
@@ -223,7 +230,8 @@ export default function Header() {
         document.addEventListener("pointerdown", onPointerDown);
 
         return () => {
-            document.body.style.overflow = original;
+            root.style.overflow = originalOverflow;
+            root.style.paddingRight = originalPaddingRight;
             window.removeEventListener("keydown", onKey);
             document.removeEventListener("pointerdown", onPointerDown);
         };
