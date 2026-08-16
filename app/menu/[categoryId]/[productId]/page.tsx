@@ -32,7 +32,7 @@ export async function generateMetadata({
     const restaurantId = resolveRestaurantId(r);
 
     try {
-        const product = await getProductFromMenu(restaurantId, productId);
+        const { product } = await getProductFromMenu(restaurantId, productId);
         return {
             title: product.name,
             description:
@@ -51,13 +51,15 @@ export default async function ProductPage({ params, searchParams }: Props) {
     ]);
     const restaurantId = resolveRestaurantId(r);
 
-    let product;
+    let found;
     try {
-        product = await getProductFromMenu(restaurantId, productId);
+        found = await getProductFromMenu(restaurantId, productId);
     } catch (err) {
         if (err instanceof NotFoundError) notFound();
         throw err;
     }
+
+    const { product, orderInfo } = found;
 
     const backHref = `/menu?category=${encodeURIComponent(categoryId)}`;
 
@@ -86,6 +88,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                         <ProductDetails
                             product={product}
                             restaurantId={restaurantId}
+                            orderInfo={orderInfo}
                             priority
                         />
                     </div>

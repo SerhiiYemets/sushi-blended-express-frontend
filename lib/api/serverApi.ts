@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Category } from "@/types/menu";
+import type { Category, CategoryOrderInfo } from "@/types/menu";
 import type { Product } from "@/types/product";
 import {
     isRestaurantId,
@@ -53,26 +53,40 @@ async function fetchMenu(restaurantId: RestaurantId): Promise<Category[]> {
 function findProductInMenu(
     menu: Category[],
     productId: string
-): Product | null {
+): { product: Product; category: Category } | null {
     for (const category of menu) {
         const product = category.products.find((p) => p._id === productId);
-        if (product) return product;
+        if (product) return { product, category };
     }
     return null;
 }
 
+export type MenuProduct = {
+    product: Product;
+    /**
+     * Phone-order notice of the containing category, present only for
+     * display-only categories (see the backend category override config).
+     */
+    orderInfo?: CategoryOrderInfo;
+};
+
 export async function getProductFromMenu(
     restaurantId: RestaurantId,
     productId: string
-): Promise<Product> {
+): Promise<MenuProduct> {
     const menu = await fetchMenu(restaurantId);
-    const product = findProductInMenu(menu, productId);
+    const found = findProductInMenu(menu, productId);
 
-    if (!product) {
+    if (!found) {
         throw new NotFoundError(
             `Product ${productId} not found in ${restaurantId}`
         );
     }
 
-    return product;
+    return {
+        product: found.product,
+        ...(found.category.orderInfo
+            ? { orderInfo: found.category.orderInfo }
+            : {}),
+    };
 }

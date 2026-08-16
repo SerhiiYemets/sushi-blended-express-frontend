@@ -1,7 +1,9 @@
 import Image from "next/image";
 
 import ProductPurchasePanel from "@/components/ProductPurchasePanel/ProductPurchasePanel";
+import CategoryOrderInfo from "@/components/CategoryOrderInfo/CategoryOrderInfo";
 import type { Product } from "@/types/product";
+import type { CategoryOrderInfo as OrderInfo } from "@/types/menu";
 import type { RestaurantId } from "@/lib/restaurants";
 
 import css from "./ProductDetails.module.css";
@@ -9,6 +11,8 @@ import css from "./ProductDetails.module.css";
 type Props = {
     product: Product;
     restaurantId: RestaurantId;
+    /** Phone-order notice, passed for display-only categories. */
+    orderInfo?: OrderInfo;
     titleId?: string;
     priority?: boolean;
 };
@@ -47,6 +51,7 @@ function formatDescription(raw: string): DescriptionBlock[] {
 export default function ProductDetails({
     product,
     restaurantId,
+    orderInfo,
     titleId,
     priority = false,
 }: Props) {
@@ -112,17 +117,30 @@ export default function ProductDetails({
                     </section>
                 )}
 
-                <ProductPurchasePanel
-                    product={{
-                        _id: product._id,
-                        posterProductId: product.posterProductId,
-                        name: product.name,
-                        price: product.price,
-                        image: product.image ?? null,
-                        // weight: product.weight,
-                    }}
-                    restaurantId={restaurantId}
-                />
+                {product.purchasable === false ? (
+                    <>
+                        <div className={css.priceRow}>
+                            <span className={css.priceLabel}>Cena</span>
+                            <span className={css.price}>
+                                {product.price} Kč
+                            </span>
+                        </div>
+
+                        {orderInfo && <CategoryOrderInfo info={orderInfo} />}
+                    </>
+                ) : (
+                    <ProductPurchasePanel
+                        product={{
+                            _id: product._id,
+                            posterProductId: product.posterProductId,
+                            name: product.name,
+                            price: product.price,
+                            image: product.image ?? null,
+                            // weight: product.weight,
+                        }}
+                        restaurantId={restaurantId}
+                    />
+                )}
             </div>
         </article>
     );

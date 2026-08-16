@@ -12,6 +12,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
 import BackToCategories from "@/components/BackToCategories/BackToCategories";
+import CategoryOrderInfo from "@/components/CategoryOrderInfo/CategoryOrderInfo";
 import ProductCard from "@/components/ProductCard/ProductCard";
 import SearchBox from "@/components/SearchBox/SearchBox";
 import { getMenu } from "@/lib/api/clientApi";
@@ -324,10 +325,18 @@ export default function MenuClient() {
                             className={css.productsAnchor}
                         >
                             {current && current.products.length > 0 ? (
-                                <MenuProducts
-                                    products={current.products}
-                                    restaurantId={selectedRestaurant}
-                                />
+                                <>
+                                    <MenuProducts
+                                        products={current.products}
+                                        restaurantId={selectedRestaurant}
+                                    />
+
+                                    {current.orderInfo && (
+                                        <CategoryOrderInfo
+                                            info={current.orderInfo}
+                                        />
+                                    )}
+                                </>
                             ) : (
                                 <p className={css.empty}>
                                     V této kategorii zatím nejsou žádné

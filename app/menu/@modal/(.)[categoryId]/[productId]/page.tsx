@@ -27,9 +27,9 @@ export default async function InterceptedProductPage({
     const [{ productId }, { r }] = await Promise.all([params, searchParams]);
     const restaurantId = resolveRestaurantId(r);
 
-    let product;
+    let found;
     try {
-        product = await getProductFromMenu(restaurantId, productId);
+        found = await getProductFromMenu(restaurantId, productId);
     } catch (err) {
         if (err instanceof NotFoundError) notFound();
         throw err;
@@ -37,8 +37,9 @@ export default async function InterceptedProductPage({
 
     return (
         <ProductDetails
-            product={product}
+            product={found.product}
             restaurantId={restaurantId}
+            orderInfo={found.orderInfo}
             titleId={MODAL_TITLE_ID}
             priority
         />

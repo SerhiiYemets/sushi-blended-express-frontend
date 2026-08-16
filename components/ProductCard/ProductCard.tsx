@@ -48,6 +48,10 @@ export default function ProductCard({
         return null;
     }
 
+    // Display-only categories (e.g. Grill) are marked by the backend menu
+    // endpoint; the product stays fully visible, only the cart control goes.
+    const isPurchasable = item.purchasable !== false;
+
     const href = `/menu/${encodeURIComponent(
         categorySlug ?? "all"
     )}/${item._id}?r=${restaurantId}`;
@@ -111,14 +115,16 @@ export default function ProductCard({
                 <div className={css.bottom}>
                     <span className={css.price}>{item.price} Kč</span>
 
-                    <button
-                        type="button"
-                        className={css.addBtn}
-                        onClick={handleAdd}
-                        aria-label={`Přidat ${item.name} do košíku`}
-                    >
-                        🛒
-                    </button>
+                    {isPurchasable && (
+                        <button
+                            type="button"
+                            className={css.addBtn}
+                            onClick={handleAdd}
+                            aria-label={`Přidat ${item.name} do košíku`}
+                        >
+                            🛒
+                        </button>
+                    )}
                 </div>
             </article>
         </Link>

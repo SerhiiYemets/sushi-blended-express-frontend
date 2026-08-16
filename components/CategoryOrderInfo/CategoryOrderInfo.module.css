@@ -1,0 +1,49 @@
+.block {
+    max-width: 540px;
+    margin: 32px auto 0;
+    padding: 20px 24px;
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 24%, transparent);
+    border-radius: 12px;
+    text-align: center;
+    font-family: var(--font-manrope, system-ui, sans-serif);
+}
+
+.text {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.phone {
+    display: inline-block;
+    margin-top: 12px;
+    color: var(--color-primary-light);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: color var(--duration-base) var(--ease-out);
+}
+
+.phone:hover,
+.phone:focus-visible {
+    color: var(--color-text-primary);
+    text-decoration: underline;
+}
+
+@media (min-width: 768px) {
+    .block {
+        margin-top: 40px;
+        padding: 24px 32px;
+    }
+
+    .text {
+        font-size: 16px;
+    }
+
+    .phone {
+        font-size: 24px;
+    }
+}
