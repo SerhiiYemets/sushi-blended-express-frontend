@@ -8,7 +8,7 @@ export const RESTAURANT_LABELS: Record<RestaurantId, string> = {
 };
 
 export const RESTAURANT_CLOSE_MINUTES: Record<RestaurantId, number> = {
-    kolin: 21 * 60,
+    kolin: 22 * 60,
     jihlava: 22 * 60,
 };
 
