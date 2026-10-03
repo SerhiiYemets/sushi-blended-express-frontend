@@ -2,8 +2,15 @@ import Link from "next/link";
 import Logo from "@/components/Logo/Logo";
 import css from "./Footer.module.css";
 
+import { RESTAURANT_CLOSE_MINUTES } from "@/lib/restaurants";
+
+import { formatMinutes } from "@/lib/deliveryTime";
+
 export default function Footer() {
     const year = new Date().getFullYear();
+
+    const kolinClose = formatMinutes(RESTAURANT_CLOSE_MINUTES.kolin);
+    const jihlavaClose = formatMinutes(RESTAURANT_CLOSE_MINUTES.jihlava);
 
     return (
         <footer id="contacts" className={css.footer}>
@@ -76,7 +83,8 @@ export default function Footer() {
                         <div className={css.block}>
                             <h3 className={css.label}>Otevírací doba</h3>
                             <p className={css.value}>Pondělí – Neděle</p>
-                            <p className={css.value}>10:00 – 22:00</p>
+                            <p className={css.value}>Kolín: 10:00 – {kolinClose}</p>
+                            <p className={css.value}>Jihlava: 10:00 – {jihlavaClose}</p>
                         </div>
 
                         <div className={css.block}>

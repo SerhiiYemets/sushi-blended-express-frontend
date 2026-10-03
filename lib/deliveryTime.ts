@@ -1,5 +1,10 @@
+import {
+    RESTAURANT_CLOSE_MINUTES,
+    type RestaurantId,
+} from "@/lib/restaurants";
+
 export const BUSINESS_OPEN_MINUTES = 10 * 60; 
-export const BUSINESS_CLOSE_MINUTES = 22 * 60; 
+export const DEFAULT_BUSINESS_CLOSE_MINUTES = 22 * 60;
 export const SLOT_STEP_MINUTES = 30;
 
 // Minimum lead time for a scheduled order: the first selectable slot must be at
@@ -18,6 +23,12 @@ export type TimeSlot = {
 
 const HHMM_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+function getCloseMinutes(restaurantId?: RestaurantId): number {
+    return restaurantId
+        ? RESTAURANT_CLOSE_MINUTES[restaurantId]
+        : DEFAULT_BUSINESS_CLOSE_MINUTES;
+}
 
 export function isValidSlotFormat(value: string): boolean {
     return HHMM_REGEX.test(value);
@@ -45,13 +56,22 @@ export function formatMinutes(totalMinutes: number): string {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-export function isRestaurantOpen(now: Date = new Date()): boolean {
+export function isRestaurantOpen(
+    now: Date = new Date(),
+    restaurantId?: RestaurantId
+): boolean {
     const m = minutesNow(now);
-    return m >= BUSINESS_OPEN_MINUTES && m < BUSINESS_CLOSE_MINUTES;
+    const closeMinutes = getCloseMinutes(restaurantId);
+
+    return m >= BUSINESS_OPEN_MINUTES && m < closeMinutes;
 }
 
-export function getAvailableSlots(now: Date = new Date()): TimeSlot[] {
+export function getAvailableSlots(
+    now: Date = new Date(),
+    restaurantId?: RestaurantId
+): TimeSlot[] {
     const earliest = minutesNow(now) + ORDER_LEAD_MINUTES;
+    const closeMinutes = getCloseMinutes(restaurantId);
 
     const start = Math.max(
         BUSINESS_OPEN_MINUTES,
@@ -59,32 +79,43 @@ export function getAvailableSlots(now: Date = new Date()): TimeSlot[] {
     );
 
     const slots: TimeSlot[] = [];
-    for (let m = start; m <= BUSINESS_CLOSE_MINUTES; m += SLOT_STEP_MINUTES) {
+
+    for (let m = start; m <= closeMinutes; m += SLOT_STEP_MINUTES) {
         const label = formatMinutes(m);
         slots.push({ value: label, label });
     }
+
     return slots;
 }
 
 export function isSlotSelectable(
     value: string,
-    now: Date = new Date()
+    now: Date = new Date(),
+    restaurantId?: RestaurantId
 ): boolean {
     if (!isValidSlotFormat(value)) return false;
-    return getAvailableSlots(now).some(slot => slot.value === value);
+
+    return getAvailableSlots(now, restaurantId).some(
+        slot => slot.value === value
+    );
 }
 
-/** Every business-hours slot (10:00–22:00, 30-min step), date-independent. */
-export function getAllSlots(): TimeSlot[] {
+/** Every business-hours slot for the selected restaurant. */
+export function getAllSlots(
+    restaurantId?: RestaurantId
+): TimeSlot[] {
+    const closeMinutes = getCloseMinutes(restaurantId);
     const slots: TimeSlot[] = [];
+
     for (
         let m = BUSINESS_OPEN_MINUTES;
-        m <= BUSINESS_CLOSE_MINUTES;
+        m <= closeMinutes;
         m += SLOT_STEP_MINUTES
     ) {
         const label = formatMinutes(m);
         slots.push({ value: label, label });
     }
+
     return slots;
 }
 
@@ -99,41 +130,53 @@ export function isDateSelectable(
 /**
  * Slots available for a given date:
  * - past date  → none
- * - today      → only slots respecting the {@link ORDER_LEAD_MINUTES} lead time
- * - future day → all business-hours slots
+ * - today      → only slots respecting the ORDER_LEAD_MINUTES lead time
+ * - future day → all business-hours slots for the selected restaurant
  */
 export function getSlotsForDate(
     dateStr: string,
-    now: Date = new Date()
+    now: Date = new Date(),
+    restaurantId?: RestaurantId
 ): TimeSlot[] {
     if (!isValidDateFormat(dateStr)) return [];
 
     const today = toDateString(now);
+
     if (dateStr < today) return [];
 
-    if (dateStr > today) return getAllSlots();
+    if (dateStr > today) {
+        return getAllSlots(restaurantId);
+    }
 
-    // Today: enforce the minimum lead time so the user can never pick a slot
-    // that is too close to now. Reuses the single lead-time-aware generator so
-    // the dropdown and the submit-time guard (isSlotSelectableOnDate) agree.
-    return getAvailableSlots(now);
+    return getAvailableSlots(now, restaurantId);
 }
 
 export function isSlotSelectableOnDate(
     dateStr: string,
     time: string,
-    now: Date = new Date()
+    now: Date = new Date(),
+    restaurantId?: RestaurantId
 ): boolean {
     if (!isValidSlotFormat(time)) return false;
-    return getSlotsForDate(dateStr, now).some(slot => slot.value === time);
+
+    return getSlotsForDate(dateStr, now, restaurantId).some(
+        slot => slot.value === time
+    );
 }
 
 /** First date that still has selectable slots (today if possible, else tomorrow). */
-export function getDefaultDeliveryDate(now: Date = new Date()): string {
+export function getDefaultDeliveryDate(
+    now: Date = new Date(),
+    restaurantId?: RestaurantId
+): string {
     const today = toDateString(now);
-    if (getSlotsForDate(today, now).length > 0) return today;
+
+    if (getSlotsForDate(today, now, restaurantId).length > 0) {
+        return today;
+    }
 
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
+
     return toDateString(tomorrow);
 }

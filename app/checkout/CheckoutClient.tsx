@@ -293,13 +293,18 @@ export default function CheckoutClient() {
     const scheduledDate = useWatch({ control, name: 'deliveryDate' });
     const scheduledTime = useWatch({ control, name: 'deliveryTime' });
 
-    const canAsap = now ? isRestaurantOpen(now) : false;
+    const canAsap = now
+        ? isRestaurantOpen(now, orderRestaurantId)
+        : false;
 
     const minDate = now ? toDateString(now) : '';
 
     const slots = useMemo(
-        () => (now && scheduledDate ? getSlotsForDate(scheduledDate, now) : []),
-        [now, scheduledDate]
+        () =>
+            now && scheduledDate
+                ? getSlotsForDate(scheduledDate, now, orderRestaurantId)
+                : [],
+        [now, scheduledDate, orderRestaurantId]
     );
 
     useEffect(() => {
@@ -312,9 +317,12 @@ export default function CheckoutClient() {
     useEffect(() => {
         if (!now || deliveryMode !== 'scheduled') return;
         if (!scheduledDate || !isDateSelectable(scheduledDate, now)) {
-            setValue('deliveryDate', getDefaultDeliveryDate(now));
+            setValue(
+                'deliveryDate',
+                getDefaultDeliveryDate(now, orderRestaurantId)
+            );
         }
-    }, [now, deliveryMode, scheduledDate, setValue]);
+    }, [now, deliveryMode, scheduledDate, setValue, orderRestaurantId]);
 
     useEffect(() => {
         if (deliveryMode !== 'scheduled') return;
@@ -363,7 +371,7 @@ export default function CheckoutClient() {
         let deliveryTime: string | undefined;
 
         if (values.deliveryMode === 'asap') {
-            if (!isRestaurantOpen(submitNow)) {
+            if (!isRestaurantOpen(submitNow, orderRestaurantId)) {
                 toast.error(
                     'Restaurace je momentálně zavřená. Vyberte prosím konkrétní čas doručení.'
                 );
@@ -381,7 +389,14 @@ export default function CheckoutClient() {
                 return;
             }
 
-            if (!isSlotSelectableOnDate(date, time, submitNow)) {
+            if (
+                !isSlotSelectableOnDate(
+                    date,
+                    time,
+                    submitNow,
+                    orderRestaurantId
+                )
+            ) {
                 toast.error(
                     'Vybraný čas doručení již není dostupný. Zvolte prosím jiný.'
                 );

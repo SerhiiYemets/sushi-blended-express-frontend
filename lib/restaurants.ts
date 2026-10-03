@@ -7,6 +7,11 @@ export const RESTAURANT_LABELS: Record<RestaurantId, string> = {
     jihlava: "Jihlava",
 };
 
+export const RESTAURANT_CLOSE_MINUTES: Record<RestaurantId, number> = {
+    kolin: 21 * 60,
+    jihlava: 22 * 60,
+};
+
 /**
  * Default map centre for each restaurant (city centre). Used purely to position
  * the delivery map before the customer picks a point — the backend remains the
