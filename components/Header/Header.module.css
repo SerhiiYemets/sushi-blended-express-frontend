@@ -11,6 +11,38 @@
     backdrop-filter: saturate(140%) blur(8px);
 }
 
+.hoursBanner {
+    position: sticky;
+    top: 72px;
+    z-index: 997;
+
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #f6c344;
+    color: #1a1a1a;
+    font-family: var(--font-manrope, var(--font-family, "Segoe UI", sans-serif));
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.hoursBanner strong {
+    font-weight: 700;
+}
+
+@media (max-width: 767px) {
+    .hoursBanner {
+        padding: 9px 12px;
+        font-size: 13px;
+        align-items: flex-start;
+    }
+}
+
 .inner {
     position: relative;
     max-width: 1440px;

@@ -15,6 +15,12 @@ import { useAuthStore } from "@/lib/store/authStore";
 import { useCartCount } from "@/lib/store/cartStore";
 import { useHydrated } from "@/hooks/useHydrated";
 
+import { RESTAURANT_CLOSE_MINUTES } from "@/lib/restaurants";
+import {
+    DEFAULT_BUSINESS_CLOSE_MINUTES,
+    formatMinutes,
+} from "@/lib/deliveryTime";
+
 const NAV_LINKS = [
     { href: "/", label: "Domů" },
     { href: "/menu", label: "Menu" },
@@ -188,6 +194,13 @@ export default function Header() {
     const isHydrated = useAuthStore(selectAuthHydrated);
     const hydrated = useHydrated();
 
+    const kolinClose = RESTAURANT_CLOSE_MINUTES.kolin;
+    const jihlavaClose = RESTAURANT_CLOSE_MINUTES.jihlava;
+
+    const showClosingHoursBanner =
+        kolinClose !== DEFAULT_BUSINESS_CLOSE_MINUTES ||
+        jihlavaClose !== DEFAULT_BUSINESS_CLOSE_MINUTES;
+
     const [menuOpenAt, setMenuOpenAt] = useState<string | null>(null);
     const menuOpen = menuOpenAt === pathname;
 
@@ -307,6 +320,18 @@ export default function Header() {
                 </button>
                 </div>
             </header>
+
+            {showClosingHoursBanner && (
+                <div className={css.hoursBanner} role="status">
+                    <span aria-hidden="true">⚠️</span>
+
+                    <span>
+                        <strong>Změna rozvozu:</strong>{" "}
+                        Rozvoz z pobočky Kolín je dnes pouze do{" "}
+                        {formatMinutes(kolinClose)}. Jihlava beze změny.
+                    </span>
+                </div>
+            )}
 
             {/* Rendered as a sibling of <header>, NOT a child: the header's
                 backdrop-filter establishes a containing block, which would make
