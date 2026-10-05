@@ -19,6 +19,11 @@ type Props = {
 
 const BLACKLIST_PRODUCT_IDS = [
     "364",
+    "402",
+    "391",
+    "141",
+    "408",
+    "409"
 ];
 
 export default function ProductCard({
