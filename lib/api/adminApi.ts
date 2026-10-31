@@ -13,6 +13,8 @@ import type {
 
 import { isRestaurantId } from "@/lib/restaurants";
 
+import type { RestaurantAbout } from "@/lib/api/restaurantAboutApi";
+
 const adminClient = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     withCredentials: true,
@@ -131,4 +133,29 @@ export const deleteAdminEvent = async (
     eventId: string
 ): Promise<void> => {
     await adminClient.delete(`/api/admin/events/${eventId}`);
+};
+
+export type UpdateAdminAboutPayload = {
+    title: string;
+    description: string;
+    imageUrl: string;
+};
+
+export const getAdminAbout = async (): Promise<RestaurantAbout | null> => {
+    const { data } = await adminClient.get<RestaurantAbout | null>(
+        "/api/admin/about"
+    );
+
+    return data;
+};
+
+export const updateAdminAbout = async (
+    payload: UpdateAdminAboutPayload
+): Promise<RestaurantAbout> => {
+    const { data } = await adminClient.patch<RestaurantAbout>(
+        "/api/admin/about",
+        payload
+    );
+
+    return data;
 };

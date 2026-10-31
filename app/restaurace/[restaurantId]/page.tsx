@@ -1,4 +1,3 @@
-
 import { notFound } from "next/navigation";
 
 import Footer from "@/components/Footer/Footer";
@@ -8,6 +7,8 @@ import RestaurantPageClient from "@/components/RestaurantPage/RestaurantPageClie
 import BackToCategories from "@/components/BackToCategories/BackToCategories";
 
 import css from "@/components/RestaurantPage/RestaurantPage.module.css";
+
+import RestaurantAbout from "@/components/RestaurantAbout/RestaurantAbout";
 
 import { isRestaurantId } from "@/lib/restaurants";
 
@@ -33,9 +34,7 @@ export default async function RestaurantPage({ params }: Props) {
 
                 <RestaurantPageClient restaurantId={restaurantId} />
 
-                <section id="o-nas" className={css.scrollTarget}>
-                    <h2>O nás</h2>
-                </section>
+                <RestaurantAbout restaurantId={restaurantId} />
 
                 <section id="galerie" className={css.scrollTarget}>
                     <h2>Galerie</h2>
