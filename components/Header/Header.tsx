@@ -23,7 +23,8 @@ import {
 
 const NAV_LINKS = [
     { href: "/", label: "Domů" },
-    { href: "/menu", label: "Menu" },
+    { href: "/restaurace/kolin", label: "Menu Kolín" },
+    { href: "/restaurace/jihlava", label: "Menu Jihlava" },
     { href: "/alergeny", label: "Seznam alergenů" },
 ] as const;
 

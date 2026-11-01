@@ -103,6 +103,15 @@ export default function Footer() {
 
                     <a
                         className={css.copy}
+                        href="https://sushimax.cz/admin/login"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Administrace
+                    </a>
+
+                    <a
+                        className={css.copy}
                         href="https://serhiiyemets.com/"
                         target="_blank"
                         rel="noopener noreferrer"

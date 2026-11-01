@@ -12,6 +12,8 @@ import RestaurantGallery from "@/components/RestaurantGallery/RestaurantGallery"
 
 import { isRestaurantId } from "@/lib/restaurants";
 
+import css from "@/components/RestaurantPage/RestaurantPage.module.css";
+
 type Props = {
     params: Promise<{
         restaurantId: string;
@@ -29,7 +31,7 @@ export default async function RestaurantPage({ params }: Props) {
         <>
             <Header />
 
-                <main>
+                <main className={css.page}>
                     <EventsBanner restaurantId={restaurantId} />
 
                     <RestaurantPageClient restaurantId={restaurantId} />

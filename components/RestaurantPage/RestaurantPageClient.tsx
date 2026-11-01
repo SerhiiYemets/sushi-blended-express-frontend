@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -28,6 +27,72 @@ type Props = {
 };
 
 const SEARCH_DEBOUNCE_MS = 300;
+
+function NavigationIcon({ children }: { children: React.ReactNode }) {
+    return (
+        <svg
+            className={css.navigationIcon}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            focusable="false"
+        >
+            {children}
+        </svg>
+    );
+}
+
+function DeliveryIcon() {
+    return (
+        <NavigationIcon>
+            <circle cx="6" cy="17" r="2.5" />
+            <circle cx="18" cy="17" r="2.5" />
+            <path d="M8.5 17h7" />
+            <path d="M3.5 17V13h7l2 4" />
+            <path d="M15 8h2.5l2.5 9" />
+            <path d="M12 6h5v5h-5z" />
+            <path d="M2 9h4" />
+            <path d="M1 11.5h3" />
+        </NavigationIcon>
+    );
+}
+
+function RestaurantMenuIcon() {
+    return (
+        <NavigationIcon>
+            <circle cx="12" cy="13" r="6" />
+            <circle cx="12" cy="13" r="3" />
+            <path d="M3 4v5a1.5 1.5 0 0 0 3 0V4" />
+            <path d="M4.5 9v11" />
+            <path d="M21 4c-1.7 1-2.5 3-2.5 5.5H21" />
+            <path d="M21 4v16" />
+        </NavigationIcon>
+    );
+}
+
+function StoreIcon() {
+    return (
+        <NavigationIcon>
+            <path d="M4 10v10h16V10" />
+            <path d="M3 5l1.5-2h15L21 5v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z" />
+            <path d="M10 20v-5h4v5" />
+        </NavigationIcon>
+    );
+}
+
+function GalleryIcon() {
+    return (
+        <NavigationIcon>
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <circle cx="9" cy="10" r="2" />
+            <path d="M3 17l5-4.5 4 3.5 3-2.5 6 5" />
+        </NavigationIcon>
+    );
+}
 
 export default function RestaurantPageClient({ restaurantId }: Props) {
     const [mode, setMode] = useState<MenuMode>("sushi");
@@ -167,6 +232,12 @@ export default function RestaurantPageClient({ restaurantId }: Props) {
 
     return (
         <div className={css.wrapper}>
+            <div className={css.decor} aria-hidden="true">
+                <span className={css.decorSakura} />
+                <span className={css.decorBrush} />
+                <span className={css.decorSushi} />
+            </div>
+
             <section className={css.navigation}>
                 <button
                     type="button"
@@ -178,34 +249,55 @@ export default function RestaurantPageClient({ restaurantId }: Props) {
                             : ""
                     }`}
                 >
-                    Rozvoz sushi
+                    <DeliveryIcon />
+                    {restaurantId === "jihlava" ? (
+                        <span className={css.navigationLabel}>
+                            <span className={css.navigationTitle}>
+                                Rozvoz sushi & Menu restaurace
+                            </span>{" "}
+                            <span className={css.navigationSubtitle}>
+                                Jihlava
+                            </span>
+                        </span>
+                    ) : (
+                        <span className={css.navigationLabel}>
+                            Rozvoz sushi Kolín
+                        </span>
+                    )}
                 </button>
 
-                <button
-                    type="button"
-                    aria-pressed={mode === "restaurant"}
-                    onClick={() => handleModeChange("restaurant")}
-                    className={`${css.navigationButton} ${
-                        mode === "restaurant"
-                            ? css.navigationButtonActive
-                            : ""
-                    }`}
-                >
-                    Menu restaurace
-                </button>
+                {restaurantId !== "jihlava" && (
+                    <button
+                        type="button"
+                        aria-pressed={mode === "restaurant"}
+                        onClick={() => handleModeChange("restaurant")}
+                        className={`${css.navigationButton} ${
+                            mode === "restaurant"
+                                ? css.navigationButtonActive
+                                : ""
+                        }`}
+                    >
+                        <RestaurantMenuIcon />
+                        <span className={css.navigationLabel}>
+                            Menu restaurace
+                        </span>
+                    </button>
+                )}
 
                 <a
                     href="#o-nas"
                     className={css.navigationButton}
                 >
-                    O nás
+                    <StoreIcon />
+                    <span className={css.navigationLabel}>O nás</span>
                 </a>
 
                 <a
                     href="#galerie"
                     className={css.navigationButton}
                 >
-                    Galerie
+                    <GalleryIcon />
+                    <span className={css.navigationLabel}>Galerie</span>
                 </a>
             </section>
 

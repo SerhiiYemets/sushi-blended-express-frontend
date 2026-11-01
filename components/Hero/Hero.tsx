@@ -13,7 +13,7 @@ export default function Hero() {
 
     const goToMenu = (restaurant: RestaurantId) => {
         requestRestaurantSwitch(restaurant);
-        router.push("/menu");
+        router.push(`/restaurace/${restaurant}`);
     };
 
     return (

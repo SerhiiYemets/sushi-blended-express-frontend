@@ -108,4 +108,16 @@
     }
 }
 
+@media (min-width: 768px) {
+    .imageWrapper {
+        width: calc(100% - 64px);
+        height: 420px;
+        min-height: 0;
+        margin: auto 32px;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+    }
+}
+
 
