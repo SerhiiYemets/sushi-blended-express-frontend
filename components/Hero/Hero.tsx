@@ -81,7 +81,7 @@ export default function Hero() {
                     <li className={css.bullet}>
                         <span className={css.bulletIcon}>⚡</span>
                         <span>
-                            <strong>30–45 min</strong> dodání
+                            <strong>30–60 min</strong> dodání
                         </span>
                     </li>
                     <li className={css.bullet}>

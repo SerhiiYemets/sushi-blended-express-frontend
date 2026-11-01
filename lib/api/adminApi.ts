@@ -14,6 +14,7 @@ import type {
 import { isRestaurantId } from "@/lib/restaurants";
 
 import type { RestaurantAbout } from "@/lib/api/restaurantAboutApi";
+import type { RestaurantGallery } from "@/lib/api/restaurantGalleryApi";
 
 const adminClient = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -159,3 +160,53 @@ export const updateAdminAbout = async (
 
     return data;
 };
+
+
+export type CreateAdminGalleryPayload = {
+    title: string;
+    images: { url: string }[];
+    isActive: boolean;
+    sortOrder: number;
+};
+
+export type UpdateAdminGalleryPayload = Partial<CreateAdminGalleryPayload>;
+
+export const getAdminGalleries = async (): Promise<RestaurantGallery[]> => {
+    const { data } = await adminClient.get<RestaurantGallery[]>(
+        "/api/admin/gallery"
+    );
+
+    return data;
+};
+
+export const createAdminGallery = async (
+    payload: CreateAdminGalleryPayload
+): Promise<RestaurantGallery> => {
+    const { data } = await adminClient.post<RestaurantGallery>(
+        "/api/admin/gallery",
+        payload
+    );
+
+    return data;
+};
+
+export const updateAdminGallery = async (
+    galleryId: string,
+    payload: UpdateAdminGalleryPayload
+): Promise<RestaurantGallery> => {
+    const { data } = await adminClient.patch<RestaurantGallery>(
+        `/api/admin/gallery/${encodeURIComponent(galleryId)}`,
+        payload
+    );
+
+    return data;
+};
+
+export const deleteAdminGallery = async (
+    galleryId: string
+): Promise<void> => {
+    await adminClient.delete(
+        `/api/admin/gallery/${encodeURIComponent(galleryId)}`
+    );
+};
+

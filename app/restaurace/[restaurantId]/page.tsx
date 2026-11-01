@@ -6,9 +6,9 @@ import EventsBanner from "@/components/Events/EventsBanner";
 import RestaurantPageClient from "@/components/RestaurantPage/RestaurantPageClient";
 import BackToCategories from "@/components/BackToCategories/BackToCategories";
 
-import css from "@/components/RestaurantPage/RestaurantPage.module.css";
-
 import RestaurantAbout from "@/components/RestaurantAbout/RestaurantAbout";
+
+import RestaurantGallery from "@/components/RestaurantGallery/RestaurantGallery";
 
 import { isRestaurantId } from "@/lib/restaurants";
 
@@ -29,19 +29,17 @@ export default async function RestaurantPage({ params }: Props) {
         <>
             <Header />
 
-            <main>
-                <EventsBanner restaurantId={restaurantId} />
+                <main>
+                    <EventsBanner restaurantId={restaurantId} />
 
-                <RestaurantPageClient restaurantId={restaurantId} />
+                    <RestaurantPageClient restaurantId={restaurantId} />
 
-                <RestaurantAbout restaurantId={restaurantId} />
+                    <RestaurantAbout restaurantId={restaurantId} />
 
-                <section id="galerie" className={css.scrollTarget}>
-                    <h2>Galerie</h2>
-                </section>
+                    <RestaurantGallery restaurantId={restaurantId} />
 
-                <BackToCategories />
-            </main>
+                    <BackToCategories />
+                </main>
 
             <Footer />
         </>
