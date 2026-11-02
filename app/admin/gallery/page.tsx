@@ -70,38 +70,38 @@ export default function AdminGalleryPage() {
         try {
             if (editing) {
                 await updateAdminGallery(editing._id, payload);
-                toast.success("Galerie byla aktualizována");
+                toast.success("Галерея обновлена");
             } else {
                 await createAdminGallery(payload);
-                toast.success("Galerie byla vytvořena");
+                toast.success("Галерея создана");
             }
 
             await loadGalleries();
             setEditing(null);
             setShowForm(false);
         } catch {
-            toast.error("Nepodařilo se uložit galerii");
+            toast.error("Не удалось сохранить галерею");
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (gallery: RestaurantGallery) => {
-        if (!window.confirm(`Opravdu smazat galerii "${gallery.title}"?`)) {
+        if (!window.confirm(`Удалить галерею «${gallery.title}»?`)) {
             return;
         }
 
         try {
             await deleteAdminGallery(gallery._id);
             await loadGalleries();
-            toast.success("Galerie byla smazána");
+            toast.success("Галерея удалена");
         } catch {
-            toast.error("Nepodařilo se smazat galerii");
+            toast.error("Не удалось удалить галерею");
         }
     };
 
     if (loading) {
-        return <p>Načítání...</p>;
+        return <p>Загрузка...</p>;
     }
 
     if (!admin) {
@@ -114,9 +114,9 @@ export default function AdminGalleryPage() {
     <section className={styles.page}>
         <div className={styles.header}>
             <div>
-                <h1 className={styles.title}>Galerie</h1>
+                <h1 className={styles.title}>Галерея</h1>
                 <p className={styles.description}>
-                    Spravujte fotografie vaší restaurace.
+                    Управляйте фотографиями вашего ресторана.
                 </p>
             </div>
 
@@ -129,7 +129,7 @@ export default function AdminGalleryPage() {
                         setShowForm(true);
                     }}
                 >
-                    + Nová galerie
+                    + Новая галерея
                 </button>
             )}
         </div>
@@ -149,12 +149,12 @@ export default function AdminGalleryPage() {
 
         <div>
             <h2 className={styles.sectionTitle}>
-                Vytvořené galerie
+                Созданные галереи
             </h2>
 
             {galleries.length === 0 ? (
                 <p className={styles.empty}>
-                    Zatím nemáte žádné galerie.
+                    У вас пока нет галерей.
                 </p>
                 ) : (
                     <div className={styles.galleryGrid}>
@@ -168,7 +168,7 @@ export default function AdminGalleryPage() {
                                 </h3>
 
                                 <p className={styles.galleryInfo}>
-                                    {gallery.images.length} fotografií
+                                    Фотографий: {gallery.images.length}
                                 </p>
 
                                 <p
@@ -179,8 +179,8 @@ export default function AdminGalleryPage() {
                                     }
                                 >
                                     {gallery.isActive
-                                        ? "Aktivní"
-                                        : "Neaktivní"}
+                                        ? "Активный"
+                                        : "Неактивный"}
                                 </p>
 
                                 <div className={styles.actions}>
@@ -192,7 +192,7 @@ export default function AdminGalleryPage() {
                                             setShowForm(true);
                                         }}
                                     >
-                                        Upravit
+                                        Изменить
                                     </button>
 
                                     <button
@@ -200,7 +200,7 @@ export default function AdminGalleryPage() {
                                         className={styles.deleteButton}
                                         onClick={() => handleDelete(gallery)}
                                     >
-                                        Smazat
+                                        Удалить
                                     </button>
                                 </div>
                             </article>

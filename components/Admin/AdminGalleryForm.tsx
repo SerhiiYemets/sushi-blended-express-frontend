@@ -60,16 +60,16 @@ export default function AdminGalleryForm({
         <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.header}>
                 <h2 className={styles.title}>
-                    {gallery ? "Upravit galerii" : "Nová galerie"}
+                    {gallery ? "Редактировать галерею" : "Новая галерея"}
                 </h2>
                 <p className={styles.subtitle}>
-                    Vyplňte název a přidejte odkazy na fotografie.
+                    Укажите название и добавьте ссылки на фотографии.
                 </p>
             </div>
 
             <div className={styles.field}>
                 <label className={styles.label} htmlFor="gallery-title">
-                    Název galerie / události
+                    Название галереи / события
                 </label>
 
                 <input
@@ -80,14 +80,14 @@ export default function AdminGalleryForm({
                     onChange={(event) => setTitle(event.target.value)}
                     maxLength={120}
                     required
-                    placeholder="Např. Halloween Sushi Night"
+                    placeholder="Например, Halloween Sushi Night"
                 />
             </div>
 
             <section className={styles.photoSection}>
                 <div className={styles.sectionHeader}>
                     <h3 className={styles.sectionTitle}>
-                        Fotografie
+                        Фотографии
                         <span className={styles.count}>{images.length}</span>
                     </h3>
 
@@ -96,7 +96,7 @@ export default function AdminGalleryForm({
                         type="button"
                         onClick={addImage}
                     >
-                        + Přidat fotografii
+                        + Добавить фото
                     </button>
                 </div>
 
@@ -106,10 +106,10 @@ export default function AdminGalleryForm({
                             🖼
                         </span>
                         <p className={styles.emptyTitle}>
-                            Zatím žádné fotografie
+                            Пока нет фотографий
                         </p>
                         <p className={styles.emptyText}>
-                            Klikněte na „Přidat fotografii“ a vložte URL obrázku.
+                            Нажмите «Добавить фото» и вставьте URL изображения.
                         </p>
                     </div>
                 ) : (
@@ -122,11 +122,11 @@ export default function AdminGalleryForm({
                                         <img
                                             className={styles.preview}
                                             src={url}
-                                            alt={`Náhled fotografie ${index + 1}`}
+                                            alt={`Предпросмотр фотографии ${index + 1}`}
                                         />
                                     ) : (
                                         <span className={styles.previewPlaceholder}>
-                                            Bez náhledu
+                                            Нет превью
                                         </span>
                                     )}
                                     <span className={styles.previewIndex}>
@@ -140,7 +140,7 @@ export default function AdminGalleryForm({
                                             className={styles.label}
                                             htmlFor={`gallery-image-${index}`}
                                         >
-                                            URL fotografie {index + 1}
+                                            URL фотографии {index + 1}
                                         </label>
 
                                         <input
@@ -160,7 +160,7 @@ export default function AdminGalleryForm({
                                         type="button"
                                         onClick={() => removeImage(index)}
                                     >
-                                        Odebrat fotografii
+                                        Удалить фото
                                     </button>
                                 </div>
                             </div>
@@ -183,9 +183,9 @@ export default function AdminGalleryForm({
                     <span className={styles.toggleThumb} />
                 </span>
                 <span className={styles.toggleText}>
-                    <span className={styles.toggleLabel}>Aktivní galerie</span>
+                    <span className={styles.toggleLabel}>Активная галерея</span>
                     <span className={styles.toggleHint}>
-                        Aktivní galerie se zobrazí na stránce restaurace.
+                        Активная галерея отображается на странице ресторана.
                     </span>
                 </span>
             </label>
@@ -196,7 +196,7 @@ export default function AdminGalleryForm({
                     type="button"
                     onClick={onCancel}
                 >
-                    Zrušit
+                    Отмена
                 </button>
 
                 <button
@@ -204,7 +204,7 @@ export default function AdminGalleryForm({
                     type="submit"
                     disabled={saving || !title.trim()}
                 >
-                    {saving ? "Ukládání..." : "Uložit galerii"}
+                    {saving ? "Сохранение..." : "Сохранить галерею"}
                 </button>
             </div>
         </form>

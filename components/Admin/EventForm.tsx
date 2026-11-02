@@ -80,7 +80,7 @@ export default function EventForm({
             new Date(startAt).getTime()
         ) {
             setError(
-                "Konec události nesmí být před začátkem."
+                "Окончание события не может быть раньше начала."
             );
             return;
         }
@@ -111,7 +111,7 @@ export default function EventForm({
             setError(
                 error instanceof Error
                     ? error.message
-                    : "Událost se nepodařilo uložit."
+                    : "Не удалось сохранить событие."
             );
         } finally {
             setIsSubmitting(false);
@@ -125,13 +125,13 @@ export default function EventForm({
         >
             <h2 className={css.sectionTitle}>
                 {initialEvent
-                    ? "Upravit událost"
-                    : "Nová událost"}
+                    ? "Редактировать событие"
+                    : "Новое событие"}
             </h2>
 
             <div className={css.field}>
                 <label htmlFor="event-title">
-                    Název *
+                    Название *
                 </label>
 
                 <input
@@ -149,7 +149,7 @@ export default function EventForm({
 
             <div className={css.field}>
                 <label htmlFor="event-description">
-                    Popis
+                    Описание
                 </label>
 
                 <textarea
@@ -168,7 +168,7 @@ export default function EventForm({
 
             <div className={css.field}>
                 <label htmlFor="event-image">
-                    URL obrázku
+                    URL изображения
                 </label>
 
                 <input
@@ -186,7 +186,7 @@ export default function EventForm({
             <div className={css.grid}>
                 <div className={css.field}>
                     <label htmlFor="event-start">
-                        Začátek události *
+                        Начало события *
                     </label>
 
                     <input
@@ -203,7 +203,7 @@ export default function EventForm({
 
                 <div className={css.field}>
                     <label htmlFor="event-end">
-                        Konec události *
+                        Окончание события *
                     </label>
 
                     <input
@@ -230,7 +230,7 @@ export default function EventForm({
                     }
                 />
 
-                Aktivní
+                Активный
             </label>
 
             {error && (
@@ -246,10 +246,10 @@ export default function EventForm({
                     disabled={isSubmitting}
                 >
                     {isSubmitting
-                        ? "Ukládám..."
+                        ? "Сохранение..."
                         : initialEvent
-                            ? "Uložit změny"
-                            : "Vytvořit událost"}
+                            ? "Сохранить изменения"
+                            : "Создать событие"}
                 </button>
 
                 {initialEvent && onCancel && (
@@ -258,7 +258,7 @@ export default function EventForm({
                         type="button"
                         onClick={onCancel}
                     >
-                        Zrušit
+                        Отмена
                     </button>
                 )}
             </div>

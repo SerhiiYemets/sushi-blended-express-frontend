@@ -59,7 +59,7 @@ const normalizeAdmin = (data: unknown): RestaurantAdmin => {
         !("role" in data) ||
         !("restaurantId" in data)
     ) {
-        throw new Error("Invalid admin account");
+        throw new Error("Недействительная учётная запись администратора");
     }
 
     const user = data as Record<string, unknown>;
@@ -68,7 +68,7 @@ const normalizeAdmin = (data: unknown): RestaurantAdmin => {
         user.role !== "restaurantAdmin" ||
         !isRestaurantId(user.restaurantId)
     ) {
-        throw new Error("This account is not a restaurant administrator");
+        throw new Error("Эта учётная запись не является администратором ресторана");
     }
 
     return {

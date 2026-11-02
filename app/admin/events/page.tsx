@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
@@ -39,7 +39,7 @@ const getErrorMessage = (error: unknown) => {
         return error.message;
     }
 
-    return "Něco se nepodařilo.";
+    return "Что-то пошло не так.";
 };
 
 export default function AdminEventsPage() {
@@ -55,6 +55,21 @@ export default function AdminEventsPage() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const formSectionRef = useRef<HTMLElement | null>(null);
+
+    const handleEdit = (event: Event) => {
+        setEditingEvent(event);
+
+        const prefersReducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+        formSectionRef.current?.scrollIntoView({
+            behavior: prefersReducedMotion ? "auto" : "smooth",
+            block: "start",
+        });
+    };
 
     const loadEvents = useCallback(async () => {
         const adminEvents = await getAdminEvents();
@@ -129,7 +144,7 @@ export default function AdminEventsPage() {
 
     const handleDelete = async (event: Event) => {
         const confirmed = window.confirm(
-            `Opravdu chcete smazat událost "${event.title}"?`
+            `Вы действительно хотите удалить событие «${event.title}»?`
         );
 
         if (!confirmed) return;
@@ -157,7 +172,7 @@ export default function AdminEventsPage() {
         return (
             <main className={css.page}>
                 <div className={css.container}>
-                    Načítání administrace...
+                    Загрузка админ-панели...
                 </div>
             </main>
         );
@@ -173,11 +188,11 @@ export default function AdminEventsPage() {
                 <div className={css.container}>
                     <header className={css.header}>
                         <h1 className={css.title}>
-                            Události
+                            События
                         </h1>
 
                         <p className={css.restaurant}>
-                            Restaurace:{" "}
+                            Ресторан:{" "}
                             <strong>
                                 {
                                     RESTAURANT_LABELS[
@@ -195,7 +210,10 @@ export default function AdminEventsPage() {
                     )}
 
                     <div className={css.content}>
-                        <section className={css.card}>
+                        <section
+                            ref={formSectionRef}
+                            className={`${css.card} ${css.formSection}`}
+                        >
                             <EventForm
                                 key={
                                     editingEvent?._id ??
@@ -215,13 +233,13 @@ export default function AdminEventsPage() {
 
                         <section className={css.card}>
                             <h2 className={css.sectionTitle}>
-                                Vytvořené události
+                                Созданные события
                             </h2>
 
                             {events.length === 0 ? (
                                 <p className={css.empty}>
-                                    Zatím nejsou vytvořené
-                                    žádné události.
+                                    Пока нет созданных
+                                    событий.
                                 </p>
                             ) : (
                                 <div className={css.eventList}>
@@ -255,8 +273,8 @@ export default function AdminEventsPage() {
                                                     }`}
                                                 >
                                                     {event.active
-                                                        ? "Aktivní"
-                                                        : "Neaktivní"}
+                                                        ? "Активный"
+                                                        : "Неактивный"}
                                                 </span>
                                             </div>
 
@@ -283,12 +301,12 @@ export default function AdminEventsPage() {
                                                     }
                                                     type="button"
                                                     onClick={() =>
-                                                        setEditingEvent(
+                                                        handleEdit(
                                                             event
                                                         )
                                                     }
                                                 >
-                                                    Upravit
+                                                    Изменить
                                                 </button>
 
                                                 <button
@@ -302,7 +320,7 @@ export default function AdminEventsPage() {
                                                         )
                                                     }
                                                 >
-                                                    Smazat
+                                                    Удалить
                                                 </button>
                                             </div>
                                         </article>

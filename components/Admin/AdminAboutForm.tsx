@@ -45,7 +45,7 @@ export default function AdminAboutForm({
                 imageUrl: imageUrl.trim(),
             });
         } catch {
-            setError("Nepodařilo se uložit změny. Zkuste to znovu.");
+            setError("Не удалось сохранить изменения. Попробуйте ещё раз.");
         } finally {
             setIsSaving(false);
         }
@@ -54,7 +54,7 @@ export default function AdminAboutForm({
     return (
         <form className={css.form} onSubmit={handleSubmit}>
             <div className={css.field}>
-                <label htmlFor="about-title">Nadpis</label>
+                <label htmlFor="about-title">Заголовок</label>
                 <input
                     id="about-title"
                     className={css.input}
@@ -68,7 +68,7 @@ export default function AdminAboutForm({
             </div>
 
             <div className={css.field}>
-                <label htmlFor="about-description">Popis</label>
+                <label htmlFor="about-description">Описание</label>
                 <textarea
                     id="about-description"
                     className={css.textarea}
@@ -78,12 +78,12 @@ export default function AdminAboutForm({
                     }
                     maxLength={3000}
                     rows={7}
-                    placeholder="Napište něco o své restauraci..."
+                    placeholder="Напишите что-нибудь о своём ресторане..."
                 />
             </div>
 
             <div className={css.field}>
-                <label htmlFor="about-image">URL fotografie</label>
+                <label htmlFor="about-image">URL фотографии</label>
                 <input
                     id="about-image"
                     className={css.input}
@@ -97,10 +97,10 @@ export default function AdminAboutForm({
 
             {imageUrl.trim() && (
                 <div className={css.field}>
-                    <span className={css.label}>Náhled fotografie</span>
+                    <span className={css.label}>Предпросмотр фотографии</span>
                     <Image
                         src={imageUrl.trim()}
-                        alt="Náhled fotografie restaurace"
+                        alt="Предпросмотр фотографии ресторана"
                         width={480}
                         height={300}
                         unoptimized
@@ -126,7 +126,7 @@ export default function AdminAboutForm({
                     type="submit"
                     disabled={isSaving}
                 >
-                    {isSaving ? "Ukládání..." : "Uložit změny"}
+                    {isSaving ? "Сохранение..." : "Сохранить изменения"}
                 </button>
             </div>
         </form>

@@ -30,11 +30,11 @@ export default function AdminLoginForm() {
             router.replace("/admin/events");
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 401) {
-                setError("Nesprávný email nebo heslo.");
+                setError("Неверный email или пароль.");
             } else if (error instanceof Error) {
                 setError(error.message);
             } else {
-                setError("Přihlášení se nezdařilo.");
+                setError("Не удалось войти.");
             }
         } finally {
             setIsSubmitting(false);
@@ -43,10 +43,10 @@ export default function AdminLoginForm() {
 
     return (
         <form className={css.form} onSubmit={handleSubmit}>
-            <h1 className={css.title}>Administrace restaurace</h1>
+            <h1 className={css.title}>Админ-панель ресторана</h1>
 
             <div className={css.formGroup}>
-                <label htmlFor="admin-email">Email</label>
+                <label htmlFor="admin-email">Электронная почта</label>
                 <input
                     id="admin-email"
                     className={css.input}
@@ -59,7 +59,7 @@ export default function AdminLoginForm() {
             </div>
 
             <div className={css.formGroup}>
-                <label htmlFor="admin-password">Heslo</label>
+                <label htmlFor="admin-password">Пароль</label>
                 <input
                     id="admin-password"
                     className={css.input}
@@ -79,7 +79,7 @@ export default function AdminLoginForm() {
                 type="submit"
                 disabled={isSubmitting}
             >
-                {isSubmitting ? "Přihlašuji..." : "Přihlásit se"}
+                {isSubmitting ? "Вход..." : "Войти"}
             </button>
         </form>
     );

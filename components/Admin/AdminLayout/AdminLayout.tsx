@@ -17,9 +17,9 @@ type Props = {
 };
 
 const navigation = [
-    { href: "/admin/events", label: "Události" },
-    { href: "/admin/gallery", label: "Galerie" },
-    { href: "/admin/about", label: "O nás" },
+    { href: "/admin/events", label: "События" },
+    { href: "/admin/gallery", label: "Галерея" },
+    { href: "/admin/about", label: "О нас" },
 ];
 
 export default function AdminLayout({ admin, children }: Props) {
@@ -37,7 +37,7 @@ export default function AdminLayout({ admin, children }: Props) {
             await adminLogout();
             router.replace("/admin/login");
         } catch {
-            setLogoutError("Odhlášení se nezdařilo. Zkuste to znovu.");
+            setLogoutError("Не удалось выйти. Попробуйте ещё раз.");
             setIsLoggingOut(false);
         }
     };
@@ -47,12 +47,12 @@ export default function AdminLayout({ admin, children }: Props) {
             <header className={css.header}>
                 <Link href="/admin/events" className={css.brand}>
                     <span className={css.brandName}>SushiMax</span>
-                    <span className={css.brandAccent}>Admin</span>
+                    <span className={css.brandAccent}>Админ</span>
                 </Link>
 
                 <div className={css.headerActions}>
                     <div className={css.restaurant}>
-                        Restaurace:{" "}
+                        Ресторан:{" "}
                         <strong>
                             {RESTAURANT_LABELS[admin.restaurantId]}
                         </strong>
@@ -64,7 +64,7 @@ export default function AdminLayout({ admin, children }: Props) {
                         onClick={() => void handleLogout()}
                         disabled={isLoggingOut}
                     >
-                        {isLoggingOut ? "Odhlašování..." : "Odhlásit se"}
+                        {isLoggingOut ? "Выход..." : "Выйти"}
                     </button>
 
                     {logoutError && (
@@ -77,7 +77,7 @@ export default function AdminLayout({ admin, children }: Props) {
 
             <div className={css.body}>
                 <aside className={css.sidebar}>
-                    <nav className={css.navigation} aria-label="Administrace">
+                    <nav className={css.navigation} aria-label="Админ-панель">
                         {navigation.map((item) => {
                             const active = pathname === item.href;
 

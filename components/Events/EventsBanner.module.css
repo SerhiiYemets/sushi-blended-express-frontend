@@ -1,7 +1,7 @@
 .wrapper {
     width: 100%;
     padding: 16px 24px 0;
-    background: #090909;
+    background: transparent;
 }
 
 .banner {
@@ -106,8 +106,9 @@
 }
 
 .image {
-    width: 155px;
-    height: 105px;
+    width: 200px;
+    height: 125px;
+    margin-block: -9px;
     flex-shrink: 0;
 
     object-fit: cover;
@@ -537,8 +538,9 @@
     }
 
     .image {
-        width: 82px;
-        height: 82px;
+        width: 100px;
+        height: 100px;
+        margin-block: -4px;
         border-radius: 15px;
     }
 
@@ -596,5 +598,13 @@
 
     .date {
         font-size: 10px;
+    }
+}
+
+@media (max-width: 380px) {
+    .image {
+        width: 84px;
+        height: 84px;
+        margin-block: 0;
     }
 }

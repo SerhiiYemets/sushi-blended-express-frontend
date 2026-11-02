@@ -34,7 +34,7 @@ const getErrorMessage = (error: unknown): string => {
         return error.message;
     }
 
-    return "Nepodařilo se načíst informace o restauraci.";
+    return "Не удалось загрузить информацию о ресторане.";
 };
 
 export default function AdminAboutPage() {
@@ -97,7 +97,7 @@ export default function AdminAboutPage() {
             const updatedAbout = await updateAdminAbout(payload);
 
             setAbout(updatedAbout);
-            setSuccess("Změny byly úspěšně uloženy.");
+            setSuccess("Изменения успешно сохранены.");
         } catch (error) {
             setError(getErrorMessage(error));
             throw error;
@@ -108,7 +108,7 @@ export default function AdminAboutPage() {
         return (
             <main className={css.page}>
                 <div className={css.container}>
-                    Načítání administrace...
+                    Загрузка админ-панели...
                 </div>
             </main>
         );
@@ -119,7 +119,7 @@ export default function AdminAboutPage() {
             <main className={css.page}>
                 <div className={css.container}>
                     <p className={css.error}>
-                        {error || "Administrace není dostupná."}
+                        {error || "Админ-панель недоступна."}
                     </p>
                 </div>
             </main>
@@ -131,9 +131,9 @@ export default function AdminAboutPage() {
             <main className={css.page}>
                 <div className={css.container}>
                     <header className={css.header}>
-                        <h1 className={css.title}>O nás</h1>
+                        <h1 className={css.title}>О нас</h1>
                         <p className={css.restaurant}>
-                            Informace o restauraci
+                            Информация о ресторане
                         </p>
                     </header>
 
@@ -145,7 +145,7 @@ export default function AdminAboutPage() {
 
                     <section className={css.card}>
                         <h2 className={css.sectionTitle}>
-                            Upravit informace o restauraci
+                            Редактировать информацию о ресторане
                         </h2>
 
                         {success && (

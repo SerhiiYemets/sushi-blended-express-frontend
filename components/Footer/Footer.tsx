@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Logo from "@/components/Logo/Logo";
+import CallButton from "@/components/CallButton/CallButton";
 import css from "./Footer.module.css";
 
 import { RESTAURANT_CLOSE_MINUTES } from "@/lib/restaurants";
@@ -13,6 +14,7 @@ export default function Footer() {
     const jihlavaClose = formatMinutes(RESTAURANT_CLOSE_MINUTES.jihlava);
 
     return (
+        <>
         <footer id="contacts" className={css.footer}>
             <div className={css.inner}>
                 <div className={css.top}>
@@ -121,5 +123,8 @@ export default function Footer() {
                 </div>
             </div>
         </footer>
+
+        <CallButton />
+        </>
     );
 }
