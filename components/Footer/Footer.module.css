@@ -137,6 +137,29 @@
     letter-spacing: 0.02em;
 }
 
+.legalLinks {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 18px;
+    margin-bottom: 8px;
+}
+
+.legalLink {
+    font-size: 13px;
+    color: var(--color-text-muted, #a0a0a0);
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.legalLink:hover,
+.legalLink:focus-visible {
+    color: var(--color-text-primary, #e0e0e0);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 @media (min-width: 768px) {
     .inner {
         max-width: 768px;

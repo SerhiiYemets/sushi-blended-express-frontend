@@ -10,6 +10,8 @@ import RestaurantAbout from "@/components/RestaurantAbout/RestaurantAbout";
 
 import RestaurantGallery from "@/components/RestaurantGallery/RestaurantGallery";
 
+import RestaurantOperator from "@/components/RestaurantOperator/RestaurantOperator";
+
 import { isRestaurantId } from "@/lib/restaurants";
 
 import css from "@/components/RestaurantPage/RestaurantPage.module.css";
@@ -39,6 +41,8 @@ export default async function RestaurantPage({ params }: Props) {
                     <RestaurantAbout restaurantId={restaurantId} />
 
                     <RestaurantGallery restaurantId={restaurantId} />
+
+                    <RestaurantOperator restaurantId={restaurantId} />
 
                     <BackToCategories />
                 </main>
