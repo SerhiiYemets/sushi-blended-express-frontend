@@ -1,13 +1,20 @@
 
 "use client";
 
-import { useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 
 import type {
     CreateEventPayload,
     Event,
 } from "@/types/event";
+
+import {
+    ADMIN_UPLOAD_ACCEPT,
+    getUploadErrorMessage,
+    uploadAdminImage,
+    validateAdminImageFile,
+} from "@/lib/api/adminApi";
 
 import css from "@/components/Admin/AdminEvents.module.css";
 
@@ -67,6 +74,51 @@ export default function EventForm({
         useState(false);
 
     const [error, setError] = useState("");
+
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadError, setUploadError] = useState("");
+    const [localPreview, setLocalPreview] = useState<string | null>(null);
+
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+    useEffect(() => {
+        if (!localPreview) return;
+
+        return () => URL.revokeObjectURL(localPreview);
+    }, [localPreview]);
+
+    const handleImageSelect = async (
+        event: ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+
+        if (!file) return;
+
+        setUploadError("");
+
+        const validationError = validateAdminImageFile(file);
+
+        if (validationError) {
+            setUploadError(validationError);
+            return;
+        }
+
+        setLocalPreview(URL.createObjectURL(file));
+        setIsUploading(true);
+
+        try {
+            const { url } = await uploadAdminImage(file, "events");
+            setImageUrl(url);
+        } catch (uploadFailure) {
+            setUploadError(getUploadErrorMessage(uploadFailure));
+        } finally {
+            setLocalPreview(null);
+            setIsUploading(false);
+        }
+    };
+
+    const previewSrc = localPreview ?? imageUrl.trim();
 
     const handleSubmit = async (
         event: FormEvent<HTMLFormElement>
@@ -180,7 +232,62 @@ export default function EventForm({
                         setImageUrl(event.target.value)
                     }
                     placeholder="https://..."
+                    disabled={isUploading}
                 />
+
+                <div className={css.upload}>
+                    <input
+                        ref={fileInputRef}
+                        id="event-image-file"
+                        className={css.fileInput}
+                        type="file"
+                        accept={ADMIN_UPLOAD_ACCEPT}
+                        onChange={(event) => void handleImageSelect(event)}
+                        disabled={isUploading}
+                        tabIndex={-1}
+                        aria-hidden="true"
+                    />
+
+                    <button
+                        type="button"
+                        className={css.secondaryButton}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        aria-describedby="event-image-hint"
+                    >
+                        {isUploading
+                            ? "Загрузка..."
+                            : "Загрузить с компьютера"}
+                    </button>
+
+                    <span id="event-image-hint" className={css.uploadHint}>
+                        JPEG, PNG, WebP или AVIF, до 5 МБ
+                    </span>
+                </div>
+
+                <p className={css.uploadStatus} role="status" aria-live="polite">
+                    {isUploading ? "Изображение загружается..." : ""}
+                </p>
+
+                {uploadError && (
+                    <p className={css.error} role="alert">
+                        {uploadError}
+                    </p>
+                )}
+
+                {previewSrc && (
+                    <div
+                        className={`${css.imagePreview} ${
+                            isUploading ? css.imagePreviewLoading : ""
+                        }`}
+                    >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={previewSrc}
+                            alt="Предпросмотр изображения события"
+                        />
+                    </div>
+                )}
             </div>
 
             <div className={css.grid}>
@@ -243,7 +350,7 @@ export default function EventForm({
                 <button
                     className={css.primaryButton}
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isUploading}
                 >
                     {isSubmitting
                         ? "Сохранение..."

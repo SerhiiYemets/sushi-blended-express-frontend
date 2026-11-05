@@ -37,7 +37,7 @@ export default function PrivacyPage() {
                     <li>
                         u&nbsp;objednávek z&nbsp;restaurace{" "}
                         <strong>SushiMax Jihlava</strong> je správcem společnost
-                        Beletskaya Oksana
+                        SushiMax s.r.o.
                     </li>
                 </ul>
                 <OperatorCards />

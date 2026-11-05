@@ -1,11 +1,31 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import {
+    useEffect,
+    useRef,
+    useState,
+    type ChangeEvent,
+    type FormEvent,
+} from "react";
 
-import type { CreateAdminGalleryPayload } from "@/lib/api/adminApi";
+import {
+    ADMIN_UPLOAD_ACCEPT,
+    getUploadErrorMessage,
+    uploadAdminImage,
+    validateAdminImageFile,
+    type CreateAdminGalleryPayload,
+} from "@/lib/api/adminApi";
 import type { RestaurantGallery } from "@/lib/api/restaurantGalleryApi";
 
 import styles from "./AdminGalleryForm.module.css";
+
+type PendingUpload = {
+    id: number;
+    name: string;
+    previewUrl: string | null;
+    status: "uploading" | "error";
+    error?: string;
+};
 
 type Props = {
     gallery?: RestaurantGallery;
@@ -42,6 +62,100 @@ export default function AdminGalleryForm({
         );
     };
 
+    const [uploads, setUploads] = useState<PendingUpload[]>([]);
+
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const nextUploadIdRef = useRef(0);
+    const previewUrlsRef = useRef(new Set<string>());
+
+    const isUploading = uploads.some((upload) => upload.status === "uploading");
+
+    useEffect(() => {
+        const previewUrls = previewUrlsRef.current;
+
+        return () => {
+            previewUrls.forEach((url) => URL.revokeObjectURL(url));
+            previewUrls.clear();
+        };
+    }, []);
+
+    const releasePreview = (previewUrl: string | null) => {
+        if (!previewUrl) return;
+
+        URL.revokeObjectURL(previewUrl);
+        previewUrlsRef.current.delete(previewUrl);
+    };
+
+    const dismissUpload = (id: number) => {
+        setUploads((previous) => {
+            const upload = previous.find((item) => item.id === id);
+            releasePreview(upload?.previewUrl ?? null);
+
+            return previous.filter((item) => item.id !== id);
+        });
+    };
+
+    const appendUploadedImage = (url: string) => {
+        setImages((previous) =>
+            previous.length === 1 && !previous[0].trim()
+                ? [url]
+                : [...previous, url]
+        );
+    };
+
+    const handleFilesSelected = async (
+        event: ChangeEvent<HTMLInputElement>
+    ) => {
+        const files = Array.from(event.target.files ?? []);
+        event.target.value = "";
+
+        if (files.length === 0) return;
+
+        const queue = files.map((file) => {
+            const validationError = validateAdminImageFile(file);
+            const previewUrl = validationError
+                ? null
+                : URL.createObjectURL(file);
+
+            if (previewUrl) previewUrlsRef.current.add(previewUrl);
+
+            const upload: PendingUpload = {
+                id: nextUploadIdRef.current++,
+                name: file.name,
+                previewUrl,
+                status: validationError ? "error" : "uploading",
+                error: validationError ?? undefined,
+            };
+
+            return { file, upload };
+        });
+
+        setUploads((previous) => [
+            ...previous,
+            ...queue.map((item) => item.upload),
+        ]);
+
+        for (const { file, upload } of queue) {
+            if (upload.status !== "uploading") continue;
+
+            try {
+                const { url } = await uploadAdminImage(file, "gallery");
+                appendUploadedImage(url);
+                dismissUpload(upload.id);
+            } catch (uploadFailure) {
+                const message = getUploadErrorMessage(uploadFailure);
+
+                setUploads((previous) =>
+                    previous.map((item) =>
+                        item.id === upload.id
+                            ? { ...item, status: "error", error: message }
+                            : item
+                    )
+                );
+            }
+        }
+    };
+
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
@@ -63,7 +177,8 @@ export default function AdminGalleryForm({
                     {gallery ? "Редактировать галерею" : "Новая галерея"}
                 </h2>
                 <p className={styles.subtitle}>
-                    Укажите название и добавьте ссылки на фотографии.
+                    Укажите название и добавьте фотографии по ссылке или
+                    с компьютера.
                 </p>
             </div>
 
@@ -91,14 +206,98 @@ export default function AdminGalleryForm({
                         <span className={styles.count}>{images.length}</span>
                     </h3>
 
-                    <button
-                        className={styles.addImageButton}
-                        type="button"
-                        onClick={addImage}
-                    >
-                        + Добавить фото
-                    </button>
+                    <div className={styles.headerActions}>
+                        <button
+                            className={styles.addImageButton}
+                            type="button"
+                            onClick={addImage}
+                        >
+                            + Добавить фото
+                        </button>
+
+                        <input
+                            ref={fileInputRef}
+                            className={styles.fileInput}
+                            type="file"
+                            accept={ADMIN_UPLOAD_ACCEPT}
+                            multiple
+                            onChange={(event) =>
+                                void handleFilesSelected(event)
+                            }
+                            tabIndex={-1}
+                            aria-hidden="true"
+                        />
+
+                        <button
+                            className={styles.addImageButton}
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            aria-describedby="gallery-upload-hint"
+                        >
+                            ⇪ Загрузить с компьютера
+                        </button>
+                    </div>
                 </div>
+
+                <p id="gallery-upload-hint" className={styles.uploadHint}>
+                    Можно выбрать несколько файлов: JPEG, PNG, WebP или AVIF,
+                    каждый до 5 МБ.
+                </p>
+
+                {uploads.length > 0 && (
+                    <ul
+                        className={styles.uploadList}
+                        aria-label="Загрузка фотографий"
+                        aria-live="polite"
+                    >
+                        {uploads.map((upload) => (
+                            <li
+                                key={upload.id}
+                                className={`${styles.uploadItem} ${
+                                    upload.status === "error"
+                                        ? styles.uploadItemError
+                                        : ""
+                                }`}
+                            >
+                                <span className={styles.uploadThumb}>
+                                    {upload.previewUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={upload.previewUrl}
+                                            alt=""
+                                        />
+                                    ) : (
+                                        <span aria-hidden="true">🖼</span>
+                                    )}
+                                </span>
+
+                                <span className={styles.uploadInfo}>
+                                    <span className={styles.uploadName}>
+                                        {upload.name}
+                                    </span>
+                                    <span className={styles.uploadState}>
+                                        {upload.status === "uploading"
+                                            ? "Загрузка..."
+                                            : upload.error}
+                                    </span>
+                                </span>
+
+                                {upload.status === "error" && (
+                                    <button
+                                        type="button"
+                                        className={styles.uploadDismiss}
+                                        onClick={() =>
+                                            dismissUpload(upload.id)
+                                        }
+                                        aria-label={`Убрать ${upload.name}`}
+                                    >
+                                        ×
+                                    </button>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                )}
 
                 {images.length === 0 ? (
                     <div className={styles.emptyState}>
@@ -109,7 +308,8 @@ export default function AdminGalleryForm({
                             Пока нет фотографий
                         </p>
                         <p className={styles.emptyText}>
-                            Нажмите «Добавить фото» и вставьте URL изображения.
+                            Нажмите «Добавить фото» и вставьте URL изображения
+                            или загрузите фото с компьютера.
                         </p>
                     </div>
                 ) : (
@@ -202,7 +402,7 @@ export default function AdminGalleryForm({
                 <button
                     className={styles.saveButton}
                     type="submit"
-                    disabled={saving || !title.trim()}
+                    disabled={saving || isUploading || !title.trim()}
                 >
                     {saving ? "Сохранение..." : "Сохранить галерею"}
                 </button>

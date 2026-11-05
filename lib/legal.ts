@@ -41,7 +41,7 @@ export const RESTAURANT_OPERATORS: Record<RestaurantId, RestaurantOperator> = {
     jihlava: {
         restaurantId: "jihlava",
         restaurantName: "SushiMax Jihlava",
-        operatorName: "Beletskaya Oksana",
+        operatorName: "SushiMax s.r.o.",
         legalForm: "společnost s ručením omezeným",
         ico: "21287830",
         dic: "CZ21287830",

@@ -5,8 +5,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import css from "./CallButton.module.css";
 
 const RESTAURANT_PHONES = [
-    { name: "Kolín", phone: "+420 721 479 332", href: "tel:+420721479332" },
-    { name: "Jihlava", phone: "+420 777 499 970", href: "tel:+420777499970" },
+    { name: "Restaurace Kolín", phone: "+420 721 479 332", href: "tel:+420721479332" },
+    { name: "Restaurace Jihlava", phone: "+420 777 499 970", href: "tel:+420777499970" },
 ] as const;
 
 export default function CallButton() {

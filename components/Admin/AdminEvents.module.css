@@ -205,6 +205,67 @@
     scroll-margin-top: 24px;
 }
 
+.upload {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin-top: 4px;
+}
+
+.fileInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    opacity: 0;
+}
+
+.uploadHint {
+    color: var(--color-text-muted, #999);
+    font-size: 13px;
+}
+
+.uploadStatus {
+    margin: 0;
+    min-height: 0;
+    color: var(--color-text-muted, #999);
+    font-size: 13px;
+}
+
+.uploadStatus:empty {
+    display: none;
+}
+
+.imagePreview {
+    width: 100%;
+    max-width: 360px;
+    overflow: hidden;
+    border: 1px solid var(--color-border-warm, #3d3d3d);
+    border-radius: 12px;
+    background: var(--color-bg-page, #111);
+    transition: opacity 0.2s ease;
+}
+
+.imagePreview img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+}
+
+.imagePreviewLoading {
+    opacity: 0.55;
+}
+
+.secondaryButton:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
 .eventList {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
