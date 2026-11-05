@@ -31,6 +31,16 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
 }
 
+:global(html):has(.hoursBanner) {
+    --sticky-header-offset: 128px;
+}
+
+@media (min-width: 768px) {
+    :global(html):has(.hoursBanner) {
+        --sticky-header-offset: 114px;
+    }
+}
+
 .hoursBanner strong {
     font-weight: 700;
 }

@@ -15,6 +15,7 @@ type Props = {
     item: Product;
     restaurantId: RestaurantId;
     categorySlug?: string;
+    href?: string;
 };
 
 const BLACKLIST_PRODUCT_IDS = [
@@ -30,6 +31,7 @@ export default function ProductCard({
     item,
     restaurantId,
     categorySlug,
+    href,
 }: Props) {
 
     const isExcluded = BLACKLIST_PRODUCT_IDS.includes(String(item._id || ""));
@@ -42,7 +44,9 @@ export default function ProductCard({
     // endpoint; the product stays fully visible, only the cart control goes.
     const isPurchasable = item.purchasable !== false;
 
-    const href = `/menu/${encodeURIComponent(
+    const productHref =
+    href ??
+    `/menu/${encodeURIComponent(
         categorySlug ?? "all"
     )}/${item._id}?r=${restaurantId}`;
 
@@ -77,7 +81,7 @@ export default function ProductCard({
     };
 
     return (
-        <Link href={href} className={css.link} prefetch={false}>
+        <Link href={productHref} className={css.link} prefetch={false}>
             <article className={css.card}>
                 <div className={css.imageWrapper}>
                     {item.image ? (

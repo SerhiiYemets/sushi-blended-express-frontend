@@ -201,10 +201,75 @@
     font-size: 14px;
 }
 
-.eventList {
+.formSection {
+    scroll-margin-top: 24px;
+}
+
+.upload {
     display: flex;
-    flex-direction: column;
-    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin-top: 4px;
+}
+
+.fileInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    opacity: 0;
+}
+
+.uploadHint {
+    color: var(--color-text-muted, #999);
+    font-size: 13px;
+}
+
+.uploadStatus {
+    margin: 0;
+    min-height: 0;
+    color: var(--color-text-muted, #999);
+    font-size: 13px;
+}
+
+.uploadStatus:empty {
+    display: none;
+}
+
+.imagePreview {
+    width: 100%;
+    max-width: 360px;
+    overflow: hidden;
+    border: 1px solid var(--color-border-warm, #3d3d3d);
+    border-radius: 12px;
+    background: var(--color-bg-page, #111);
+    transition: opacity 0.2s ease;
+}
+
+.imagePreview img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+}
+
+.imagePreviewLoading {
+    opacity: 0.55;
+}
+
+.secondaryButton:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.eventList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+    gap: 12px;
 }
 
 .empty {
@@ -213,31 +278,39 @@
 }
 
 .eventCard {
-    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 14px;
     border: 1px solid var(--color-border-warm, #3d3d3d);
-    border-radius: 16px;
+    border-radius: 14px;
     background: var(--color-bg-page, #141414);
 }
 
 .eventTop {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 10px;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
 .eventTitle {
+    min-width: 0;
     margin: 0;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.3;
+    overflow-wrap: anywhere;
 }
 
 .status {
+    flex-shrink: 0;
     width: fit-content;
-    padding: 5px 10px;
+    padding: 4px 9px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 700;
+    white-space: nowrap;
 }
 
 .statusActive {
@@ -251,9 +324,16 @@
 }
 
 .description {
-    margin: 0 0 14px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+
+    margin: 0 0 12px;
     color: var(--color-text-muted, #bbb);
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.45;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
@@ -261,7 +341,16 @@
 .eventActions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.eventActions .secondaryButton,
+.eventActions .dangerButton {
+    flex: 1 1 0;
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 13px;
 }
 
 @media (min-width: 640px) {
@@ -272,12 +361,6 @@
 
     .grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .eventTop {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
     }
 }
 

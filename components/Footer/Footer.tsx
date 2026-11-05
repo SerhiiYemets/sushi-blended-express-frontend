@@ -1,10 +1,12 @@
 import Link from "next/link";
 import Logo from "@/components/Logo/Logo";
+import CallButton from "@/components/CallButton/CallButton";
 import css from "./Footer.module.css";
 
 import { RESTAURANT_CLOSE_MINUTES } from "@/lib/restaurants";
 
 import { formatMinutes } from "@/lib/deliveryTime";
+import { LEGAL_ROUTES } from "@/lib/legal";
 
 export default function Footer() {
     const year = new Date().getFullYear();
@@ -13,6 +15,7 @@ export default function Footer() {
     const jihlavaClose = formatMinutes(RESTAURANT_CLOSE_MINUTES.jihlava);
 
     return (
+        <>
         <footer id="contacts" className={css.footer}>
             <div className={css.inner}>
                 <div className={css.top}>
@@ -97,9 +100,33 @@ export default function Footer() {
                 </div>
 
                 <div className={css.bottom}>
+                    <nav
+                        className={css.legalLinks}
+                        aria-label="Právní informace"
+                    >
+                        <Link href={LEGAL_ROUTES.terms} className={css.legalLink}>
+                            Obchodní podmínky
+                        </Link>
+                        <Link href={LEGAL_ROUTES.privacy} className={css.legalLink}>
+                            Ochrana osobních údajů
+                        </Link>
+                        <Link href={LEGAL_ROUTES.cookies} className={css.legalLink}>
+                            Zásady používání cookies
+                        </Link>
+                    </nav>
+
                     <span className={css.copy}>
                         © {year} SushiMax. Všechna práva vyhrazena.
                     </span>
+
+                    <a
+                        className={css.copy}
+                        href="https://sushimax.cz/admin/login"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Administrace
+                    </a>
 
                     <a
                         className={css.copy}
@@ -112,5 +139,8 @@ export default function Footer() {
                 </div>
             </div>
         </footer>
+
+        <CallButton />
+        </>
     );
 }

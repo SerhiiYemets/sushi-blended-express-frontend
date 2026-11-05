@@ -6,8 +6,8 @@ import Logo from "@/components/Logo/Logo";
 import css from "@/components/AuthComponent/Auth.module.css";
 
 export const metadata: Metadata = {
-    title: "Administrace | SushiMax",
-    description: "Přihlášení do administrace restaurace SushiMax",
+    title: "Админ-панель | SushiMax",
+    description: "Вход в админ-панель ресторана SushiMax",
 };
 
 export default function AdminLoginPage() {
