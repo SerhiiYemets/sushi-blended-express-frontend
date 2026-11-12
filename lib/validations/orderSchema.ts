@@ -10,6 +10,12 @@ export function isValidPhone(raw: string): boolean {
     return PHONE_FORMAT.test(raw.trim());
 }
 
+const ADDRESS_LOCALITY = /[A-Za-zÀ-ž]/;
+
+export function hasAddressLocality(raw: string): boolean {
+    return ADDRESS_LOCALITY.test(raw);
+}
+
 export const orderSchema =
     z.object({
         firstName: z

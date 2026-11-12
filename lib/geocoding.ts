@@ -114,8 +114,14 @@ function buildShortAddress(
     if (!address) return null;
 
     const street =
-        address.road ?? address.pedestrian ?? address.footway ?? address.suburb;
+    address.road ??
+    address.pedestrian ??
+    address.footway ??
+    address.suburb ??
+    address.village;
     const city = resolveCity(address, displayName);
+
+    if (!street && !city) return null;
 
     const streetPart = [street, address.house_number]
         .filter(Boolean)

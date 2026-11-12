@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type Ref } from "react";
+import { useEffect, useRef, useState, type Ref } from "react";
 import {
     MapContainer,
     Marker,
@@ -94,6 +94,9 @@ export default function DeliveryMap({
     const center = RESTAURANT_COORDS[restaurantId];
 
     const [position, setPosition] = useState<LatLng | null>(null);
+    const reverseRequestRef = useRef<AbortController | null>(null);
+
+    useEffect(() => () => reverseRequestRef.current?.abort(), []);
 
     const [query, setQuery] = useState("");
     // `searchActive` gates both the network request and the dropdown, so a
@@ -119,6 +122,7 @@ export default function DeliveryMap({
     const showResults = searchActive && results.length > 0;
 
     function handlePickResult(result: GeocodeResult) {
+        reverseRequestRef.current?.abort();
         setSearchActive(false);
         setQuery(result.label);
         const point = { lat: result.lat, lng: result.lng };
@@ -139,8 +143,13 @@ export default function DeliveryMap({
             address: `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`,
         });
 
-        reverseGeocode(point)
+        reverseRequestRef.current?.abort();
+        const request = new AbortController();
+        reverseRequestRef.current = request;
+
+        reverseGeocode(point, request.signal)
             .then(({ address, houseNumber }) => {
+                if (request.signal.aborted) return;
                 setQuery(address);
                 onLocationSelected({ ...point, address, houseNumber });
             })
@@ -172,6 +181,7 @@ export default function DeliveryMap({
                         placeholder="Zadejte ulici a číslo domu (např. Na Magistrále 709, Kolín)"
                         value={query}
                         onChange={(event) => {
+                            reverseRequestRef.current?.abort();
                             setQuery(event.target.value);
                             setSearchActive(true);
                             // Editing the text invalidates any previously picked

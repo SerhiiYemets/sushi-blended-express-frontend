@@ -42,6 +42,7 @@ import {
 import {
     orderSchema,
     isValidPhone,
+    hasAddressLocality,
     type OrderFormData,
 } from '@/lib/validations/orderSchema';
 import { calculateDelivery } from '@/lib/api/deliveryApi';
@@ -228,7 +229,9 @@ export default function CheckoutClient() {
     // carry a house number. Drives the inline validation message + error style,
     // updating immediately as the user types or selects (no submit needed).
     const deliveryAddressIncomplete =
-        !selectedLocation || !selectedLocation.houseNumber;
+        !selectedLocation ||
+        !selectedLocation.houseNumber ||
+        !hasAddressLocality(selectedLocation.address);
 
     // The backend owns the fee — we only display what it returns and never
     // submit a fee. Refetches whenever the chosen point or restaurant changes.
@@ -348,7 +351,10 @@ export default function CheckoutClient() {
             }
 
             // Address selected but missing a house number → block submission.
-            if (!selectedLocation.houseNumber) {
+            if (
+                !selectedLocation.houseNumber ||
+                !hasAddressLocality(selectedLocation.address)
+            ) {
                 focusAddressField();
                 return;
             }
