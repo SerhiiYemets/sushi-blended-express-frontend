@@ -391,8 +391,24 @@ export default function RestaurantPageClient({ restaurantId }: Props) {
                                 </h3>
 
                                 <div className={css.products}>
-                                    {currentCategory.products.map(
-                                        (product) => (
+                                    {[...currentCategory.products]
+                                        .sort((a, b) => {
+                                            if (restaurantId !== "kolin" || currentCategory._id !== "34") {
+                                                return 0;
+                                            }
+
+                                            const grillOrder = [
+                                                "339", "341", "340", "344", "345",
+                                                "362", "346", "347", "349", "350", "382",
+                                            ];
+
+                                            const aIndex = grillOrder.indexOf(a._id);
+                                            const bIndex = grillOrder.indexOf(b._id);
+
+                                            return (aIndex === -1 ? Infinity : aIndex) -
+                                                (bIndex === -1 ? Infinity : bIndex);
+                                        })
+                                        .map((product) => (
                                             <ProductCard
                                                 key={product._id}
                                                 item={product}

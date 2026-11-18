@@ -24,7 +24,8 @@ const BLACKLIST_PRODUCT_IDS = [
     "391",
     "141",
     "408",
-    "409"
+    "409",
+    "598"
 ];
 
 export default function ProductCard({

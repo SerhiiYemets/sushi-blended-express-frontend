@@ -1246,9 +1246,9 @@ export default function CheckoutClient() {
                                 </span>
 
                                 <p className={css.outsideText}>
-                                    Tuto adresu bohužel nedoručujeme – je mimo
-                                    naši oblast doručení. Zvolte prosím jinou
-                                    adresu.
+                                    Tuto adresu bohužel nedoručujeme – nachází se mimo naši oblast doručení.
+                                    Zkontrolujte prosím, zda objednáváte ze správné restaurace (Kolín nebo Jihlava).
+                                    Pokud jste vybrali nesprávné město, přejděte na stránku správné restaurace a zkuste objednávku znovu.
                                 </p>
                             </div>
                         ) : (
